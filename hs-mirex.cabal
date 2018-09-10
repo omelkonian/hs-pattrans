@@ -1,0 +1,16 @@
+name          : hs-mirex
+version       : 0.1.0.0
+synopsis      : A pattern language, based on the MIREX "Discovery of Repeated Themes & Sections" task.
+homepage      : https://github.com/omelkonian/hs-mirex
+author        : Orestis Melkonian
+category      : Language
+build-type    : Simple
+cabal-version : >= 1.10
+
+executable hs-mirex
+  main-is:            Main.hs
+  other-modules:
+  build-depends:      base >= 4.9
+  ghc-options:        -Wall
+  hs-source-dirs:     src
+  default-language:   Haskell2010
