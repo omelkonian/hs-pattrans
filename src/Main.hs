@@ -1,6 +1,18 @@
-import Mirex (decode)
+import Control.Monad (forM_)
+import System.Directory
+
+import Parser
+import Analysis
 
 main :: IO ()
 main = do
-  entries <- decode "JKUPDD-Aug2013/groundTruth/bachBWV889Fg/monophonic/csv/wtc2f20.csv"
-  print entries
+  setCurrentDirectory "data/pieces"
+  fnames <- listDirs
+  forM_ fnames $ \fname -> do
+    putStrLn $ "\n********** " ++ fname ++ " **********\n"
+    -- Parse
+    (music, patternTypes) <- parseMirex fname Monophonic
+    -- Analyse
+    forM_ patternTypes $ \pt ->
+      putStrLn $ name pt ++ " " ++ show (analysePatternType pt)
+
