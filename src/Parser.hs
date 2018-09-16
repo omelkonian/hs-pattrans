@@ -6,7 +6,7 @@ module Parser ( Time
               , Note(..), (~>), (<~)
               , ParseOption(..)
               , parseMirex
-              , listDirs, listFiles
+              , cd, listDirs, listFiles
               ) where
 
 import Control.Monad (forM, filterM)
@@ -30,9 +30,11 @@ data MirexEntry = MirexEntry { t        :: Time
                              }
                              deriving (Eq, Show)
 
-data PatternType = PatternType { name :: String
-                               , basePattern :: Pattern
-                               , patterns :: [Pattern]
+data PatternType = PatternType { piece_name   :: String
+                               , expert_name  :: String
+                               , pattern_name :: String
+                               , basePattern  :: Pattern
+                               , patterns     :: [Pattern]
                                } deriving (Eq, Show)
 
 newtype Pattern = Pattern [Note] deriving (Show)
@@ -77,9 +79,11 @@ parseMirex f_root pOpt = cd (f_root ++ "/" ++ show pOpt) $ do
         basePat:pats <- cd (f_patTy ++ "/occurrences/csv") $ do
           f_pats <- listFiles
           forM f_pats ((Pattern <$>) . parseMany noteP)
-        return $ PatternType { name = f_patEx ++ ":" ++ f_patTy
-                             , basePattern = basePat
-                             , patterns = pats
+        return $ PatternType { piece_name   = f_root
+                             , expert_name  = f_patEx
+                             , pattern_name = f_patTy
+                             , basePattern  = basePat
+                             , patterns     = pats
                              }
     return $ concat allPats
   return (music, patTypes)
