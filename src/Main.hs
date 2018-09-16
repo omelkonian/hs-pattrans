@@ -1,4 +1,4 @@
-import Control.Monad (forM, forM_)
+import Control.Monad (forM)
 
 import Parser
 import Analysis
@@ -13,12 +13,16 @@ main = do
       parseMirex fname Monophonic
 
   -- Analyse
-  forM_ allPts $ \(_, pts) ->
-    forM_ pts $ \pt -> do
-      let an = analysePatternType pt
-      let title = piece_name pt ++ ":" ++ expert_name pt ++ ":" ++ pattern_name pt
-      -- display on terminal
-      putStrLn $ title ++ " " ++ show an
-      -- produce pie chart
-      render pt title an
+  analyses <-
+    forM allPts $ \(_, pts) -> do
+      forM pts $ \pt -> do
+        let an = analysePatternType pt
+        let title = piece_name pt ++ ":" ++ expert_name pt ++ ":" ++ pattern_name pt
+        putStrLn $ title ++ " " ++ show an -- display on terminal
+        renderOne pt an -- produce pie chart
+        return an
+
+  let finalAn = combineAnalyses (concat analyses)
+  putStrLn $ "ALL " ++ show finalAn
+  renderAll finalAn
 

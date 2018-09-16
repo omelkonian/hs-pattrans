@@ -1,20 +1,27 @@
-module Charts where
+module Charts (renderOne, renderAll) where
 
-import Control.Monad (void)
 import System.Directory
 
-import Graphics.Rendering.Chart.Easy
+import Graphics.Rendering.Chart.Easy hiding (render)
 import Graphics.Rendering.Chart.Backend.Cairo
 
 import Parser
 import Analysis
 
-render :: PatternType -> String -> AnalysisResult -> IO ()
-render pt title an = do
-  let PatternType piece_n expert_n pattern_n _ _ = pt
-  let dir = "output/" ++ piece_n ++ "/" ++ expert_n ++ "/"
-  createDirectoryIfMissing True dir
-  toFile def (dir ++ pattern_n ++ ".png") $ do
+renderOne :: PatternType -> AnalysisResult -> IO ()
+renderOne pt =
+  render ("output/" ++ piece_n ++ "/" ++ expert_n) pattern_n title
+  where
+    PatternType piece_n expert_n pattern_n _ _ = pt
+    title = piece_n ++ ":" ++ expert_n ++ ":" ++ pattern_n
+
+renderAll :: AnalysisResult -> IO ()
+renderAll = render "output" "ALL" "ALL"
+
+render :: FilePath -> String -> String -> AnalysisResult -> IO ()
+render root fname title an = do
+  createDirectoryIfMissing True root
+  toFile def (root ++ "/" ++ fname ++ ".png") $ do
     pie_title .= title
     pie_plot . pie_data .= values
   where
