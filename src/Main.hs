@@ -6,23 +6,20 @@ import Charts
 
 main :: IO ()
 main = do
-  -- Parse
-  allPts <- cd "data/pieces" $ do
+  -- Parse the MIREX dataset, retrieving all pattern groups.
+  allPatternGroups <- cd "data/pieces" $ do
     fnames <- listDirs
-    forM fnames $ \fname -> do
-      parseMirex fname Monophonic
+    concat <$> forM fnames ((snd <$>) . parseMirex Monophonic)
 
-  -- Analyse
+  -- Analyse individual pattern groups.
   analyses <-
-    forM allPts $ \(_, pts) -> do
-      forM pts $ \pt -> do
-        let an = analysePatternType pt
-        let title = piece_name pt ++ ":" ++ expert_name pt ++ ":" ++ pattern_name pt
-        putStrLn $ title ++ " " ++ show an -- display on terminal
-        renderOne pt an -- produce pie chart
-        return an
+    forM allPatternGroups $ \pg -> do
+      let an = analysePatternGroup pg
+      putStrLn $ getTitle pg ++ " " ++ show an -- display on terminal
+      renderOne pg an -- produce pie chart
+      return an
 
-  let finalAn = combineAnalyses (concat analyses)
+  -- Combine all individual analyses and render in one chart.
+  let finalAn = combineAnalyses analyses
   putStrLn $ "ALL " ++ show finalAn
   renderAll finalAn
-

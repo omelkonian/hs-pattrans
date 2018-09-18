@@ -5,16 +5,18 @@ import System.Directory
 import Graphics.Rendering.Chart.Easy hiding (render)
 import Graphics.Rendering.Chart.Backend.Cairo
 
-import Parser
+import Types
 import Analysis
 
-renderOne :: PatternType -> AnalysisResult -> IO ()
-renderOne pt =
+-- | Visualize the results of analyzing a single pattern group in a pie chart.
+renderOne :: PatternGroup -> AnalysisResult -> IO ()
+renderOne pg =
   render ("output/" ++ piece_n ++ "/" ++ expert_n) pattern_n title
   where
-    PatternType piece_n expert_n pattern_n _ _ = pt
+    PatternGroup piece_n expert_n pattern_n _ _ = pg
     title = piece_n ++ ":" ++ expert_n ++ ":" ++ pattern_n
 
+-- | Visualize the result of analyzing multiple pattern groups in a single pie chart.
 renderAll :: AnalysisResult -> IO ()
 renderAll = render "output" "ALL" "ALL"
 
