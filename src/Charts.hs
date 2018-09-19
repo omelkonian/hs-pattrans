@@ -1,31 +1,30 @@
 module Charts (renderOne, renderAll) where
 
-import System.Directory
-
 import Graphics.Rendering.Chart.Easy hiding (render)
 import Graphics.Rendering.Chart.Backend.Cairo
 
 import Types
+import Parser
 import Analysis
 
 -- | Visualize the results of analyzing a single pattern group in a pie chart.
 renderOne :: PatternGroup -> AnalysisResult -> IO ()
-renderOne pg =
-  render ("output/" ++ piece_n ++ "/" ++ expert_n) pattern_n title
-  where
-    PatternGroup piece_n expert_n pattern_n _ _ = pg
-    title = piece_n ++ ":" ++ expert_n ++ ":" ++ pattern_n
+renderOne (PatternGroup piece_n expert_n pattern_n _ _) an =
+  cd (piece_n ++ "/" ++ expert_n) $
+    render pattern_n (piece_n ++ ":" ++ expert_n ++ ":" ++ pattern_n) an
 
 -- | Visualize the result of analyzing multiple pattern groups in a single pie chart.
 renderAll :: AnalysisResult -> IO ()
-renderAll = render "output" "ALL" "ALL"
+renderAll = render "ALL" "ALL"
 
-render :: FilePath -> String -> String -> AnalysisResult -> IO ()
-render root fname title an = do
-  createDirectoryIfMissing True root
-  toFile def (root ++ "/" ++ fname ++ ".png") $ do
-    pie_title .= title
-    pie_plot . pie_data .= values
+render :: String -> String -> AnalysisResult -> IO ()
+render fname title an
+  | total an == 0
+  = return ()
+  | otherwise
+  = do toFile def (fname ++ ".png") $ do
+         pie_title .= title
+         pie_plot . pie_data .= values
   where
     values :: [PieItem]
     values =

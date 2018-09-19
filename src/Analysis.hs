@@ -18,7 +18,7 @@ analysePatternGroup (PatternGroup _ _ _ base pats) =
 
 -- | Combine analyses from different pattern groups.
 combineAnalyses :: [AnalysisResult] -> AnalysisResult
-combineAnalyses = foldl1 (<+>)
+combineAnalyses = foldl (<+>) (AnalysisResult 0 0)
   where
     AnalysisResult tot ex <+> AnalysisResult tot' ex'
       = AnalysisResult (tot + tot') (ex + ex')

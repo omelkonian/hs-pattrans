@@ -17,7 +17,7 @@ data MirexEntry = MirexEntry
   } deriving (Eq, Show)
 
 -- | A pattern group is one of the patterns of a piece of music, identified by an expert
--- or algorithm
+-- or algorithm, and defined by a pattern prototype and other pattern occurences.
 data PatternGroup = PatternGroup
   { piece_name   :: String
   -- ^ the name of the music piece, that the pattern group belongs to
