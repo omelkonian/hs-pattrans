@@ -30,8 +30,18 @@ render fname title an
     values =
       [ pitem_value .~ v
       $ pitem_label .~ s
-      $ pitem_offset .~ (if o then 25 else 0)
+      $ pitem_offset .~ 40
       $ def
-      | (s, v, o) <- [("exact", exPer, True), ("other", 100.0 - exPer, False)]
+      | let xs = (percentage an <$>) <$> [ ("exact", exact)
+                                         , ("transposed", transposed)
+                                         , ("inverted", inverted)
+                                         , ("augmented", augmented)
+                                         , ("retrograded", retrograded)
+                                         , ("rotated", rotated)
+                                         , ("trInverted", trInverted)
+                                         , ("trAugmented", trAugmented)
+                                         , ("trRetrograded", trRetrograded) ]
+      , (s, v) <- xs ++ [("other", 100.0 - sum (snd <$> xs))]
       ]
-      where exPer = exactPercentage an
+
+

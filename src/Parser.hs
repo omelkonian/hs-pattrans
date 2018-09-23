@@ -38,7 +38,7 @@ parseMirex pOpt = cd "data/pieces" $ do
         forM f_patTys $ \f_patTy -> do
           basePat:pats <- cd (f_patTy ++ "/occurrences/csv") $ do
             f_pats <- listFiles
-            forM f_pats ((Pattern <$>) . parseMany noteP)
+            forM f_pats (parseMany noteP)
           return $ PatternGroup { piece_name   = f_root
                                 , expert_name  = f_patEx
                                 , pattern_name = f_patTy
@@ -94,7 +94,7 @@ patternGroupP piece_n algo_n =
                               <*> many patternP
   where
     patternP :: Parser Pattern
-    patternP = nameP 'o' *> (Pattern <$> many noteP)
+    patternP = nameP 'o' *> many noteP
     nameP :: Char -> Parser String
     nameP c = char c *> ((:) <$> return c <*> many1 alphaNum) <* lineP
 
