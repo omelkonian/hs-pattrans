@@ -7,5 +7,5 @@
   * Pie-charts will be generated in `output/`
 
 
-- To generate the docs: `stack exec -- haddock --html src/Main.hs src/Types.hs src/Parser.hs src/Analysis.hs src/Charts.hs --hyperlinked-source --odir=dist/docs`
-  * You can then open `dist/docs/index.html` with your web browser
+- To update the docs: `stack exec -- haddock --html src/Main.hs src/Types.hs src/Parser.hs src/Analysis.hs src/Charts.hs --hyperlinked-source --odir=docs`
+  * After commiting the docs, you can view them [online](https://omelkonian.github.io/hs-mirex/)
