@@ -10,6 +10,7 @@ cabal-version : >= 1.10
 executable hs-mirex
   main-is:            Main.hs
   other-modules:      Types,
+                      Transformations,
                       Parser,
                       Analysis,
                       Charts

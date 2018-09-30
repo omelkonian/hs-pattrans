@@ -7,8 +7,8 @@ import Charts
 
 main :: IO ()
 main = do
-  runAnalysis "output/experts" (parseMirex Monophonic)
-  runAnalysis "output/algorithms" parseAlgo
+  runAnalysis "docs/out/experts" (parseMirex Monophonic)
+  runAnalysis "docs/out/algorithms" parseAlgo
 
 runAnalysis :: FilePath -> IO [PatternGroup] -> IO ()
 runAnalysis f_root parser = do
@@ -26,4 +26,4 @@ runAnalysis f_root parser = do
       -- Combine all individual analyses and render in one chart.
       let finalAn = combineAnalyses analyses
       putStrLn $ "ALL " ++ show finalAn
-      renderAll finalAn
+      renderAll f_root finalAn

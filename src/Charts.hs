@@ -14,8 +14,8 @@ renderOne (PatternGroup piece_n expert_n pattern_n _ _) an =
     render pattern_n (piece_n ++ ":" ++ expert_n ++ ":" ++ pattern_n) an
 
 -- | Visualize the result of analyzing multiple pattern groups in a single pie chart.
-renderAll :: AnalysisResult -> IO ()
-renderAll = render "ALL" "ALL"
+renderAll :: String -> AnalysisResult -> IO ()
+renderAll pre = render "ALL" ("ALL: " ++ pre)
 
 render :: String -> String -> AnalysisResult -> IO ()
 render fname title an
@@ -40,7 +40,16 @@ render fname title an
                                          , ("rotated", rotated)
                                          , ("trInverted", trInverted)
                                          , ("trAugmented", trAugmented)
-                                         , ("trRetrograded", trRetrograded) ]
+                                         , ("trRetrograded", trRetrograded)
+                                         , ("aproxEq2", approxEq2)
+                                         , ("aproxEq4", approxEq4)
+                                         , ("aproxEq6", approxEq6)
+                                         , ("aproxEq8", approxEq8)
+                                         , ("aproxEq10", approxEq10)
+                                         , ("aproxEq12", approxEq12)
+                                         , ("aproxEq14", approxEq14)
+                                         , ("aproxEq16", approxEq16)
+                                         ]
       , (s, v) <- xs ++ [("other", 100.0 - sum (snd <$> xs))]
       ]
 
