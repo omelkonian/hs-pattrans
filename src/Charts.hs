@@ -15,7 +15,7 @@ renderOne (PatternGroup piece_n expert_n pattern_n _ _) an =
 
 -- | Visualize the result of analyzing multiple pattern groups in a single pie chart.
 renderAll :: String -> AnalysisResult -> IO ()
-renderAll pre = render "ALL" ("ALL: " ++ pre)
+renderAll s = render "ALL" ("ALL: " ++ s)
 
 render :: String -> String -> AnalysisResult -> IO ()
 render fname title an
@@ -34,6 +34,7 @@ render fname title an
       $ def
       | let xs = (percentage an <$>) <$> [ ("exact", exact)
                                          , ("transposed", transposed)
+                                         , ("tonalTransped", tonalTransped)
                                          , ("inverted", inverted)
                                          , ("augmented", augmented)
                                          , ("retrograded", retrograded)

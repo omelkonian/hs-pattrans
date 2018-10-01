@@ -10,7 +10,8 @@ import Transformations
 data AnalysisResult = An
   { total         :: Int -- ^ all other occurences of the pattern
   , exact         :: Int -- ^ # of exact occurences
-  , transposed    :: Int -- ^ # of transpositions
+  , transposed    :: Int -- ^ # of *atonal* transpositions
+  , tonalTransped :: Int -- ^ # of *tonal* transpositions
   , inverted      :: Int -- ^ # of inversions
   , augmented     :: Int -- ^ # of augmentations
   , retrograded   :: Int -- ^ # of retrogrades
@@ -35,34 +36,35 @@ analysePatternGroup (PatternGroup _ _ _ base pats) =
   where
     -- Check which equivalence class a pattern belongs to.
     check p
-      | (base <=> p) exactOf          = An 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-      | (base <=> p) transpositionOf  = An 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-      | (base <=> p) inversionOf      = An 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-      | (base <=> p) augmentationOf   = An 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
-      | (base <=> p) retrogradeOf     = An 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
-      | (base <=> p) rotationOf       = An 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
-      | (base <=> p) trInversionOf    = An 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
-      | (base <=> p) trAugmentationOf = An 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
-      | (base <=> p) trRetrogradeOf   = An 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0
-      | (base <=> p) (approxEq 2)     = An 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
-      | (base <=> p) (approxEq 4)     = An 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
-      | (base <=> p) (approxEq 6)     = An 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
-      | (base <=> p) (approxEq 8)     = An 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
-      | (base <=> p) (approxEq 10)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
-      | (base <=> p) (approxEq 12)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
-      | (base <=> p) (approxEq 14)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0
-      | (base <=> p) (approxEq 16)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
-      | otherwise                     = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) exactOf          = An 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) transpositionOf  = An 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) tonalTranspOf    = An 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) inversionOf      = An 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) augmentationOf   = An 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) retrogradeOf     = An 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) rotationOf       = An 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) trInversionOf    = An 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+      | (base <=> p) trAugmentationOf = An 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+      | (base <=> p) trRetrogradeOf   = An 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0
+      | (base <=> p) (approxEq 2)     = An 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+      | (base <=> p) (approxEq 4)     = An 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0
+      | (base <=> p) (approxEq 6)     = An 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+      | (base <=> p) (approxEq 8)     = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+      | (base <=> p) (approxEq 10)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+      | (base <=> p) (approxEq 12)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+      | (base <=> p) (approxEq 14)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0
+      | (base <=> p) (approxEq 16)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+      | otherwise                     = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 -- | Combine analyses from different pattern groups.
 combineAnalyses :: [AnalysisResult] -> AnalysisResult
-combineAnalyses = foldl (<+>) (An 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+combineAnalyses = foldl (<+>) (An 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
   where
-    An n e tt i a r ro ti ta tr e1 e2 e3 e4 e5 e6 e7 e8
-      <+> An n' e' tt' i' a' r' ro' ti' ta' tr' e1' e2' e3' e4' e5' e6' e7' e8'
-      = An (n+n') (e+e') (tt+tt') (i+i') (a+a') (r+r') (ro+ro') (ti+ti')
-           (ta+ta') (tr+tr') (e1+e1') (e2+e2') (e3+e3') (e4+e4') (e5+e5')
-           (e6+e6') (e7+e7') (e8+e8')
+    An n e tt ttt i a r ro ti ta tr e1 e2 e3 e4 e5 e6 e7 e8
+      <+> An n' e' tt' ttt' i' a' r' ro' ti' ta' tr' e1' e2' e3' e4' e5' e6' e7' e8'
+      = An (n+n') (e+e') (tt+tt') (ttt+ttt') (i+i') (a+a') (r+r') (ro+ro') (ti+ti')
+           (ta+ta') (tr+tr') (e1+e1') (e2+e2') (e3+e3') (e4+e4') (e5+e5') (e6+e6')
+           (e7+e7') (e8+e8')
 
 -- | Get the percentage of an equivalence class from an analysis result.
 percentage :: AnalysisResult -> (AnalysisResult -> Int) -> Double
@@ -74,6 +76,7 @@ instance Show AnalysisResult where
     printf ("{  \n\ttotal: %d"
             ++ "\n\texact: %.2f%% (%d)"
             ++ "\n\ttransposed: %.2f%% (%d)"
+            ++ "\n\ttonalTransped: %.2f%% (%d)"
             ++ "\n\tinverted: %.2f%% (%d)"
             ++ "\n\taugmented: %.2f%% (%d)"
             ++ "\n\tretrograded: %.2f%% (%d)"
@@ -93,6 +96,7 @@ instance Show AnalysisResult where
            (total an)
            (percentage an exact) (exact an)
            (percentage an transposed) (transposed an)
+           (percentage an tonalTransped) (tonalTransped an)
            (percentage an inverted) (inverted an)
            (percentage an augmented) (augmented an)
            (percentage an retrograded) (retrograded an)

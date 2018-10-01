@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title></title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<link rel="stylesheet" href="lib/justifiedGallery.min.css">
+<script src="lib/jquery.justifiedGallery.min.js"></script>
+
+<link rel="stylesheet" href="lib/colorbox.css">
+<script src="lib/jquery.colorbox-min.js"></script>
+
+<script type="text/javascript">
+
+// Attach every chart to the appropriate gallery
+var handleFile = function(file0) {
+  // remove 'docs/' prefix
+  var file = file0.slice(5);
+  // experts -> 0, algorithms -> 1
+  var n = file.indexOf("experts") !== -1 ? 0 : 1
+  $(`#chart${n}`).append(
+    `<a class='gallery' href="${file}"> <img src="${file}"> </a>`
+  );
+}
+
+// Justify chart galleries
+window.onload = function() {
+  // Gather all images (script will insert the actual chart filenames)
+var files = [
+  %%%
+];
+files.forEach(handleFile)
+
+  for (var i = 0; i < 2; i++) {
+    $(`#chart${i}`).justifiedGallery({
+      rowHeight : 140,
+      lastRow : 'nojustify',
+      margins : 3
+    });
+  }
+  $('a.gallery').colorbox();
+}
+
+</script>
+</head>
+
+<body>
+
+<h2>Experts</h2>
+<div id="chart0"></div>
+
+<h2>Algorithms</h2>
+<div id="chart1"></div>
+
+</body>
+</html>
