@@ -15,7 +15,11 @@ renderOne (PatternGroup piece_n expert_n pattern_n _ _) an =
 
 -- | Visualize the result of analyzing multiple pattern groups in a single pie chart.
 renderAll :: String -> AnalysisResult -> IO ()
-renderAll s = render "ALL" ("ALL: " ++ s)
+renderAll s an = do
+  -- Render overview chart
+  render "ALL" ("ALL: " ++ s) an
+  -- Store unclassified patterns
+  writeFile "unclassified.txt" $ unlines (unclassified an)
 
 render :: String -> String -> AnalysisResult -> IO ()
 render fname title an
