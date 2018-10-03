@@ -27,7 +27,7 @@ data AnalysisResult = An
   , approxEq12    :: Int -- ^ # of approximately exact occurences (dist = 12)
   , approxEq14    :: Int -- ^ # of approximately exact occurences (dist = 14)
   , approxEq16    :: Int -- ^ # of approximately exact occurences (dist = 16)
-  , unclassified  :: [String] -- ^ filenames of all unclassfied patterns
+  , unclassified  :: [(String, Pattern)] -- ^ filenames of all unclassfied patterns
   }
 
 -- | Analyze a single pattern group
@@ -55,7 +55,7 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (approxEq 12)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 []
       | (base <=> p) (approxEq 14)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 []
       | (base <=> p) (approxEq 16)    = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 []
-      | otherwise                     = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 [getTitle pg ++ ":" ++ show i]
+      | otherwise                     = An 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 [(getTitle pg ++ ":" ++ show i, p)]
 
 -- | Combine analyses from different pattern groups.
 combineAnalyses :: [AnalysisResult] -> AnalysisResult

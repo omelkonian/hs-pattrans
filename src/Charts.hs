@@ -1,11 +1,14 @@
 module Charts (renderOne, renderAll) where
 
+import Control.Monad (forM_)
+
 import Graphics.Rendering.Chart.Easy hiding (render)
 import Graphics.Rendering.Chart.Backend.Cairo
 
 import Types
 import Parser
 import Analysis
+import Export (writeToMidi)
 
 -- | Visualize the results of analyzing a single pattern group in a pie chart.
 renderOne :: PatternGroup -> AnalysisResult -> IO ()
@@ -19,7 +22,10 @@ renderAll s an = do
   -- Render overview chart
   render "ALL" ("ALL: " ++ s) an
   -- Store unclassified patterns
-  writeFile "unclassified.txt" $ unlines (unclassified an)
+  let uncls = unclassified an
+  writeFile "unclassified.txt" $ unlines (fst <$> uncls)
+  cd "mid" $
+    forM_ uncls $ \(f, p) -> writeToMidi (f ++ ".mid") p
 
 render :: String -> String -> AnalysisResult -> IO ()
 render fname title an

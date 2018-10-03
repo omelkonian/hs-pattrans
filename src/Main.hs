@@ -8,7 +8,7 @@ import Charts
 main :: IO ()
 main = do
   runAnalysis "docs/out/experts" (parseMirex Monophonic)
-  runAnalysis "docs/out/algorithms" parseAlgo
+  -- runAnalysis "docs/out/algorithms" parseAlgo
 
 runAnalysis :: FilePath -> IO [PatternGroup] -> IO ()
 runAnalysis f_root parser = do
