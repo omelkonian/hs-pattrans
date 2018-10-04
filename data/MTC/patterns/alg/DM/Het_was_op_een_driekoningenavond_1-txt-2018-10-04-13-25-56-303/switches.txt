@@ -1,0 +1,1 @@
+-i Het_was_op_een_driekoningenavond_1.txt -o ./output -m -d 

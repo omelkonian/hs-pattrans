@@ -1,0 +1,1 @@
+-i Er_was_een_koopman_rijk_en_machtig.txt -o ./output -m -d 

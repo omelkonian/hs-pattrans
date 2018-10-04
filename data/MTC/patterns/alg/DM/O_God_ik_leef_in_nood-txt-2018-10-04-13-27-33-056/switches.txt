@@ -1,0 +1,1 @@
+-i O_God_ik_leef_in_nood.txt -o ./output -m -d 

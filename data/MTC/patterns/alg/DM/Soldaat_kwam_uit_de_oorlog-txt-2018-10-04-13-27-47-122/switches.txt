@@ -1,0 +1,1 @@
+-i Soldaat_kwam_uit_de_oorlog.txt -o ./output -m -d 

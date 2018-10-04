@@ -1,0 +1,1 @@
+-i Vaarwel_bruidje_schoon.txt -o ./output -m -d 
