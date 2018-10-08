@@ -137,16 +137,21 @@ type Interval = Integer
 equal :: Eq a => Check a
 equal = Check (==)
 
--- | Check that two patterns are approximately equal, ie. have at most `n` differences.
--- e.g. [A, C, F] (approxEq 1) [A, C, C]
-approxEq :: Int -> Check Pattern
-approxEq n = Check $ \xs ys -> go xs ys <= n
+-- | Check that two patterns are approximately equal, wrt a certain percentage.
+-- A base pattern and an occurence are approximately equal with percentage `p` when:
+--    1. The occurence ignores (1-p)% notes of the base pattern
+--    2. (1-p)% notes of the occurence are additional notes (not in the base pattern)
+-- e.g. [A,C,F,A,B] (approxEq 80%) [A,C,G,A,B]
+approxEq :: Float -> Check Pattern
+approxEq p = Check go
   where
     go xs ys =
-      let zs = ys \\ xs
+      let [n, m]   = length <$> [xs, ys]
+          zs       = ys \\ xs
           remained = length zs
-          ignored = length xs - (length ys - remained)
-      in  remained + ignored
+          ignored  = n - (m - remained)
+          toF      = fromIntegral
+      in  (toF ignored <= (1 - p) * toF n) && (toF remained <= (1 - p) * toF m)
 
 -- | Negate the values of a numeric list.
 inverse :: Num a => [a] -> [a]

@@ -1,6 +1,6 @@
 module Charts (renderOne, renderAll) where
 
-import Control.Monad (forM_)
+import Control.Monad (forM_, when)
 
 import Graphics.Rendering.Chart.Easy hiding (render)
 import Graphics.Rendering.Chart.Backend.Cairo
@@ -17,15 +17,16 @@ renderOne (PatternGroup piece_n expert_n pattern_n _ _) an =
     render pattern_n (piece_n ++ ":" ++ expert_n ++ ":" ++ pattern_n) an
 
 -- | Visualize the result of analyzing multiple pattern groups in a single pie chart.
-renderAll :: String -> AnalysisResult -> IO ()
-renderAll s an = do
+renderAll :: Bool -> String -> AnalysisResult -> IO ()
+renderAll expo s an = do
   -- Render overview chart
   render "ALL" ("ALL: " ++ s) an
   -- Store unclassified patterns
-  let uncls = unclassified an
-  writeFile "unclassified.txt" $ unlines (fst <$> uncls)
-  cd "mid" $
-    forM_ uncls $ \(f, p) -> writeToMidi (f ++ ".mid") p
+  when expo $ do
+    let uncls = unclassified an
+    writeFile "unclassified.txt" $ unlines (fst <$> uncls)
+    cd "mid" $
+      forM_ uncls $ \(f, p) -> writeToMidi (f ++ ".mid") p
 
 render :: String -> String -> AnalysisResult -> IO ()
 render fname title an
@@ -52,16 +53,17 @@ render fname title an
                                          , ("trInverted", trInverted)
                                          , ("trAugmented", trAugmented)
                                          , ("trRetrograded", trRetrograded)
-                                         , ("aproxEq2", approxEq2)
-                                         , ("aproxEq4", approxEq4)
-                                         , ("aproxEq6", approxEq6)
+                                         , ("aproxEq9", approxEq9)
                                          , ("aproxEq8", approxEq8)
-                                         , ("aproxEq10", approxEq10)
-                                         , ("aproxEq12", approxEq12)
-                                         , ("aproxEq14", approxEq14)
-                                         , ("aproxEq16", approxEq16)
+                                         , ("aproxEq7", approxEq7)
+                                         , ("aproxEq6", approxEq6)
+                                         , ("aproxEq5", approxEq5)
+                                         , ("aproxEq4", approxEq4)
+                                         , ("aproxEq3", approxEq3)
+                                         , ("aproxEq2", approxEq2)
+                                         , ("aproxEq1", approxEq1)
                                          ]
-      , (s, v) <- xs ++ [("other", 100.0 - sum (snd <$> xs))]
+      , (s, v) <- xs ++ [("other", otherPercentage an)]
       ]
 
 
