@@ -1,1 +1,0 @@
--i Kom_laat_ons_nu_zo_stil_niet_zijn_1.txt -o ./output -m -d 

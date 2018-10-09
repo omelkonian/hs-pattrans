@@ -1,5 +1,4 @@
-module Parser ( ParseOption(..)
-              , parseMirex, parseAlgo
+module Parser ( parseMirex, parseAlgo, parseFolk
               , cd, listDirs, listFiles
               ) where
 
@@ -14,17 +13,11 @@ import qualified Text.Parsec.Token as Tokens
 
 import Types
 
--- | Parser options (monophonic or polyphonic).
-data ParseOption = Monophonic | Polyphonic
-instance Show ParseOption where
-  show Monophonic = "monophonic"
-  show Polyphonic = "polyphonic"
-
 -- | Get a specific piece of music and all its patterns from the MIREX dataset.
-parseMirex :: ParseOption -> IO [PatternGroup]
-parseMirex pOpt = cd "data/pieces" $ do
+parseMirex :: IO [PatternGroup]
+parseMirex = cd "data/pieces" $ do
   f_roots <- listDirs
-  res <- forM f_roots $ \f_root -> cd (f_root ++ "/" ++ show pOpt) $ do
+  res <- forM f_roots $ \f_root -> cd (f_root ++ "/monophonic") $ do
     -- Parse music
     music <- cd "csv" $ do
       f_music:[] <- listFiles
@@ -69,23 +62,53 @@ parseAlgo = cd "data/algOutput" $ do
             listFiles >>= ((concat <$>) . mapM (parseAlgoPiece $ f_alg ++ ":" ++ f_v)))
   return (concat allPgs)
 
+-- | Parse all pattern groups (all algorithms/pieces) from the Dutch Folk dataset.
+parseFolk :: IO [PatternGroup]
+parseFolk = cd "data/MTC/patterns/alg" $ do
+  f_algs <- listDirs
+  allPgs <- forM f_algs $ \f_alg -> cd f_alg $
+    listFiles >>= ((concat <$>) . mapM (parseAlgoPiece f_alg))
+  return (concat allPgs)
+
 parseAlgoPiece :: String -> FilePath -> IO [PatternGroup]
 parseAlgoPiece algo_n fname =
   parseMany (patternGroupP (sanitize fname) algo_n) fname
   where
     sanitize s
-      | ("bach" `isPrefixOf` s) || ("wtc" `isPrefixOf` s)
-      = "bachBMW889Fg"
-      | ("beethoven" `isPrefixOf` s) || ("sonata01" `isPrefixOf` s)
-      = "beethovenOp2No1Mvt3"
-      | ("chopin" `isPrefixOf` s) || ("mazurka" `isPrefixOf` s)
-      = "chopinOp24No4"
-      | ("gibbons" `isPrefixOf` s) || ("silver" `isPrefixOf` s)
-      = "gibbonsSilverSwan1612"
-      | ("mozart" `isPrefixOf` s) || ("sonata04" `isPrefixOf` s)
-      = "mozartK282Mvt2"
-      | otherwise
-      = s
+      -- Classical pieces
+      | ("bach" `isPrefixOf` s) || ("wtc" `isPrefixOf` s)           = "bachBMW889Fg"
+      | ("beethoven" `isPrefixOf` s) || ("sonata01" `isPrefixOf` s) = "beethovenOp2No1Mvt3"
+      | ("chopin" `isPrefixOf` s) || ("mazurka" `isPrefixOf` s)     = "chopinOp24No4"
+      | ("gibbons" `isPrefixOf` s) || ("silver" `isPrefixOf` s)     = "gibbonsSilverSwan1612"
+      | ("mozart" `isPrefixOf` s) || ("sonata04" `isPrefixOf` s)    = "mozartK282Mvt2"
+      -- Folk pieces
+      | ("Daar_g" `isPrefixOf` s)          = "DaarGingEenHeer"
+      | ("Daar_r" `isPrefixOf` s)          = "DaarReedEenJonkheer"
+      | ("Daar_w" `isPrefixOf` s)          = "DaarWasLaatstmaalEenRuiter"
+      | ("Daar_z" `isPrefixOf` s)          = "DaarZouErEenMaagdjeVroegOpstaan"
+      | ("Een_l" `isPrefixOf` s)           = "EenLindeboomStondInHetDal"
+      | ("Een_S" `isPrefixOf` s)           = "EenSoudaanHadEenDochtertje"
+      | ("En" `isPrefixOf` s)              = "EnErWarenEensTweeZoeteliefjes"
+      | ("Er_r" `isPrefixOf` s)            = "ErReedErEensEenRuiter"
+      | ("Er_was_een_h" `isPrefixOf` s)    = "ErWasEenHerderinnetje"
+      | ("Er_was_een_k" `isPrefixOf` s)    = "ErWasEenKoopmanRijkEnMachtig"
+      | ("Er_was_een_m" `isPrefixOf` s)    = "ErWasEenMeisjeVanZestienJaren"
+      | ("Er_woonde" `isPrefixOf` s)       = "ErWoondeEenVrouwtjeAlOverHetBos"
+      | ("Femmes" `isPrefixOf` s)          = "FemmesVoulezVousEprouver"
+      | ("Heer_Halewijn_2" `isPrefixOf` s) = "HeerHalewijn2"
+      | ("Heer_Halewijn_4" `isPrefixOf` s) = "HeerHalewijn4"
+      | ("Het_v" `isPrefixOf` s)           = "HetVrouwtjeVanStavoren"
+      | ("Het_was_l" `isPrefixOf` s)       = "HetWasLaatstOpEenZomerdag"
+      | ("Het_was_o" `isPrefixOf` s)       = "HetWasOpEenDriekoningenavond"
+      | ("Ik" `isPrefixOf` s)              = "IkKwamLaatstEensInDeStad"
+      | ("Kom" `isPrefixOf` s)             = "KomLaatOnsNuZoStilNietZijn"
+      | ("Lieve" `isPrefixOf` s)           = "LieveSchipperVaarMeOver"
+      | ("O_God" `isPrefixOf` s)           = "OGodIkLeefInNood"
+      | ("Soldaat" `isPrefixOf` s)         = "SoldaatKwamUitDeOorlog"
+      | ("Vaarwel" `isPrefixOf` s)         = "VaarwelBruidjeSchoon"
+      | ("Wat" `isPrefixOf` s)             = "WatZagIkDaarVanVerre"
+      | ("Zolang" `isPrefixOf` s)          = "ZolangDeBoomZalBloeien"
+      | otherwise                          = s
 
 patternGroupP :: String -> String -> Parser PatternGroup
 patternGroupP piece_n algo_n =
@@ -104,7 +127,7 @@ patternGroupP piece_n algo_n =
 parseMany :: Parser a -> FilePath -> IO [a]
 parseMany p f = do
   input <- readFile f
-  case runParser (many p <* eof) () f input of
+  case runParser ((many p <* many lineP) <* eof) () f input of
     Left err -> error $ show err
     Right x  -> return x
 

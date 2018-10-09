@@ -1,1 +1,0 @@
--i Er_was_een_herderinnetje_1.txt -o ./output -m -d 

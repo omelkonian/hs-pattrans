@@ -1,1 +1,0 @@
--i Daar_was_laatstmaal_een_ruiter_2.txt -o ./output -m -d 

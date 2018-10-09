@@ -1,1 +1,0 @@
--i Een_lindeboom_stond_in_het_dal_1.txt -o ./output -m -d 

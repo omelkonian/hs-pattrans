@@ -25,7 +25,7 @@ renderAll expo s an = do
   when expo $ do
     let uncls = unclassified an
     writeFile "unclassified.txt" $ unlines (fst <$> uncls)
-    cd "mid" $
+    cd "unclassified" $
       forM_ uncls $ \(f, p) -> writeToMidi (f ++ ".mid") p
 
 render :: String -> String -> AnalysisResult -> IO ()

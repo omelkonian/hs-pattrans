@@ -10,6 +10,7 @@ import Charts
 -- | Command-line options.
 data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , algorithms :: Bool -- ^ analyze algorithm dataset
+                       , folk       :: Bool -- ^ analyze dutch folk dataset
                        , export     :: Bool -- ^ export MIDI files
                        }
 
@@ -26,6 +27,11 @@ parseOpts = Options
       <> help "Analyze the algorithm dataset"
       )
   <*> switch
+      (  long "folk"
+      <> short 'F'
+      <> help "Analyze the dutch folk dataset (algorithms)"
+      )
+  <*> switch
       (  long "export"
       <> short 'X'
       <> help "Export MIDI files"
@@ -33,11 +39,13 @@ parseOpts = Options
 
 main :: IO ()
 main = do
-  Options {experts = expe, algorithms = alg, export = expo} <- execParser opts
+  Options {experts = expe, algorithms = alg, folk = fl, export = expo} <- execParser opts
   when expe $
-    runAnalysis expo "docs/out/experts" (parseMirex Monophonic)
+    runAnalysis expo "docs/out/experts" parseMirex
   when alg $
     runAnalysis expo "docs/out/algorithms" parseAlgo
+  when fl $
+    runAnalysis expo "docs/out/folk" parseFolk
 
   where
     opts :: ParserInfo Options
@@ -51,6 +59,7 @@ runAnalysis :: Bool -> FilePath -> IO [PatternGroup] -> IO ()
 runAnalysis expo f_root parser = do
     -- Parse dataset to retrieve all pattern groups.
     allPatternGroups <- parser
+    print $ length allPatternGroups
     -- Analyse individual pattern groups.
     cd f_root $ do
       analyses <-

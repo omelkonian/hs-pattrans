@@ -1,1 +1,0 @@
--i Het_vrouwtje_van_Stavoren_1.txt -o ./output -m -d 

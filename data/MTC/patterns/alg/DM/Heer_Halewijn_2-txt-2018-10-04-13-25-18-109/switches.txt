@@ -1,1 +1,0 @@
--i Heer_Halewijn_2.txt -o ./output -m -d 
