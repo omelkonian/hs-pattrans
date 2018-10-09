@@ -19,7 +19,7 @@ var handleFile = function(file0) {
   // remove 'docs/' prefix
   var file = file0.slice(5);
   // experts -> 0, algorithms -> 1
-  var n = file.indexOf("experts") !== -1 ? 0 : 1
+  var n = file.indexOf("folk") !== -1 ? 2 : (file.indexOf("alg") !== -1 ? 1 : 0)
   $(`#chart${n}`).append(
     `<a class='gallery' href="${file}"> <img src="${file}"> </a>`
   );
@@ -32,8 +32,7 @@ var files = [
   %%%
 ];
 files.forEach(handleFile)
-
-  for (var i = 0; i < 2; i++) {
+  for (var i = 0; i < 3; i++) {
     $(`#chart${i}`).justifiedGallery({
       rowHeight : 140,
       lastRow : 'nojustify',
@@ -53,6 +52,9 @@ files.forEach(handleFile)
 
 <h2>Algorithms</h2>
 <div id="chart1"></div>
+
+<h2>Folk</h2>
+<div id="chart2"></div>
 
 </body>
 </html>
