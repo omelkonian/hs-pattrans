@@ -1,0 +1,24 @@
+pattern1
+occurrence0
+0.0, 67.0
+0.5, 72.0
+pattern2
+occurrence0
+4.5, 71.0
+5.5, 67.0
+occurrence1
+12.5, 71.0
+13.5, 67.0
+pattern3
+occurrence0
+16.5, 74.0
+17.25, 74.0
+17.5, 74.0
+18.0, 74.0
+pattern4
+occurrence0
+20.5, 78.0
+21.25, 78.0
+21.5, 76.0
+22.0, 74.0
+22.5, 72.0

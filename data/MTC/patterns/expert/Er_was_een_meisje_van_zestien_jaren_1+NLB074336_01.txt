@@ -1,0 +1,19 @@
+pattern1
+occurrence0
+0.0, 62.0
+1.0, 72.0
+occurrence1
+9.0, 62.0
+10.0, 72.0
+pattern2
+occurrence0
+6.0, 71.0
+7.0, 69.0
+occurrence1
+15.0, 71.0
+16.0, 69.0
+pattern3
+occurrence0
+27.0, 71.0
+29.0, 69.0
+31.0, 67.0
