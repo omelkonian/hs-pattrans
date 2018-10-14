@@ -38,12 +38,14 @@ parseOpts = Options
 main :: IO ()
 main = do
   Options {experts=e, algorithms=a, classical=c, folk=f, export=x} <- execParser opts
-  when (c && e)  $
-    runAnalysis x "docs/out/classical/experts" parseMirex
+  when (c && e) $
+    runAnalysis x "docs/out/classical/experts" parseClassicExperts
   when (c && a) $
-    runAnalysis x "docs/out/classical/algorithms" parseAlgo
+    runAnalysis x "docs/out/classical/algorithms" parseClassicExperts
+  when (f && e) $
+    runAnalysis x "docs/out/folk/experts" parseFolkExperts
   when (f && a) $
-    runAnalysis x "docs/out/folk/algorithms" parseFolk
+    runAnalysis x "docs/out/folk/algorithms" parseFolkAlgo
 
   where
     opts :: ParserInfo Options

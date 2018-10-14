@@ -1,9 +1,10 @@
-module Parser ( parseMirex, parseAlgo, parseFolk
+module Parser ( parseClassicExperts, parseClassiclAlgo
+              , parseFolkExperts, parseFolkAlgo
               , cd, listDirs, listFiles
               ) where
 
 import Control.Monad (forM, filterM, mapM, void)
-import Data.List (sort, isPrefixOf)
+import Data.List (sort, isPrefixOf, sortOn, groupBy)
 import System.Directory
 
 import Text.Parsec
@@ -12,45 +13,31 @@ import Text.Parsec.String
 import qualified Text.Parsec.Token as Tokens
 
 import Types
+import Analysis
 
--- | Get a specific piece of music and all its patterns from the MIREX dataset.
-parseMirex :: IO [PatternGroup]
-parseMirex = cd "data/pieces" $ do
+-- | Parse all (expert) pattern groups from the classical dataset.
+parseClassicExperts :: IO [PatternGroup]
+parseClassicExperts = cd "data/pieces" $ do
   f_roots <- listDirs
-  res <- forM f_roots $ \f_root -> cd (f_root ++ "/monophonic") $ do
-    -- Parse music
-    music <- cd "csv" $ do
-      f_music:[] <- listFiles
-      parseMany mirexP f_music
+  res <- forM f_roots $ \f_root -> cd (f_root ++ "/monophonic/repeatedPatterns") $ do
+    f_patExs <- listDirs
+    allPats <- forM f_patExs $ \f_patEx -> cd f_patEx $ do
+      f_patTys <- listDirs
+      forM f_patTys $ \f_patTy -> do
+        basePat:pats <- cd (f_patTy ++ "/occurrences/csv") $ do
+          f_pats <- listFiles
+          forM f_pats (parseMany noteP)
+        return $ PatternGroup { piece_name   = f_root
+                              , expert_name  = f_patEx
+                              , pattern_name = f_patTy
+                              , basePattern  = basePat
+                              , patterns     = pats }
+    return $ concat allPats
+  return $ concat res
 
-    -- Parse patterns
-    patGroups <- cd "repeatedPatterns" $ do
-      f_patExs <- listDirs
-      allPats <- forM f_patExs $ \f_patEx -> cd f_patEx $ do
-        f_patTys <- listDirs
-        forM f_patTys $ \f_patTy -> do
-          basePat:pats <- cd (f_patTy ++ "/occurrences/csv") $ do
-            f_pats <- listFiles
-            forM f_pats (parseMany noteP)
-          return $ PatternGroup { piece_name   = f_root
-                                , expert_name  = f_patEx
-                                , pattern_name = f_patTy
-                                , basePattern  = basePat
-                                , patterns     = pats }
-      return $ concat allPats
-    return (music, patGroups)
-  return $ concat $ snd <$> res
-
-  where
-    -- | Parse one entry from a MIREX piece of music.
-    mirexP :: Parser MirexEntry
-    mirexP = MirexEntry <$> (floatP <* sepP) <*> (intP   <* sepP)
-                        <*> (intP   <* sepP) <*> (floatP <* sepP)
-                        <*> intP <* lineP
-
--- | Parse all pattern groups (all algorithms/pieces) from the MIREX dataset.
-parseAlgo :: IO [PatternGroup]
-parseAlgo = cd "data/algOutput" $ do
+-- | Parse all (algorithmic) pattern groups from the classical dataset.
+parseClassiclAlgo :: IO [PatternGroup]
+parseClassiclAlgo = cd "data/algOutput" $ do
   f_algs <- listDirs
   allPgs <- forM f_algs $ \f_alg -> cd f_alg $ do
     f_versions <- listDirs
@@ -62,9 +49,30 @@ parseAlgo = cd "data/algOutput" $ do
             listFiles >>= ((concat <$>) . mapM (parseAlgoPiece $ f_alg ++ ":" ++ f_v)))
   return (concat allPgs)
 
--- | Parse all pattern groups (all algorithms/pieces) from the Dutch Folk dataset.
-parseFolk :: IO [PatternGroup]
-parseFolk = cd "data/MTC/patterns/alg" $ do
+
+-- | Parse all (expert) pattern groups from the dutch folk dataset.
+parseFolkExperts :: IO [PatternGroup]
+parseFolkExperts = cd "data/MTC/patterns/expert" $ do
+  allPgs <- listFiles >>= ((concat <$>) . mapM (parseAlgoPiece "exp"))
+  return (groupPatterns allPgs)
+  where
+    groupPatterns :: [PatternGroup] -> [PatternGroup]
+    groupPatterns = (foldl1 combinePatterns <$>)
+                  . groupBy samePattern
+                  . sortOn getTitle
+
+    samePattern :: PatternGroup -> PatternGroup -> Bool
+    samePattern (PatternGroup p e pa _ _) (PatternGroup p' e' pa' _ _) =
+      p == p' && e == e' && pa == pa'
+
+    combinePatterns :: PatternGroup -> PatternGroup -> PatternGroup
+    combinePatterns p1@(PatternGroup p e pa b os) p2@(PatternGroup _ _ _ b' os')
+      | samePattern p1 p2 = PatternGroup p e pa b $ (b' : os) ++ os'
+      | otherwise         = error "Cannot combine occurences of different patterns"
+
+-- | Parse all (algorithmic) pattern groups from the dutch folk dataset.
+parseFolkAlgo :: IO [PatternGroup]
+parseFolkAlgo = cd "data/MTC/patterns/alg" $ do
   f_algs <- listDirs
   allPgs <- forM f_algs $ \f_alg -> cd f_alg $
     listFiles >>= ((concat <$>) . mapM (parseAlgoPiece f_alg))
@@ -147,7 +155,7 @@ floatP = negP <|> Tokens.float haskell
   where negP = (\i -> -i) <$> (string "-" *> Tokens.float haskell)
 
 lineP :: Parser ()
-lineP = void (newline <|> crlf)
+lineP = void (newline <|> crlf) <|> void (many1 space)
 
 -------------------------
 -- File-system utilities.

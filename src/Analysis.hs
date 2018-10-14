@@ -15,7 +15,7 @@ import Transformations
 
 -- | Analyzing a pattern group with a pattern prototype (occ1.csv).
 data AnalysisResult = An
-  { name          :: String
+  { name          :: String -- ^ name associated with the analysis
   , total         :: Int -- ^ all other occurences of the pattern
   , exact         :: Int -- ^ # of exact occurences
   , transposed    :: Int -- ^ # of *atonal* transpositions
@@ -42,7 +42,6 @@ data AnalysisResult = An
 
 instance ToNamedRecord AnalysisResult
 instance DefaultOrdered AnalysisResult
-
 instance ToField [(String, Pattern)] where
   toField = toField . length
 
