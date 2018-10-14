@@ -2,6 +2,8 @@ module Charts (renderOne, renderAll) where
 
 import Control.Monad (forM_, when)
 
+import Data.Colour
+import Data.Colour.Names
 import Graphics.Rendering.Chart.Easy hiding (render)
 import Graphics.Rendering.Chart.Backend.Cairo
 
@@ -36,11 +38,24 @@ render fname title an
   = do toFile def (fname ++ ".png") $ do
          pie_title .= title
          pie_plot . pie_data .= values
+         pie_plot . pie_colors .= map opaque colors
   where
+    colors :: [Colour Double]
+    colors = [ -- exacts
+               pink
+               -- transformations
+             , blue, red, green, yellow, cyan, magenta, brown, gray, goldenrod
+               -- approximate equality
+             , darkblue, darkred, darkgreen, yellowgreen, darkcyan, darkmagenta
+             , saddlebrown, darkgray, darkgoldenrod
+               -- other
+             , black
+             ]
+
     values :: [PieItem]
     values =
       [ pitem_value .~ v
-      $ pitem_label .~ s
+      $ pitem_label .~ (if v > 0 then s else "")
       $ pitem_offset .~ 40
       $ def
       | let xs = (percentage an <$>) <$> [ ("exact", exact)
