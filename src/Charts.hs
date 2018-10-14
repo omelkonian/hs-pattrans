@@ -38,10 +38,10 @@ render fname title an
   = do toFile def (fname ++ ".png") $ do
          pie_title .= title
          pie_plot . pie_data .= values
-         pie_plot . pie_colors .= map opaque colors
+         pie_plot . pie_colors .= map opaque colours
   where
-    colors :: [Colour Double]
-    colors = [ -- exacts
+    colours :: [Colour Double]
+    colours = [ -- exacts
                pink
                -- transformations
              , blue, red, green, yellow, cyan, magenta, brown, gray, goldenrod

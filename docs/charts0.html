@@ -12,6 +12,9 @@
 <link rel="stylesheet" href="lib/colorbox.css">
 <script src="lib/jquery.colorbox-min.js"></script>
 
+<link rel="stylesheet" href="lib/jquery-ui.min.css">
+<script src="lib/jquery-ui.min.js"></script>
+
 <script type="text/javascript">
 
 // Attach every chart to the appropriate gallery
@@ -19,20 +22,22 @@ var handleFile = function(file0) {
   // remove 'docs/' prefix
   var file = file0.slice(5);
   // experts -> 0, algorithms -> 1
-  var n = file.indexOf("folk") !== -1 ? 2 : (file.indexOf("alg") !== -1 ? 1 : 0)
+  var n = file.indexOf("folk") !== -1 ? 2 : 0
+  n += file.indexOf("algorithms") !== -1 ? 1 : 0
   $(`#chart${n}`).append(
     `<a class='gallery' href="${file}"> <img src="${file}"> </a>`
   );
 }
 
+
 // Justify chart galleries
 window.onload = function() {
   // Gather all images (script will insert the actual chart filenames)
-var files = [
-  %%%
-];
-files.forEach(handleFile)
-  for (var i = 0; i < 3; i++) {
+  var files = [
+    %%%
+  ];
+  files.forEach(handleFile)
+  for (var i = 0; i < 4; i++) {
     $(`#chart${i}`).justifiedGallery({
       rowHeight : 140,
       lastRow : 'nojustify',
@@ -40,6 +45,8 @@ files.forEach(handleFile)
     });
   }
   $('a.gallery').colorbox();
+  // Enable accordion
+  $('#accordion').accordion({header: "h2", active:false, collapsible: true});
 }
 
 </script>
@@ -47,14 +54,19 @@ files.forEach(handleFile)
 
 <body>
 
-<h2>Experts</h2>
-<div id="chart0"></div>
+<div id="accordion">
+  <h2>Classical: Experts</h2>
+  <div class= id="chart0"></div>
 
-<h2>Algorithms</h2>
-<div id="chart1"></div>
+  <h2>Classical: Algorithms</h2>
+  <div id="chart1"></div>
 
-<h2>Folk</h2>
-<div id="chart2"></div>
+  <h2>Folk: Experts</h2>
+  <div id="chart2"></div>
+
+  <h2>Folk: Algorithms</h2>
+  <div id="chart3"></div>
+</div>
 
 </body>
 </html>

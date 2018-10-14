@@ -1,6 +1,8 @@
 import Data.Semigroup ((<>))
 import Control.Monad (forM, when)
 import Options.Applicative
+import Data.Csv (encodeDefaultOrderedByName)
+import qualified Data.ByteString.Lazy as BL
 
 import Types
 import Parser
@@ -10,42 +12,38 @@ import Charts
 -- | Command-line options.
 data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , algorithms :: Bool -- ^ analyze algorithm dataset
+                       , classical  :: Bool -- ^ analyze classical dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
                        , export     :: Bool -- ^ export MIDI files
                        }
 
 parseOpts :: Parser Options
 parseOpts = Options
-  <$> switch
-      (  long "experts"
-      <> short 'E'
-      <> help "Analyze the expert dataset"
-      )
-  <*> switch
-      (  long "algorithms"
-      <> short 'A'
-      <> help "Analyze the algorithm dataset"
-      )
-  <*> switch
-      (  long "folk"
-      <> short 'F'
-      <> help "Analyze the dutch folk dataset (algorithms)"
-      )
-  <*> switch
-      (  long "export"
-      <> short 'X'
-      <> help "Export MIDI files"
-      )
+  <$> switch (  long "experts"
+             <> short 'E'
+             <> help "Analyze the expert dataset" )
+  <*> switch (  long "algorithms"
+             <> short 'A'
+             <> help "Analyze the algorithm dataset" )
+  <*> switch (  long "classical"
+             <> short 'C'
+             <> help "Analyze the classical dataset" )
+  <*> switch (  long "folk"
+             <> short 'F'
+             <> help "Analyze the dutch folk dataset" )
+  <*> switch (  long "export"
+             <> short 'X'
+             <> help "Export MIDI files" )
 
 main :: IO ()
 main = do
-  Options {experts = expe, algorithms = alg, folk = fl, export = expo} <- execParser opts
-  when expe $
-    runAnalysis expo "docs/out/experts" parseMirex
-  when alg $
-    runAnalysis expo "docs/out/algorithms" parseAlgo
-  when fl $
-    runAnalysis expo "docs/out/folk" parseFolk
+  Options {experts=e, algorithms=a, classical=c, folk=f, export=x} <- execParser opts
+  when (c && e)  $
+    runAnalysis x "docs/out/classical/experts" parseMirex
+  when (c && a) $
+    runAnalysis x "docs/out/classical/algorithms" parseAlgo
+  when (f && a) $
+    runAnalysis x "docs/out/folk/algorithms" parseFolk
 
   where
     opts :: ParserInfo Options
@@ -65,9 +63,12 @@ runAnalysis expo f_root parser = do
       analyses <-
         forM allPatternGroups $ \pg -> do
           let an = analysePatternGroup pg
-          putStrLn $ getTitle pg ++ " " ++ show an -- display on terminal
+          print an -- display on terminal
           renderOne pg an -- produce pie chart
           return an
+
+      -- Output in CSV format
+      BL.writeFile "output.csv" (encodeDefaultOrderedByName analyses)
 
       -- Combine all individual analyses and render in one chart.
       let finalAn = combineAnalyses analyses
