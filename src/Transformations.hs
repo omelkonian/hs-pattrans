@@ -1,3 +1,4 @@
+{-# LANGUAGE GADTs #-}
 module Transformations where
 
 import qualified Data.Set as S
@@ -13,6 +14,8 @@ import Types
 
 newtype Check a = Check { getCheck :: a -> a -> Bool }
   -- ^ Checks two patterns (horizontal translation in time is always assumed).
+
+type ApproxCheck a = Float -> Check a
 
 (<=>) :: a -> a -> Check a -> Bool
 (x <=> y) p = getCheck p x y
@@ -37,21 +40,21 @@ f $< p = Check $ \x y -> (x <=> f y) p
 
 -- | Exact repetition: move a pattern in time.
 -- (AKA horizontal translation)
-exactOf :: Check Pattern
-exactOf = rhythm >$< equal
-       <> pitch  >$< equal
+exactOf :: ApproxCheck Pattern
+exactOf p = rhythm >$< approxEq p
+         <> pitch  >$< approxEq p
 
 -- | Transposition: move a pattern in pitch.
 -- (AKA horizontal+vertical translation)
-transpositionOf :: Check Pattern
-transpositionOf = rhythm    >$< equal
-               <> intervals >$< equal
+transpositionOf :: ApproxCheck Pattern
+transpositionOf p = rhythm    >$< approxEq p
+                 <> intervals >$< approxEq p
 
 -- | Inversion: negate all pitch intervals (starting from the same base pitch).
-inversionOf :: Check Pattern
-inversionOf = basePitch >$< equal
-           <> rhythm    >$< equal
-           <> intervals >$< (inverse $< equal)
+inversionOf :: ApproxCheck Pattern
+inversionOf p = basePitch >$< equal
+             <> rhythm    >$< approxEq p
+             <> intervals >$< (inverse $< approxEq p)
 
 -- | Retrograde: mirror a pattern in both pitch and rhythm.
 -- (AKA vertical reflection)
@@ -78,9 +81,9 @@ type Scale = M.Map MIDI Degree
 
 -- | Octave-agnostic tonal transposition, wrt a scale that 'fits' the base pattern
 -- e.g. [I, IV, V] tonalTranspOf [III, VI, VII]
-tonalTranspOf :: Check Pattern
-tonalTranspOf = Check $ \xs ys ->
-  (xs <=> ys) (applyScale (guessScale xs) >$< (intervals >$< equal))
+tonalTranspOf :: ApproxCheck Pattern
+tonalTranspOf p = Check $ \xs ys ->
+  (xs <=> ys) (applyScale (guessScale xs) >$< (intervals >$< approxEq p))
   where
     toDegree :: MIDI -> Scale -> Degree
     toDegree = M.findWithDefault 0 -- 'outside' note
@@ -137,13 +140,15 @@ type Interval = Integer
 equal :: Eq a => Check a
 equal = Check (==)
 
--- | Check that two patterns are approximately equal, wrt a certain percentage.
+-- | Check that two lists are approximately equal, wrt a certain percentage.
 -- A base pattern and an occurence are approximately equal with percentage `p` when:
 --    1. The occurence ignores (1-p)% notes of the base pattern
 --    2. (1-p)% notes of the occurence are additional notes (not in the base pattern)
 -- e.g. [A,C,F,A,B] (approxEq 80%) [A,C,G,A,B]
-approxEq :: Float -> Check Pattern
-approxEq p = Check go
+approxEq :: (Eq b, a ~ [b]) => Float -> Check a
+approxEq p
+  | p == 1.0  = Check (==)
+  | otherwise = Check go
   where
     go xs ys =
       let [n, m]   = length <$> [xs, ys]

@@ -41,7 +41,7 @@ main = do
   when (c && e) $
     runAnalysis x "docs/out/classical/experts" parseClassicExperts
   when (c && a) $
-    runAnalysis x "docs/out/classical/algorithms" parseClassicExperts
+    runAnalysis x "docs/out/classical/algorithms" parseClassiclAlgo
   when (f && e) $
     runAnalysis x "docs/out/folk/experts" parseFolkExperts
   when (f && a) $

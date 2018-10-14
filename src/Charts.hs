@@ -59,8 +59,17 @@ render fname title an
       $ pitem_offset .~ 40
       $ def
       | let xs = (percentage an <$>) <$> [ ("exact", exact)
+                                         , ("exact9", exact9)
+                                         , ("exact7", exact7)
+                                         , ("exact5", exact5)
                                          , ("transposed", transposed)
+                                         , ("transposed9", transposed9)
+                                         , ("transposed7", transposed7)
+                                         , ("transposed5", transposed5)
                                          , ("tonalTransped", tonalTransped)
+                                         , ("tonalTransped9", tonalTransped9)
+                                         , ("tonalTransped7", tonalTransped7)
+                                         , ("tonalTransped5", tonalTransped5)
                                          , ("inverted", inverted)
                                          , ("augmented", augmented)
                                          , ("retrograded", retrograded)
@@ -68,15 +77,6 @@ render fname title an
                                          , ("trInverted", trInverted)
                                          , ("trAugmented", trAugmented)
                                          , ("trRetrograded", trRetrograded)
-                                         , ("aproxEq9", approxEq9)
-                                         , ("aproxEq8", approxEq8)
-                                         , ("aproxEq7", approxEq7)
-                                         , ("aproxEq6", approxEq6)
-                                         , ("aproxEq5", approxEq5)
-                                         , ("aproxEq4", approxEq4)
-                                         , ("aproxEq3", approxEq3)
-                                         , ("aproxEq2", approxEq2)
-                                         , ("aproxEq1", approxEq1)
                                          ]
       , (s, v) <- xs ++ [("other", otherPercentage an)]
       ]
