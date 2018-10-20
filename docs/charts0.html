@@ -21,9 +21,13 @@
 var handleFile = function(file0) {
   // remove 'docs/' prefix
   var file = file0.slice(5);
-  // experts -> 0, algorithms -> 1
-  var n = file.indexOf("folk") !== -1 ? 2 : 0;
-  n += file.indexOf("algorithms") !== -1 ? 1 : 0;
+  // classical -> 0/1, folk -> 2/3, random -> 4
+  var n = 0;
+  if file.indexOf("random") { n = 4; }
+  else {
+    n = file.indexOf("folk") !== -1 ? 2 : 0;
+    n += file.indexOf("algorithms") !== -1 ? 1 : 0;
+  }
   $(`#chart${n}`).append(
     `<a class='gallery' href="${file}"> <img src="${file}"> </a>`
   );
@@ -38,7 +42,7 @@ window.onload = function() {
   ];
   files.forEach(handleFile);
   // Format gallery
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 5; i++) {
     $(`#chart${i}`).justifiedGallery({
       rowHeight : 140,
       lastRow : 'nojustify',
@@ -67,6 +71,9 @@ window.onload = function() {
 
   <h2>Folk: Algorithms</h2>
   <div id="chart3"></div>
+
+  <h2>Random</h2>
+  <div id="chart4"></div>
 </div>
 
 </body>

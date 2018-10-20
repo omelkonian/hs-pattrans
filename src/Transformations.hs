@@ -1,9 +1,9 @@
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, ImplicitParams, Rank2Types #-}
 module Transformations where
 
 import qualified Data.Set as S
 import qualified Data.Map as M
-import Data.List ((\\), maximumBy)
+import Data.List (maximumBy, sortOn)
 import Data.Semigroup
 import Data.Functor.Contravariant hiding ((>$<), (>$), ($<))
 
@@ -15,13 +15,11 @@ import Types
 newtype Check a = Check { getCheck :: a -> a -> Bool }
   -- ^ Checks two patterns (horizontal translation in time is always assumed).
 
-type ApproxCheck a = Float -> Check a
-
 (<=>) :: a -> a -> Check a -> Bool
 (x <=> y) p = getCheck p x y
 
 instance Semigroup (Check a) where
-  p <> q = Check $ \x y -> (x <=> y) p && (x <=> y) q
+  p <> q = Check $ \x y -> and (x <=> y `pmap` [p, q])
 
 instance Contravariant Check where
   contramap f p = Check $ \x y -> (f x <=> f y) p
@@ -35,43 +33,48 @@ infix 8 >$, $<
 f >$ p = Check $ \x y -> (f x <=> y) p
 f $< p = Check $ \x y -> (x <=> f y) p
 
+type ApproxCheck a = (?p :: Float) => Check a
+
+(~~) :: ((?p::Float) => r) -> Float -> r
+(~~) thing f = let ?p = f in thing
+
 ---------------------
 -- Transformations
 
 -- | Exact repetition: move a pattern in time.
 -- (AKA horizontal translation)
 exactOf :: ApproxCheck Pattern
-exactOf p = rhythm >$< approxEq p
-         <> pitch  >$< approxEq p
+exactOf = rhythm >$< approxEq2
+       <> pitch  >$< approxEq
 
 -- | Transposition: move a pattern in pitch.
 -- (AKA horizontal+vertical translation)
 transpositionOf :: ApproxCheck Pattern
-transpositionOf p = rhythm    >$< approxEq p
-                 <> intervals >$< approxEq p
+transpositionOf = rhythm    >$< approxEq2
+               <> intervals >$< approxEq2
 
 -- | Inversion: negate all pitch intervals (starting from the same base pitch).
 inversionOf :: ApproxCheck Pattern
-inversionOf p = basePitch >$< equal
-             <> rhythm    >$< approxEq p
-             <> intervals >$< (inverse $< approxEq p)
+inversionOf = basePitch >$< equal
+           <> rhythm    >$< approxEq2
+           <> intervals >$< (inverse $< approxEq2)
 
 -- | Retrograde: mirror a pattern in both pitch and rhythm.
 -- (AKA vertical reflection)
-retrogradeOf :: Check Pattern
-retrogradeOf = rhythm >$< (reverse $< equal)
-            <> pitch  >$< (reverse $< equal)
+retrogradeOf :: ApproxCheck Pattern
+retrogradeOf = rhythm >$< (reverse $< approxEq2)
+            <> pitch  >$< (reverse $< approxEq)
 
 -- | Rotation: reversal of pitch intervals and reversal of rhythm.
 -- (AKA retrograde inversion)
-rotationOf :: Check Pattern
-rotationOf = rhythm    >$< (reverse $< equal)
-          <> intervals >$< (reverse $< equal)
+rotationOf :: ApproxCheck Pattern
+rotationOf = rhythm    >$< (reverse $< approxEq2)
+          <> intervals >$< (reverse $< approxEq2)
 
 -- | Augmentation: speed-up/slow-down the rhythmic structure of a pattern.
-augmentationOf :: Check Pattern
-augmentationOf = normalRhythm >$< equal
-              <> pitch        >$< equal
+augmentationOf :: ApproxCheck Pattern
+augmentationOf = normalRhythm >$< approxEq2
+              <> pitch        >$< approxEq
 
 -----------------------
 -- Tonal transposition
@@ -82,8 +85,9 @@ type Scale = M.Map MIDI Degree
 -- | Octave-agnostic tonal transposition, wrt a scale that 'fits' the base pattern
 -- e.g. [I, IV, V] tonalTranspOf [III, VI, VII]
 tonalTranspOf :: ApproxCheck Pattern
-tonalTranspOf p = Check $ \xs ys ->
-  (xs <=> ys) (applyScale (guessScale xs) >$< (intervals >$< approxEq p))
+tonalTranspOf =  rhythm >$< approxEq2
+              <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale xs)
+                                               >$< (intervals >$< approxEq2)))
   where
     toDegree :: MIDI -> Scale -> Degree
     toDegree = M.findWithDefault 0 -- 'outside' note
@@ -114,21 +118,20 @@ tonalTranspOf p = Check $ \xs ys ->
 
 -- | Transposition + Inversion.
 -- (AKA horizontal reflection)
-trInversionOf :: Check Pattern
-trInversionOf = rhythm    >$< equal
-             <> intervals >$< (inverse $< equal)
+trInversionOf :: ApproxCheck Pattern
+trInversionOf = rhythm    >$< approxEq2
+             <> intervals >$< (inverse $< approxEq2)
 
 -- | Transposition + Augmentation.
-trAugmentationOf :: Check Pattern
-trAugmentationOf = normalRhythm >$< equal
-                <> intervals    >$< equal
+trAugmentationOf :: ApproxCheck Pattern
+trAugmentationOf = normalRhythm >$< approxEq2
+                <> intervals    >$< approxEq2
 
 -- | Transposition + Retrograde.
 -- (AKA vertical glide reflection)
-trRetrogradeOf :: Check Pattern
-trRetrogradeOf = rhythm    >$< (reverse $< equal)
-              <> intervals >$< (reverse . inverse $< equal)
-
+trRetrogradeOf :: ApproxCheck Pattern
+trRetrogradeOf = rhythm    >$< (reverse $< approxEq2)
+              <> intervals >$< (reverse . inverse $< approxEq2)
 
 -----------------------
 -- Utilities
@@ -140,23 +143,85 @@ type Interval = Integer
 equal :: Eq a => Check a
 equal = Check (==)
 
--- | Check that two lists are approximately equal, wrt a certain percentage.
+approxEqWith :: (Show b, Num b, Eq b, a ~ [b], ?p :: Float)
+             => (b -> [b] -> Maybe [b] {-list after deleting the element-})
+                -- ^ function that deletes an element from a list, possibly
+                -- reducing (summing) consecutive elements to be equal to the
+                -- element being deleted
+             -> Check a
+approxEqWith del1 = Check go
+  where
+    go xs' ys' =
+      let [xs, ys] = sortOn length [xs', ys']
+          [n, m]   = length <$> [xs, ys]
+          (remained, ignored) = ys `del` xs
+          toF      =  fromIntegral
+      in  (toF ignored <= (1 - ?p) * toF n) && (toF remained <= (1 - ?p) * toF m)
+
+    del ys [] = (length ys, 0)
+    del [] xs = (0, length xs)
+    del ys (x:xs)
+      | Just ys' <- del1 x ys = del ys' xs
+      | otherwise             = (+ 1) <$> del ys xs
+
+-- | First-order approximate equality of lists.
+--
+-- Check that two lists are approximately equal, wrt a certain percentage.
 -- A base pattern and an occurence are approximately equal with percentage `p` when:
 --    1. The occurence ignores (1-p)% notes of the base pattern
 --    2. (1-p)% notes of the occurence are additional notes (not in the base pattern)
 -- e.g. [A,C,F,A,B] (approxEq 80%) [A,C,G,A,B]
-approxEq :: (Eq b, a ~ [b]) => Float -> Check a
-approxEq p
-  | p == 1.0  = Check (==)
-  | otherwise = Check go
+approxEq :: (Show b, Num b, Eq b, a ~ [b], ?p :: Float) => Check a
+approxEq
+  | ?p == 1.0 = equal
+  | otherwise = approxEqWith del1
   where
-    go xs ys =
-      let [n, m]   = length <$> [xs, ys]
-          zs       = ys \\ xs
-          remained = length zs
-          ignored  = n - (m - remained)
-          toF      = fromIntegral
-      in  (toF ignored <= (1 - p) * toF n) && (toF remained <= (1 - p) * toF m)
+    -- does not reduce consecutive elements (first-order)
+    del1 _ []     = Nothing
+    del1 x (y:ys)
+      | x == y    = Just ys
+      | otherwise = (y:) <$> del1 x ys
+
+-- | Second-order approximate equality of lists.
+--
+-- The essential difference with first-order approximate equality is the ability
+-- to equate consecutive elements with their sum, hence the Ord/Num constraint.
+--
+-- NB: motivated by lists which are the result of pairing an initial list
+-- and we count approximation by checking the initial lists
+-- e.g. * intervals from pitches
+--      * rhythm from durations
+approxEq2 :: (Show b, Ord b, Num b, Eq b, a ~ [b], ?p :: Float) => Check a
+approxEq2 = approxEqWith del1
+  where
+    -- reduces consecutive elements (second-order)
+    del1 _ [] = Nothing
+    del1 x (y:ys)
+      | x == y                         = Just ys
+      | Just i <- findIndex 0 x (y:ys) = Just (snd $ splitAt i ys)
+      | otherwise                      = (y:) <$> del1 x ys
+
+    findIndex i 0 _  = Just i
+    findIndex _ _ [] = Nothing
+    findIndex i acc (y:ys)
+      | acc >= y  = findIndex (i + 1) (acc - y) ys
+      | otherwise = Nothing
+
+{- ^^^ COMPUTATIONALLY INFEASIBLE (even when threaded, due to space leaks) ^^^
+approxEq2 :: (Semigroup b, Eq b, a ~ [b], ?p :: Float) => Check a
+approxEq2
+  | ?p == 1.0 = equal
+  | otherwise = Check $ \x y ->
+      or $ parMap rpar (\y' -> (x <=> y') approxEq) (ndShrink y)
+  where
+    -- | Non-deterministically combine consecutive elements of the array.
+    ndShrink :: Semigroup a => [a] -> [[a]]
+    ndShrink []     = [[]]
+    ndShrink (x:xs) = ((x:) <$> rest) ++ (merge <$> rest)
+      where rest = ndShrink xs
+            merge []     = []
+            merge (y:ys) = (x <> y) : ys
+-}
 
 -- | Negate the values of a numeric list.
 inverse :: Num a => [a] -> [a]
@@ -188,16 +253,16 @@ durations = fmap ontime
 rhythm :: Pattern -> [Time]
 rhythm = fmap (\(Note t1 _, Note t2 _) -> t2 - t1) . pairs
 
--- | Convert times to ratios wrt the first time unit used.
--- e.g. normalizeTime [2, 6, 8, 6, 1, 2] = [1, 3, 4, 1/2, 1]
-normalizeTime :: [Time] -> [Time]
-normalizeTime (tt : ts)  = 1 : ((/ tt) <$> ts)
-normalizeTime []         = []
-
 -- | Normalized (relative) rhythmic structure of a pattern.
 -- e.g. normalRhythm [(A,2), (C#,6), (Eb,8), (B,1), (A,2)] = [1, 3, 4, 1/2, 1]
 normalRhythm :: Pattern -> [Time]
 normalRhythm = normalizeTime . rhythm
+  where
+    -- | Convert times to ratios wrt the first time unit used.
+    -- e.g. normalizeTime [2, 6, 8, 6, 1, 2] = [1, 3, 4, 1/2, 1]
+    normalizeTime :: [Time] -> [Time]
+    normalizeTime (tt : ts)  = 1 : ((/ tt) <$> ts)
+    normalizeTime []         = []
 
 -- | Translate a note horizontally (in time).
 -- e.g. translateH (-0.5) [(25,1), (27,2), (25,2.5)] = [(25,0.5), (27,1.5), (25,2)]

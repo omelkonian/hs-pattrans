@@ -1,9 +1,9 @@
 module Parser ( parseClassicExperts, parseClassiclAlgo
-              , parseFolkExperts, parseFolkAlgo
+              , parseFolkExperts, parseFolkAlgo, parseRandom
               , cd, listDirs, listFiles
               ) where
 
-import Control.Monad (forM, filterM, mapM, void)
+import Control.Monad (forM, filterM, void)
 import Data.List (sort, isPrefixOf, sortOn, groupBy)
 import System.Directory
 
@@ -13,7 +13,7 @@ import Text.Parsec.String
 import qualified Text.Parsec.Token as Tokens
 
 import Types
-import Analysis
+import MIDI (readFromMidi)
 
 -- | Parse all (expert) pattern groups from the classical dataset.
 parseClassicExperts :: IO [PatternGroup]
@@ -26,7 +26,7 @@ parseClassicExperts = cd "data/pieces" $ do
       forM f_patTys $ \f_patTy -> do
         basePat:pats <- cd (f_patTy ++ "/occurrences/csv") $ do
           f_pats <- listFiles
-          forM f_pats (parseMany noteP)
+          pforM f_pats (parseMany noteP)
         return $ PatternGroup { piece_name   = f_root
                               , expert_name  = f_patEx
                               , pattern_name = f_patTy
@@ -42,24 +42,24 @@ parseClassiclAlgo = cd "data/algOutput" $ do
   allPgs <- forM f_algs $ \f_alg -> cd f_alg $ do
     f_versions <- listDirs
     if null f_versions then do
-      listFiles >>= ((concat <$>) . mapM (parseAlgoPiece f_alg))
+      listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece f_alg))
     else
       concat <$> forM f_versions
         (\f_v -> cd f_v $
-            listFiles >>= ((concat <$>) . mapM (parseAlgoPiece $ f_alg ++ ":" ++ f_v)))
+            listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece $ f_alg ++ ":" ++ f_v)))
   return (concat allPgs)
 
 
 -- | Parse all (expert) pattern groups from the dutch folk dataset.
 parseFolkExperts :: IO [PatternGroup]
 parseFolkExperts = cd "data/MTC/patterns/expert" $ do
-  allPgs <- listFiles >>= ((concat <$>) . mapM (parseAlgoPiece "exp"))
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "exp"))
   return (groupPatterns allPgs)
   where
     groupPatterns :: [PatternGroup] -> [PatternGroup]
     groupPatterns = (foldl1 combinePatterns <$>)
                   . groupBy samePattern
-                  . sortOn getTitle
+                  . sortOn show
 
     samePattern :: PatternGroup -> PatternGroup -> Bool
     samePattern (PatternGroup p e pa _ _) (PatternGroup p' e' pa' _ _) =
@@ -75,8 +75,22 @@ parseFolkAlgo :: IO [PatternGroup]
 parseFolkAlgo = cd "data/MTC/patterns/alg" $ do
   f_algs <- listDirs
   allPgs <- forM f_algs $ \f_alg -> cd f_alg $
-    listFiles >>= ((concat <$>) . mapM (parseAlgoPiece f_alg))
+    listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece f_alg))
   return (concat allPgs)
+
+-- | Parse all patterns from the random dutch folk dataset and form random groups.
+parseRandom :: IO [PatternGroup]
+parseRandom = cd "data/MTC/ranexcerpts" $ do
+  f_groups <- listDirs
+  forM f_groups $ \f_group -> cd f_group $ do
+    -- convert MIDI to Pattern
+    (base:pats) <- mapM readFromMidi =<< listFiles
+    return PatternGroup { piece_name   = "RANDOM"
+                        , expert_name  = "RANDOM"
+                        , pattern_name = f_group
+                        , basePattern  = base
+                        , patterns     = pats }
+    -- T0D0 random subsets as pattern groups
 
 parseAlgoPiece :: String -> FilePath -> IO [PatternGroup]
 parseAlgoPiece algo_n fname =

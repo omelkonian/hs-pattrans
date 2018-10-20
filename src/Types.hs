@@ -1,5 +1,9 @@
 module Types where
 
+import Data.List (intersperse)
+import Control.Parallel.Strategies (parMap, rpar)
+import Control.Concurrent.Async (forConcurrently, mapConcurrently)
+
 -- | Time in crochet beats.
 type Time = Double
 -- | MIDI values are represented with integers.
@@ -29,7 +33,13 @@ data PatternGroup = PatternGroup
   -- ^ the pattern prototype (always taken from `occ1.csv`)
   , patterns     :: [Pattern]
   -- ^ all other pattern occurences of the prototype
-  } deriving (Eq, Show)
+  } deriving (Eq)
+
+instance Show PatternGroup where
+  -- | Get a title, unique to the given PatternGroup, in the following format:
+  -- <piece>:<expert>:<pattern>.
+  show (PatternGroup piece_n expert_n pattern_n _ _) =
+    concat $ intersperse ":" [piece_n, expert_n, pattern_n]
 
 -- | A pattern is a sequence of notes.
 type Pattern = [Note]
@@ -37,3 +47,19 @@ type Pattern = [Note]
 data Note = Note { ontime :: Time -- ^ onset time
                  , midi   :: MIDI -- ^ MIDI number
                  } deriving (Eq, Show)
+
+
+-----------------------
+-- Parallel operations
+
+
+-- | Parallel map.
+pmap :: (a -> b) -> [a] -> [b]
+pmap = parMap rpar
+
+-- | Parallel forM.
+pforM :: Traversable t => t a -> (a -> IO b) -> IO (t b)
+pforM = forConcurrently
+
+pmapM :: Traversable t => (a -> IO b) -> t a -> IO (t b)
+pmapM = mapConcurrently

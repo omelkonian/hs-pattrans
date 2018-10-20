@@ -10,7 +10,7 @@ import Graphics.Rendering.Chart.Backend.Cairo
 import Types
 import Parser
 import Analysis
-import Export (writeToMidi)
+import MIDI (writeToMidi)
 
 -- | Visualize the results of analyzing a single pattern group in a pie chart.
 renderOne :: PatternGroup -> AnalysisResult -> IO ()
@@ -41,16 +41,11 @@ render fname title an
          pie_plot . pie_colors .= map opaque colours
   where
     colours :: [Colour Double]
-    colours = [ -- exacts
-               pink
-               -- transformations
-             , blue, red, green, yellow, cyan, magenta, brown, gray, goldenrod
-               -- approximate equality
-             , darkblue, darkred, darkgreen, yellowgreen, darkcyan, darkmagenta
-             , saddlebrown, darkgray, darkgoldenrod
-               -- other
-             , black
-             ]
+    colours =
+      -- transformations (100%, 80%, 60%, 40%)
+      take 30 (cycle [pink, darkblue, darkred, green, darkorange, darkcyan, darkmagenta, brown, darkviolet, darkorange])
+      -- other
+      ++ [black]
 
     values :: [PieItem]
     values =
@@ -59,17 +54,8 @@ render fname title an
       $ pitem_offset .~ 40
       $ def
       | let xs = (percentage an <$>) <$> [ ("exact", exact)
-                                         , ("exact9", exact9)
-                                         , ("exact7", exact7)
-                                         , ("exact5", exact5)
                                          , ("transposed", transposed)
-                                         , ("transposed9", transposed9)
-                                         , ("transposed7", transposed7)
-                                         , ("transposed5", transposed5)
                                          , ("tonalTransped", tonalTransped)
-                                         , ("tonalTransped9", tonalTransped9)
-                                         , ("tonalTransped7", tonalTransped7)
-                                         , ("tonalTransped5", tonalTransped5)
                                          , ("inverted", inverted)
                                          , ("augmented", augmented)
                                          , ("retrograded", retrograded)
@@ -77,6 +63,26 @@ render fname title an
                                          , ("trInverted", trInverted)
                                          , ("trAugmented", trAugmented)
                                          , ("trRetrograded", trRetrograded)
+                                         , ("exact8", exact8)
+                                         , ("transposed8", transposed8)
+                                         , ("tonalTransped8", tonalTransped8)
+                                         , ("inverted8", inverted8)
+                                         , ("augmented8", augmented8)
+                                         , ("retrograded8", retrograded8)
+                                         , ("rotated8", rotated8)
+                                         , ("trInverted8", trInverted8)
+                                         , ("trAugmented8", trAugmented8)
+                                         , ("trRetrograded8", trRetrograded8)
+                                         , ("exact6", exact6)
+                                         , ("transposed6", transposed6)
+                                         , ("tonalTransped6", tonalTransped6)
+                                         , ("inverted6", inverted6)
+                                         , ("augmented6", augmented6)
+                                         , ("retrograded6", retrograded6)
+                                         , ("rotated6", rotated6)
+                                         , ("trInverted6", trInverted6)
+                                         , ("trAugmented6", trAugmented6)
+                                         , ("trRetrograded6", trRetrograded6)
                                          ]
       , (s, v) <- xs ++ [("other", otherPercentage an)]
       ]

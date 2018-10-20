@@ -1,0 +1,7 @@
+name,total,exact,transposed,tonalTransped,inverted,augmented,retrograded,rotated,trInverted,trAugmented,trRetrograded,exact8,transposed8,tonalTransped8,inverted8,augmented8,retrograded8,rotated8,trInverted8,trAugmented8,trRetrograded8,exact6,transposed6,tonalTransped6,inverted6,augmented6,retrograded6,rotated6,trInverted6,trAugmented6,trRetrograded6,unclassified
+ALL,8280,0,8,12,0,0,0,5,0,20,4,4,84,80,0,0,0,44,24,120,48,80,508,396,49,30,15,188,110,510,47,5894
+RANDOM:RANDOM:nonpatmidiname0,1656,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,52,24,16,5,6,11,20,22,6,19,1474
+RANDOM:RANDOM:nonpatmidiname1,1656,0,2,3,0,0,0,1,0,5,1,1,21,20,0,0,0,11,6,30,12,7,121,95,11,6,1,42,22,126,7,1105
+RANDOM:RANDOM:nonpatmidiname2,1656,0,2,3,0,0,0,1,0,5,1,1,21,20,0,0,0,11,6,30,12,7,121,95,11,6,1,42,22,126,7,1105
+RANDOM:RANDOM:nonpatmidiname3,1656,0,2,3,0,0,0,1,0,5,1,1,21,20,0,0,0,11,6,30,12,7,121,95,11,6,1,42,22,126,7,1105
+RANDOM:RANDOM:nonpatmidiname4,1656,0,2,3,0,0,0,1,0,5,1,1,21,20,0,0,0,11,6,30,12,7,121,95,11,6,1,42,22,126,7,1105

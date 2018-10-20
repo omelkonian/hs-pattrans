@@ -1,5 +1,5 @@
 import Data.Semigroup ((<>))
-import Control.Monad (forM, when)
+import Control.Monad (when, forM)
 import Options.Applicative
 import Data.Csv (encodeDefaultOrderedByName)
 import qualified Data.ByteString.Lazy as BL
@@ -14,7 +14,9 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , algorithms :: Bool -- ^ analyze algorithm dataset
                        , classical  :: Bool -- ^ analyze classical dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
+                       , random     :: Bool -- ^ analyze random datasets
                        , export     :: Bool -- ^ export MIDI files
+                       , progress   :: Bool -- ^ whether to show progress bar
                        }
 
 parseOpts :: Parser Options
@@ -31,22 +33,32 @@ parseOpts = Options
   <*> switch (  long "folk"
              <> short 'F'
              <> help "Analyze the dutch folk dataset" )
+  <*> switch (  long "random"
+             <> short 'R'
+             <> help "Analyze the random datasets" )
   <*> switch (  long "export"
              <> short 'X'
              <> help "Export MIDI files" )
+  <*> switch (  long "progress"
+             <> short 'P'
+             <> help "Show progress bar" )
 
 main :: IO ()
 main = do
-  Options {experts=e, algorithms=a, classical=c, folk=f, export=x} <- execParser opts
-  when (c && e) $
-    runAnalysis x "docs/out/classical/experts" parseClassicExperts
-  when (c && a) $
-    runAnalysis x "docs/out/classical/algorithms" parseClassiclAlgo
-  when (f && e) $
-    runAnalysis x "docs/out/folk/experts" parseFolkExperts
-  when (f && a) $
-    runAnalysis x "docs/out/folk/algorithms" parseFolkAlgo
-
+  op <- execParser opts
+  let run = runAnalysis (export op) (progress op)
+  when (classical op) $ do
+    when (experts op) $
+      run "docs/out/classical/experts" parseClassicExperts
+    when (algorithms op) $
+      run "docs/out/classical/algorithms" parseClassiclAlgo
+  when (folk op) $ do
+    when (experts op) $
+      run "docs/out/folk/experts" parseFolkExperts
+    when (algorithms op) $
+      run "docs/out/folk/algorithms" parseFolkAlgo
+  when (random op) $
+    run "docs/out/random" parseRandom
   where
     opts :: ParserInfo Options
     opts = info (parseOpts <**> helper)
@@ -55,24 +67,23 @@ main = do
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
 
-runAnalysis :: Bool -> FilePath -> IO [PatternGroup] -> IO ()
-runAnalysis expo f_root parser = do
+runAnalysis :: Bool -> Bool -> FilePath -> IO [PatternGroup] -> IO ()
+runAnalysis expo pr f_root parser = do
     -- Parse dataset to retrieve all pattern groups.
-    allPatternGroups <- parser
-    print $ length allPatternGroups
+    allPatternGroups <- putStrLn "Parsing..." *> parser <* putStrLn "Parsed."
     -- Analyse individual pattern groups.
     cd f_root $ do
       analyses <-
         forM allPatternGroups $ \pg -> do
-          let an = analysePatternGroup pg
+          an <- analysePatternGroup pr pg
           print an -- display on terminal
           renderOne pg an -- produce pie chart
           return an
 
-      -- Output in CSV format
-      BL.writeFile "output.csv" (encodeDefaultOrderedByName analyses)
-
       -- Combine all individual analyses and render in one chart.
-      let finalAn = combineAnalyses analyses
-      putStrLn $ "ALL " ++ show finalAn
+      let finalAn = (combineAnalyses analyses) { name = "ALL" }
+      print finalAn
       renderAll expo f_root finalAn
+
+      -- Output in CSV format
+      BL.writeFile "output.csv" $ encodeDefaultOrderedByName (finalAn:analyses)

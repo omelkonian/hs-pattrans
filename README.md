@@ -4,7 +4,7 @@
 - To run the analysis: `make analysis`
 
 
-- To choose from options: `stack build && stack exec -- hs-mirex [-E|--experts] [-A|--algorithms] [-C|--classical] [-F|--folk] [-X|--export]`
+- To choose from options: `stack build && stack exec -- hs-mirex [-E|--experts] [-A|--algorithms] [-C|--classical] [-F|--folk] [-R|--random] [-X|--export]`
 
 
 - To update the docs: `make docs`
