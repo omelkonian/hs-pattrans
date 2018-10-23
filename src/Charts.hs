@@ -24,6 +24,7 @@ renderAll expo s an = do
   -- Render overview chart
   render "ALL" ("ALL: " ++ s) an
   -- Store unclassified patterns
+  emptyDirectory "unclassified"
   when expo $ do
     let uncls = unclassified an
     writeFile "unclassified.txt" $ unlines (fst <$> uncls)
@@ -43,7 +44,7 @@ render fname title an
     colours :: [Colour Double]
     colours =
       -- transformations (100%, 80%, 60%, 40%)
-      take 30 (cycle [pink, darkblue, darkred, green, darkorange, darkcyan, darkmagenta, brown, darkviolet, darkorange])
+      take 50 (cycle [pink, darkblue, darkred, green, darkorange, darkcyan, darkmagenta, brown, darkviolet, darkorange])
       -- other
       ++ [black]
 
@@ -83,6 +84,26 @@ render fname title an
                                          , ("trInverted6", trInverted6)
                                          , ("trAugmented6", trAugmented6)
                                          , ("trRetrograded6", trRetrograded6)
+                                         , ("exact4", exact4)
+                                         , ("transposed4", transposed4)
+                                         , ("tonalTransped4", tonalTransped4)
+                                         , ("inverted4", inverted4)
+                                         , ("augmented4", augmented4)
+                                         , ("retrograded4", retrograded4)
+                                         , ("rotated4", rotated4)
+                                         , ("trInverted4", trInverted4)
+                                         , ("trAugmented4", trAugmented4)
+                                         , ("trRetrograded4", trRetrograded4)
+                                         , ("exact2", exact2)
+                                         , ("transposed2", transposed2)
+                                         , ("tonalTransped2", tonalTransped2)
+                                         , ("inverted2", inverted2)
+                                         , ("augmented2", augmented2)
+                                         , ("retrograded2", retrograded2)
+                                         , ("rotated2", rotated2)
+                                         , ("trInverted2", trInverted2)
+                                         , ("trAugmented2", trAugmented2)
+                                         , ("trRetrograded2", trRetrograded2)
                                          ]
       , (s, v) <- xs ++ [("other", otherPercentage an)]
       ]

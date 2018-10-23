@@ -1,10 +1,10 @@
 module Parser ( parseClassicExperts, parseClassiclAlgo
               , parseFolkExperts, parseFolkAlgo, parseRandom
-              , cd, listDirs, listFiles
+              , cd, listDirs, listFiles, emptyDirectory
               ) where
 
-import Control.Monad (forM, filterM, void)
-import Data.List (sort, isPrefixOf, sortOn, groupBy)
+import Control.Monad (forM, mapM_, filterM, void)
+import Data.List (sort, isPrefixOf, isInfixOf, sortOn, groupBy)
 import System.Directory
 
 import Text.Parsec
@@ -82,55 +82,58 @@ parseFolkAlgo = cd "data/MTC/patterns/alg" $ do
 parseRandom :: IO [PatternGroup]
 parseRandom = cd "data/MTC/ranexcerpts" $ do
   f_groups <- listDirs
-  forM f_groups $ \f_group -> cd f_group $ do
-    -- convert MIDI to Pattern
-    (base:pats) <- mapM readFromMidi =<< listFiles
-    return PatternGroup { piece_name   = "RANDOM"
-                        , expert_name  = "RANDOM"
-                        , pattern_name = f_group
-                        , basePattern  = base
-                        , patterns     = pats }
-    -- T0D0 random subsets as pattern groups
+  allPgs <- forM f_groups $ \f_group -> cd f_group $ do
+    fs <- listFiles
+    let families = groupBy (\x y -> sanitize x == sanitize y) $ sortOn sanitize fs
+    forM families $ \family -> do
+      (base:pats) <- pmapM readFromMidi family -- convert MIDI to Pattern
+      return PatternGroup { piece_name   = sanitize (head family)
+                          , expert_name  = "RAND"
+                          , pattern_name = f_group
+                          , basePattern  = base
+                          , patterns     = pats }
+  return (concat allPgs)
 
 parseAlgoPiece :: String -> FilePath -> IO [PatternGroup]
 parseAlgoPiece algo_n fname =
   parseMany (patternGroupP (sanitize fname) algo_n) fname
-  where
-    sanitize s
-      -- Classical pieces
-      | ("bach" `isPrefixOf` s) || ("wtc" `isPrefixOf` s)           = "bachBMW889Fg"
-      | ("beethoven" `isPrefixOf` s) || ("sonata01" `isPrefixOf` s) = "beethovenOp2No1Mvt3"
-      | ("chopin" `isPrefixOf` s) || ("mazurka" `isPrefixOf` s)     = "chopinOp24No4"
-      | ("gibbons" `isPrefixOf` s) || ("silver" `isPrefixOf` s)     = "gibbonsSilverSwan1612"
-      | ("mozart" `isPrefixOf` s) || ("sonata04" `isPrefixOf` s)    = "mozartK282Mvt2"
-      -- Folk pieces
-      | ("Daar_g" `isPrefixOf` s)          = "DaarGingEenHeer"
-      | ("Daar_r" `isPrefixOf` s)          = "DaarReedEenJonkheer"
-      | ("Daar_w" `isPrefixOf` s)          = "DaarWasLaatstmaalEenRuiter"
-      | ("Daar_z" `isPrefixOf` s)          = "DaarZouErEenMaagdjeVroegOpstaan"
-      | ("Een_l" `isPrefixOf` s)           = "EenLindeboomStondInHetDal"
-      | ("Een_S" `isPrefixOf` s)           = "EenSoudaanHadEenDochtertje"
-      | ("En" `isPrefixOf` s)              = "EnErWarenEensTweeZoeteliefjes"
-      | ("Er_r" `isPrefixOf` s)            = "ErReedErEensEenRuiter"
-      | ("Er_was_een_h" `isPrefixOf` s)    = "ErWasEenHerderinnetje"
-      | ("Er_was_een_k" `isPrefixOf` s)    = "ErWasEenKoopmanRijkEnMachtig"
-      | ("Er_was_een_m" `isPrefixOf` s)    = "ErWasEenMeisjeVanZestienJaren"
-      | ("Er_woonde" `isPrefixOf` s)       = "ErWoondeEenVrouwtjeAlOverHetBos"
-      | ("Femmes" `isPrefixOf` s)          = "FemmesVoulezVousEprouver"
-      | ("Heer_Halewijn_2" `isPrefixOf` s) = "HeerHalewijn2"
-      | ("Heer_Halewijn_4" `isPrefixOf` s) = "HeerHalewijn4"
-      | ("Het_v" `isPrefixOf` s)           = "HetVrouwtjeVanStavoren"
-      | ("Het_was_l" `isPrefixOf` s)       = "HetWasLaatstOpEenZomerdag"
-      | ("Het_was_o" `isPrefixOf` s)       = "HetWasOpEenDriekoningenavond"
-      | ("Ik" `isPrefixOf` s)              = "IkKwamLaatstEensInDeStad"
-      | ("Kom" `isPrefixOf` s)             = "KomLaatOnsNuZoStilNietZijn"
-      | ("Lieve" `isPrefixOf` s)           = "LieveSchipperVaarMeOver"
-      | ("O_God" `isPrefixOf` s)           = "OGodIkLeefInNood"
-      | ("Soldaat" `isPrefixOf` s)         = "SoldaatKwamUitDeOorlog"
-      | ("Vaarwel" `isPrefixOf` s)         = "VaarwelBruidjeSchoon"
-      | ("Wat" `isPrefixOf` s)             = "WatZagIkDaarVanVerre"
-      | ("Zolang" `isPrefixOf` s)          = "ZolangDeBoomZalBloeien"
-      | otherwise                          = s
+
+-- | Normalize names of musical pieces to a static representation.
+sanitize :: String -> String
+sanitize s
+  -- Classical pieces
+  | ("bach" `isPrefixOf` s) || ("wtc" `isPrefixOf` s)           = "bachBMW889Fg"
+  | ("beethoven" `isPrefixOf` s) || ("sonata01" `isPrefixOf` s) = "beethovenOp2No1Mvt3"
+  | ("chopin" `isPrefixOf` s) || ("mazurka" `isPrefixOf` s)     = "chopinOp24No4"
+  | ("gibbons" `isPrefixOf` s) || ("silver" `isPrefixOf` s)     = "gibbonsSilverSwan1612"
+  | ("mozart" `isPrefixOf` s) || ("sonata04" `isPrefixOf` s)    = "mozartK282Mvt2"
+  -- Folk pieces
+  | ("Daar_g" `isInfixOf` s)          = "DaarGingEenHeer"
+  | ("Daar_r" `isInfixOf` s)          = "DaarReedEenJonkheer"
+  | ("Daar_w" `isInfixOf` s)          = "DaarWasLaatstmaalEenRuiter"
+  | ("Daar_z" `isInfixOf` s)          = "DaarZouErEenMaagdjeVroegOpstaan"
+  | ("Een_l" `isInfixOf` s)           = "EenLindeboomStondInHetDal"
+  | ("Een_S" `isInfixOf` s)           = "EenSoudaanHadEenDochtertje"
+  | ("En" `isInfixOf` s)              = "EnErWarenEensTweeZoeteliefjes"
+  | ("Er_r" `isInfixOf` s)            = "ErReedErEensEenRuiter"
+  | ("Er_was_een_h" `isInfixOf` s)    = "ErWasEenHerderinnetje"
+  | ("Er_was_een_k" `isInfixOf` s)    = "ErWasEenKoopmanRijkEnMachtig"
+  | ("Er_was_een_m" `isInfixOf` s)    = "ErWasEenMeisjeVanZestienJaren"
+  | ("Er_woonde" `isInfixOf` s)       = "ErWoondeEenVrouwtjeAlOverHetBos"
+  | ("Femmes" `isInfixOf` s)          = "FemmesVoulezVousEprouver"
+  | ("Heer_Halewijn" `isInfixOf` s)   = "HeerHalewijn"
+  | ("Het_v" `isInfixOf` s)           = "HetVrouwtjeVanStavoren"
+  | ("Het_was_l" `isInfixOf` s)       = "HetWasLaatstOpEenZomerdag"
+  | ("Het_was_o" `isInfixOf` s)       = "HetWasOpEenDriekoningenavond"
+  | ("Ik" `isInfixOf` s)              = "IkKwamLaatstEensInDeStad"
+  | ("Kom" `isInfixOf` s)             = "KomLaatOnsNuZoStilNietZijn"
+  | ("Lieve" `isInfixOf` s)           = "LieveSchipperVaarMeOver"
+  | ("O_God" `isInfixOf` s)           = "OGodIkLeefInNood"
+  | ("Soldaat" `isInfixOf` s)         = "SoldaatKwamUitDeOorlog"
+  | ("Vaarwel" `isInfixOf` s)         = "VaarwelBruidjeSchoon"
+  | ("Wat" `isInfixOf` s)             = "WatZagIkDaarVanVerre"
+  | ("Zolang" `isInfixOf` s)          = "ZolangDeBoomZalBloeien"
+  | otherwise                          = s
 
 patternGroupP :: String -> String -> Parser PatternGroup
 patternGroupP piece_n algo_n =
@@ -187,3 +190,6 @@ listFiles :: IO [FilePath]
 listFiles = sort <$> (getCurrentDirectory
                  >>= listDirectory
                  >>= filterM ((not <$>) . doesDirectoryExist))
+
+emptyDirectory :: FilePath -> IO ()
+emptyDirectory f_root = cd f_root $ mapM_ removeFile =<< listFiles

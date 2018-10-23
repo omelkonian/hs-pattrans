@@ -6,6 +6,7 @@ import qualified Data.Map as M
 import Data.List (maximumBy, sortOn)
 import Data.Semigroup
 import Data.Functor.Contravariant hiding ((>$<), (>$), ($<))
+import Control.Arrow (first)
 
 import Types
 
@@ -44,7 +45,7 @@ type ApproxCheck a = (?p :: Float) => Check a
 -- | Exact repetition: move a pattern in time.
 -- (AKA horizontal translation)
 exactOf :: ApproxCheck Pattern
-exactOf = rhythm >$< approxEq2
+exactOf = rhythm >$< approxEq {-approxEq2-}
        <> pitch  >$< approxEq
 
 -- | Transposition: move a pattern in pitch.
@@ -144,10 +145,14 @@ equal :: Eq a => Check a
 equal = Check (==)
 
 approxEqWith :: (Show b, Num b, Eq b, a ~ [b], ?p :: Float)
-             => (b -> [b] -> Maybe [b] {-list after deleting the element-})
+             => (b -> [b] -> Maybe ([b], [b]))
                 -- ^ function that deletes an element from a list, possibly
                 -- reducing (summing) consecutive elements to be equal to the
                 -- element being deleted
+                -- returns:
+                --   * Nothing,   if there was no deletion
+                --   * Just(l,r), otherwise, where l/r are the remaining
+                --                lists before/after the deletion point
              -> Check a
 approxEqWith del1 = Check go
   where
@@ -161,8 +166,8 @@ approxEqWith del1 = Check go
     del ys [] = (length ys, 0)
     del [] xs = (0, length xs)
     del ys (x:xs)
-      | Just ys' <- del1 x ys = del ys' xs
-      | otherwise             = (+ 1) <$> del ys xs
+      | Just (_, ys_r) <- del1 x ys = del ys_r xs
+      | otherwise                   = (+ 1) <$> del ys xs
 
 -- | First-order approximate equality of lists.
 --
@@ -179,8 +184,8 @@ approxEq
     -- does not reduce consecutive elements (first-order)
     del1 _ []     = Nothing
     del1 x (y:ys)
-      | x == y    = Just ys
-      | otherwise = (y:) <$> del1 x ys
+      | x == y    = Just ([], ys)
+      | otherwise = first (y:) <$> del1 x ys
 
 -- | Second-order approximate equality of lists.
 --
@@ -197,9 +202,9 @@ approxEq2 = approxEqWith del1
     -- reduces consecutive elements (second-order)
     del1 _ [] = Nothing
     del1 x (y:ys)
-      | x == y                         = Just ys
-      | Just i <- findIndex 0 x (y:ys) = Just (snd $ splitAt i ys)
-      | otherwise                      = (y:) <$> del1 x ys
+      | x == y                         = Just ([], ys)
+      | Just i <- findIndex 0 x (y:ys) = Just ([], snd $ splitAt i ys)
+      | otherwise                      = first (y:) <$> del1 x ys
 
     findIndex i 0 _  = Just i
     findIndex _ _ [] = Nothing

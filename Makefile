@@ -4,7 +4,7 @@ build:
 	stack build
 
 analysis: build
-	stack exec -- hs-mirex -EAFCRX && ./prepare.sh
+	stack exec -- hs-mirex -PXRCFEA && ./prepare.sh
 
 docs: build
 	stack exec -- haddock --html \

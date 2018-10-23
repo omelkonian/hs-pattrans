@@ -56,6 +56,30 @@ data AnalysisResult = An
   , trAugmented6   :: !Int -- ^ # of transposed augmentations
   , trRetrograded6 :: !Int -- ^ # of transposed retrogrades
 
+  -- 40%
+  , exact4         :: !Int -- ^ # of exact occurences
+  , transposed4    :: !Int -- ^ # of *atonal* transpositions
+  , tonalTransped4 :: !Int -- ^ # of *tonal* transpositions
+  , inverted4      :: !Int -- ^ # of inversions
+  , augmented4     :: !Int -- ^ # of augmentations
+  , retrograded4   :: !Int -- ^ # of retrogrades
+  , rotated4       :: !Int -- ^ # of rotations
+  , trInverted4    :: !Int -- ^ # of transposed inversions
+  , trAugmented4   :: !Int -- ^ # of transposed augmentations
+  , trRetrograded4 :: !Int -- ^ # of transposed retrogrades
+
+  -- 20%
+  , exact2         :: !Int -- ^ # of exact occurences
+  , transposed2    :: !Int -- ^ # of *atonal* transpositions
+  , tonalTransped2 :: !Int -- ^ # of *tonal* transpositions
+  , inverted2      :: !Int -- ^ # of inversions
+  , augmented2     :: !Int -- ^ # of augmentations
+  , retrograded2   :: !Int -- ^ # of retrogrades
+  , rotated2       :: !Int -- ^ # of rotations
+  , trInverted2    :: !Int -- ^ # of transposed inversions
+  , trAugmented2   :: !Int -- ^ # of transposed augmentations
+  , trRetrograded2 :: !Int -- ^ # of transposed retrogrades
+
   , unclassified  :: ![(String, Pattern)] -- ^ filenames of all unclassified patterns
   }
   deriving (Generic)
@@ -65,65 +89,98 @@ instance DefaultOrdered AnalysisResult
 instance ToField [(String, Pattern)] where
   toField = toField . length
 
+defAn :: AnalysisResult
+defAn = An "" 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
+
+singleAn :: AnalysisResult
+singleAn = defAn {total = 1}
+
 -- | Analyze a single pattern group.
 analysePatternGroup :: Bool -> PatternGroup -> IO AnalysisResult
 analysePatternGroup showProgress pg@(PatternGroup _ _ _ base pats)
   | showProgress
   = do  h <- fst <$> P.startProgress P.percentage P.exact (13 +  60) (toInteger $ length pats)
-        res <- pforM (zip [2..] pats) $ \p -> do let !res = check p
-                                                 P.incProgress h 1
-                                                 return res
-        return (combineAnalyses res) { name = show pg }
+        res <- pforM (zip [2..] pats) $ \p -> do
+          let !res = check p
+          P.incProgress h 1
+          return res
+        returnAnalyses res
   | otherwise
-  = do let res = pmap check (zip [2..] pats)
-       return (combineAnalyses $ res) { name = show pg }
-
+  = returnAnalyses $ pmap check (zip [2..] pats)
   where
+    returnAnalyses res = return (combineAnalyses res) { name = show pg }
+
     -- Check which equivalence class a pattern belongs to.
     check (i, p)
-      | (base <=> p) (exactOf ~~ 1)            = An "" 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (transpositionOf ~~ 1)    = An "" 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (tonalTranspOf ~~ 1)      = An "" 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (inversionOf ~~ 1)        = An "" 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (augmentationOf ~~ 1)     = An "" 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (retrogradeOf ~~ 1)       = An "" 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (rotationOf ~~ 1)         = An "" 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (trInversionOf ~~ 1)      = An "" 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (trAugmentationOf ~~ 1)   = An "" 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (trRetrogradeOf ~~ 1)     = An "" 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (exactOf ~~ 0.8)          = An "" 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (transpositionOf ~~ 0.8)  = An "" 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (tonalTranspOf ~~ 0.8)    = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (inversionOf ~~ 0.8)      = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (augmentationOf ~~ 0.8)   = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (retrogradeOf ~~ 0.8)     = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (rotationOf ~~ 0.8)       = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (trInversionOf ~~ 0.8)    = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (trAugmentationOf ~~ 0.8) = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (trRetrogradeOf ~~ 0.8)   = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (exactOf ~~ 0.6)          = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (transpositionOf ~~ 0.6)  = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 []
-      | (base <=> p) (tonalTranspOf ~~ 0.6)    = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 []
-      | (base <=> p) (inversionOf ~~ 0.6)      = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 []
-      | (base <=> p) (augmentationOf ~~ 0.6)   = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 []
-      | (base <=> p) (retrogradeOf ~~ 0.6)     = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 []
-      | (base <=> p) (rotationOf ~~ 0.6)       = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 []
-      | (base <=> p) (trInversionOf ~~ 0.6)    = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 []
-      | (base <=> p) (trAugmentationOf ~~ 0.6) = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 []
-      | (base <=> p) (trRetrogradeOf ~~ 0.6)   = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 []
-      | otherwise                              = An "" 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 [(show pg ++ ":" ++ show i, p)]
+      | (base <=> p) (exactOf ~~ 1)            = singleAn { exact = 1 }
+      | (base <=> p) (transpositionOf ~~ 1)    = singleAn { transposed = 1 }
+      | (base <=> p) (tonalTranspOf ~~ 1)      = singleAn { tonalTransped = 1 }
+      | (base <=> p) (inversionOf ~~ 1)        = singleAn { inverted = 1 }
+      | (base <=> p) (augmentationOf ~~ 1)     = singleAn { augmented = 1 }
+      | (base <=> p) (retrogradeOf ~~ 1)       = singleAn { retrograded = 1 }
+      | (base <=> p) (rotationOf ~~ 1)         = singleAn { rotated = 1 }
+      | (base <=> p) (trInversionOf ~~ 1)      = singleAn { trInverted = 1 }
+      | (base <=> p) (trAugmentationOf ~~ 1)   = singleAn { trAugmented = 1 }
+      | (base <=> p) (trRetrogradeOf ~~ 1)     = singleAn { trRetrograded = 1 }
+      | (base <=> p) (exactOf ~~ 0.8)          = singleAn { exact8 = 1 }
+      | (base <=> p) (transpositionOf ~~ 0.8)  = singleAn { transposed8 = 1 }
+      | (base <=> p) (tonalTranspOf ~~ 0.8)    = singleAn { tonalTransped8 = 1 }
+      | (base <=> p) (inversionOf ~~ 0.8)      = singleAn { inverted8 = 1 }
+      | (base <=> p) (augmentationOf ~~ 0.8)   = singleAn { augmented8 = 1 }
+      | (base <=> p) (retrogradeOf ~~ 0.8)     = singleAn { retrograded8 = 1 }
+      | (base <=> p) (rotationOf ~~ 0.8)       = singleAn { rotated8 = 1 }
+      | (base <=> p) (trInversionOf ~~ 0.8)    = singleAn { trInverted8 = 1 }
+      | (base <=> p) (trAugmentationOf ~~ 0.8) = singleAn { trAugmented8 = 1 }
+      | (base <=> p) (trRetrogradeOf ~~ 0.8)   = singleAn { trRetrograded8 = 1 }
+      | (base <=> p) (exactOf ~~ 0.6)          = singleAn { exact6 = 1 }
+      | (base <=> p) (transpositionOf ~~ 0.6)  = singleAn { transposed6 = 1 }
+      | (base <=> p) (tonalTranspOf ~~ 0.6)    = singleAn { tonalTransped6 = 1 }
+      | (base <=> p) (inversionOf ~~ 0.6)      = singleAn { inverted6 = 1 }
+      | (base <=> p) (augmentationOf ~~ 0.6)   = singleAn { augmented6 = 1 }
+      | (base <=> p) (retrogradeOf ~~ 0.6)     = singleAn { retrograded6 = 1 }
+      | (base <=> p) (rotationOf ~~ 0.6)       = singleAn { rotated6 = 1 }
+      | (base <=> p) (trInversionOf ~~ 0.6)    = singleAn { trInverted6 = 1 }
+      | (base <=> p) (trAugmentationOf ~~ 0.6) = singleAn { trAugmented6 = 1 }
+      | (base <=> p) (trRetrogradeOf ~~ 0.6)   = singleAn { trRetrograded6 = 1 }
+      | (base <=> p) (exactOf ~~ 0.4)          = singleAn { exact4 = 1 }
+      | (base <=> p) (transpositionOf ~~ 0.4)  = singleAn { transposed4 = 1 }
+      | (base <=> p) (tonalTranspOf ~~ 0.4)    = singleAn { tonalTransped4 = 1 }
+      | (base <=> p) (inversionOf ~~ 0.4)      = singleAn { inverted4 = 1 }
+      | (base <=> p) (augmentationOf ~~ 0.4)   = singleAn { augmented4 = 1 }
+      | (base <=> p) (retrogradeOf ~~ 0.4)     = singleAn { retrograded4 = 1 }
+      | (base <=> p) (rotationOf ~~ 0.4)       = singleAn { rotated4 = 1 }
+      | (base <=> p) (trInversionOf ~~ 0.4)    = singleAn { trInverted4 = 1 }
+      | (base <=> p) (trAugmentationOf ~~ 0.4) = singleAn { trAugmented4 = 1 }
+      | (base <=> p) (trRetrogradeOf ~~ 0.4)   = singleAn { trRetrograded4 = 1 }
+      | (base <=> p) (exactOf ~~ 0.2)          = singleAn { exact2 = 1 }
+      | (base <=> p) (transpositionOf ~~ 0.2)  = singleAn { transposed2 = 1 }
+      | (base <=> p) (tonalTranspOf ~~ 0.2)    = singleAn { tonalTransped2 = 1 }
+      | (base <=> p) (inversionOf ~~ 0.2)      = singleAn { inverted2 = 1 }
+      | (base <=> p) (augmentationOf ~~ 0.2)   = singleAn { augmented2 = 1 }
+      | (base <=> p) (retrogradeOf ~~ 0.2)     = singleAn { retrograded2 = 1 }
+      | (base <=> p) (rotationOf ~~ 0.2)       = singleAn { rotated2 = 1 }
+      | (base <=> p) (trInversionOf ~~ 0.2)    = singleAn { trInverted2 = 1 }
+      | (base <=> p) (trAugmentationOf ~~ 0.2) = singleAn { trAugmented2 = 1 }
+      | (base <=> p) (trRetrogradeOf ~~ 0.2)   = singleAn { trRetrograded2 = 1 }
+      | otherwise
+      = defAn {total = 1, unclassified = [(show pg ++ ":" ++ show i, p)]}
 
 -- | Combine analyses from different pattern groups.
 combineAnalyses :: [AnalysisResult] -> AnalysisResult
-combineAnalyses = foldl' (<+>) (An "" 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 [])
+combineAnalyses = foldl' (<+>) defAn
   where
-    An _ tot m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m20
-       m21 m22 m23 m24 m25 m26 m27 m28 m29 m30 xs
+    An _ tot
+       m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m20
+       m21 m22 m23 m24 m25 m26 m27 m28 m29 m30 m31 m32 m33 m34 m35 m36 m37 m38 m39 m40
+       m41 m42 m43 m44 m45 m46 m47 m48 m49 m50 xs
       <+> An _ tot' n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15 n16 n17 n18 n19 n20
-             n21 n22 n23 n24 n25 n26 n27 n28 n29 n30 ys
+             n21 n22 n23 n24 n25 n26 n27 n28 n29 n30 n31 n32 n33 n34 n35 n36 n37 n38 n39 n40
+             n41 n42 n43 n44 n45 n46 n47 n48 n49 n50 ys
       = An "" (tot+tot') (m1+n1) (m2+n2) (m3+n3) (m4+n4) (m5+n5) (m6+n6) (m7+n7) (m8+n8) (m9+n9) (m10+n10)
               (m11+n11) (m12+n12) (m13+n13) (m14+n14) (m15+n15) (m16+n16) (m17+n17) (m18+n18) (m19+n19) (m20+n20)
               (m21+n21) (m22+n22) (m23+n23) (m24+n24) (m25+n25) (m26+n26) (m27+n27) (m28+n28) (m29+n29) (m30+n30)
+              (m31+n31) (m32+n32) (m33+n33) (m34+n34) (m35+n35) (m36+n36) (m37+n37) (m38+n38) (m39+n39) (m40+n40)
+              (m41+n41) (m42+n42) (m43+n43) (m44+n44) (m45+n45) (m46+n46) (m47+n47) (m48+n48) (m49+n49) (m50+n50)
               (xs++ys)
 
 -- | Get the percentage of an equivalence class from an analysis result.
@@ -169,6 +226,26 @@ instance Show AnalysisResult where
               ++ "\n\ttrInverted6: %.2f%% (%d)"
               ++ "\n\ttrAugmented6: %.2f%% (%d)"
               ++ "\n\ttrRetrograded6: %.2f%% (%d)"
+              ++ "\n\texact4: %.2f%% (%d)"
+              ++ "\n\ttransposed4: %.2f%% (%d)"
+              ++ "\n\ttonalTransped4: %.2f%% (%d)"
+              ++ "\n\tinverted4: %.2f%% (%d)"
+              ++ "\n\taugmented4: %.2f%% (%d)"
+              ++ "\n\tretrograded4: %.2f%% (%d)"
+              ++ "\n\trotated4: %.2f%% (%d)"
+              ++ "\n\ttrInverted4: %.2f%% (%d)"
+              ++ "\n\ttrAugmented4: %.2f%% (%d)"
+              ++ "\n\ttrRetrograded4: %.2f%% (%d)"
+              ++ "\n\texact2: %.2f%% (%d)"
+              ++ "\n\ttransposed2: %.2f%% (%d)"
+              ++ "\n\ttonalTransped2: %.2f%% (%d)"
+              ++ "\n\tinverted2: %.2f%% (%d)"
+              ++ "\n\taugmented2: %.2f%% (%d)"
+              ++ "\n\tretrograded2: %.2f%% (%d)"
+              ++ "\n\trotated2: %.2f%% (%d)"
+              ++ "\n\ttrInverted2: %.2f%% (%d)"
+              ++ "\n\ttrAugmented2: %.2f%% (%d)"
+              ++ "\n\ttrRetrograded2: %.2f%% (%d)"
               ++ "\n\tother: %.2f%% (%d)"
               ++ "\n}")
            (name an) (total an)
@@ -202,4 +279,24 @@ instance Show AnalysisResult where
            (percentage an trInverted6) (trInverted6 an)
            (percentage an trAugmented6) (trAugmented6 an)
            (percentage an trRetrograded6) (trRetrograded6 an)
+           (percentage an exact4) (exact4 an)
+           (percentage an transposed4) (transposed4 an)
+           (percentage an tonalTransped4) (tonalTransped4 an)
+           (percentage an inverted4) (inverted4 an)
+           (percentage an augmented4) (augmented4 an)
+           (percentage an retrograded4) (retrograded4 an)
+           (percentage an rotated4) (rotated4 an)
+           (percentage an trInverted4) (trInverted4 an)
+           (percentage an trAugmented4) (trAugmented4 an)
+           (percentage an trRetrograded4) (trRetrograded4 an)
+           (percentage an exact2) (exact2 an)
+           (percentage an transposed2) (transposed2 an)
+           (percentage an tonalTransped2) (tonalTransped2 an)
+           (percentage an inverted2) (inverted2 an)
+           (percentage an augmented2) (augmented2 an)
+           (percentage an retrograded2) (retrograded2 an)
+           (percentage an rotated2) (rotated2 an)
+           (percentage an trInverted2) (trInverted2 an)
+           (percentage an trAugmented2) (trAugmented2 an)
+           (percentage an trRetrograded2) (trRetrograded2 an)
            (otherPercentage an) (length $ unclassified an)
