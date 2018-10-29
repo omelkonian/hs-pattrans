@@ -137,14 +137,12 @@ trRetrogradeOf = rhythm    >$< (reverse $< approxEq2)
 -----------------------
 -- Utilities
 
-type Interval = Integer
-
 -- | Check that two elements are exactly equal (using `eq`).
 -- e.g. [a, c, b] equal [a, c, b]
 equal :: Eq a => Check a
 equal = Check (==)
 
-approxEqWith :: (Show b, Num b, Eq b, a ~ [b], ?p :: Float)
+approxEqWith :: (Show b, Num b, Eq b, a ~ [b])
              => (b -> [b] -> Maybe ([b], [b]))
                 -- ^ function that deletes an element from a list, possibly
                 -- reducing (summing) consecutive elements to be equal to the
@@ -153,7 +151,7 @@ approxEqWith :: (Show b, Num b, Eq b, a ~ [b], ?p :: Float)
                 --   * Nothing,   if there was no deletion
                 --   * Just(l,r), otherwise, where l/r are the remaining
                 --                lists before/after the deletion point
-             -> Check a
+             -> ApproxCheck a
 approxEqWith del1 = Check go
   where
     go xs' ys' =
@@ -176,7 +174,7 @@ approxEqWith del1 = Check go
 --    1. The occurence ignores (1-p)% notes of the base pattern
 --    2. (1-p)% notes of the occurence are additional notes (not in the base pattern)
 -- e.g. [A,C,F,A,B] (approxEq 80%) [A,C,G,A,B]
-approxEq :: (Show b, Num b, Eq b, a ~ [b], ?p :: Float) => Check a
+approxEq :: (Show b, Num b, Eq b, a ~ [b]) => ApproxCheck a
 approxEq
   | ?p == 1.0 = equal
   | otherwise = approxEqWith del1
@@ -196,7 +194,7 @@ approxEq
 -- and we count approximation by checking the initial lists
 -- e.g. * intervals from pitches
 --      * rhythm from durations
-approxEq2 :: (Show b, Ord b, Num b, Eq b, a ~ [b], ?p :: Float) => Check a
+approxEq2 :: (Show b, Ord b, Num b, Eq b, a ~ [b]) => ApproxCheck a
 approxEq2 = approxEqWith del1
   where
     -- reduces consecutive elements (second-order)

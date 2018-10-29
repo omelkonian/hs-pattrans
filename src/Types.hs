@@ -8,17 +8,8 @@ import Control.Concurrent.Async (forConcurrently, mapConcurrently)
 type Time = Double
 -- | MIDI values are represented with integers.
 type MIDI = Integer
-
--- | A piece of music consists of multiple music events.
-type MusicPiece = [MirexEntry]
--- | A single entry in a MIREX piece of music.
-data MirexEntry = MirexEntry
-  { t        :: Time    -- ^ onset time
-  , mid      :: MIDI    -- ^ note's MIDI number
-  , morph    :: Integer -- ^ note's morphetic pitch number
-  , duration :: Time    -- ^ duration in crotchet beats
-  , staff    :: Integer -- ^ voice number (starting from 0)
-  } deriving (Eq, Show)
+-- | Intervals are represented with integers (i.e. number of semitones).
+type Interval = Integer
 
 -- | A pattern group is one of the patterns of a piece of music, identified by an expert
 -- or algorithm, and defined by a pattern prototype and other pattern occurences.
@@ -43,15 +34,24 @@ instance Show PatternGroup where
 
 -- | A pattern is a sequence of notes.
 type Pattern = [Note]
+
 -- | A simplistic music note (only time and pitch).
 data Note = Note { ontime :: Time -- ^ onset time
                  , midi   :: MIDI -- ^ MIDI number
                  } deriving (Eq, Show)
 
+-- | Infix variant of the Note constructor.
+(.@) :: Time -> MIDI -> Note
+(.@) = Note
+
+-- | A piece of music is a huge pattern.
+type MusicPiece = Pattern
+
+-- | Songs are identified with a string.
+type Song = String
 
 -----------------------
 -- Parallel operations
-
 
 -- | Parallel map.
 pmap :: (a -> b) -> [a] -> [b]

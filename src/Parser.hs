@@ -1,10 +1,11 @@
 module Parser ( parseClassicExperts, parseClassiclAlgo
               , parseFolkExperts, parseFolkAlgo, parseRandom
+              , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
               ) where
 
 import Control.Monad (forM, mapM_, filterM, void)
-import Data.List (sort, isPrefixOf, isInfixOf, sortOn, groupBy)
+import Data.List (sort, isInfixOf, sortOn, groupBy)
 import System.Directory
 
 import Text.Parsec
@@ -14,6 +15,22 @@ import qualified Text.Parsec.Token as Tokens
 
 import Types
 import MIDI (readFromMidi)
+
+--------------------
+-- Parsers.
+
+-- | Parse a music piece from the MIREX dataset.
+-- the song can be one of [bach, beethoven, chopin, gibbons, mozart]
+parseMusic :: Song -> IO MusicPiece
+parseMusic song = cd ("data/pieces/" ++ sanitize song ++ "/monophonic/csv") $ do
+  [f_music] <- listFiles
+  parseMany mirexP f_music
+  where
+    -- | Parse one entry from a MIREX piece of music.
+    mirexP :: Parser Note
+    mirexP = Note <$> (floatP <* sepP) <*> (intP <* sepP)
+                   <* (intP <* sepP) <* (floatP <* sepP)
+                   <* intP <* newline
 
 -- | Parse all (expert) pattern groups from the classical dataset.
 parseClassicExperts :: IO [PatternGroup]
@@ -102,11 +119,11 @@ parseAlgoPiece algo_n fname =
 sanitize :: String -> String
 sanitize s
   -- Classical pieces
-  | ("bach" `isPrefixOf` s) || ("wtc" `isPrefixOf` s)           = "bachBMW889Fg"
-  | ("beethoven" `isPrefixOf` s) || ("sonata01" `isPrefixOf` s) = "beethovenOp2No1Mvt3"
-  | ("chopin" `isPrefixOf` s) || ("mazurka" `isPrefixOf` s)     = "chopinOp24No4"
-  | ("gibbons" `isPrefixOf` s) || ("silver" `isPrefixOf` s)     = "gibbonsSilverSwan1612"
-  | ("mozart" `isPrefixOf` s) || ("sonata04" `isPrefixOf` s)    = "mozartK282Mvt2"
+  | ("bach" `isInfixOf` s) || ("wtc" `isInfixOf` s)           = "bachBWV889Fg"
+  | ("beethoven" `isInfixOf` s) || ("sonata01" `isInfixOf` s) = "beethovenOp2No1Mvt3"
+  | ("chopin" `isInfixOf` s) || ("mazurka" `isInfixOf` s)     = "chopinOp24No4"
+  | ("gibbons" `isInfixOf` s) || ("silver" `isInfixOf` s)     = "gibbonsSilverSwan1612"
+  | ("mozart" `isInfixOf` s) || ("sonata04" `isInfixOf` s)    = "mozartK282Mvt2"
   -- Folk pieces
   | ("Daar_g" `isInfixOf` s)          = "DaarGingEenHeer"
   | ("Daar_r" `isInfixOf` s)          = "DaarReedEenJonkheer"

@@ -3,6 +3,12 @@
 
 - To run the analysis: `make analysis`
 
+- To run an interactive shell, where you can discover patterns using
+transformation queries:
+  1. `stack repl`
+  2. `"bach" ?? (transpositionOf ~~ 0.6) :@ (21,28)`
+  3. view extracted MIDI at `data/extracted/bach/`
+
 
 - To choose from options: `stack build && stack exec -- hs-mirex [-E|--experts] [-A|--algorithms] [-C|--classical] [-F|--folk] [-R|--random] [-X|--export]`
 

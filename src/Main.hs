@@ -1,14 +1,17 @@
-import Data.List ((\\))
+import Data.List ((\\), takeWhile, dropWhile)
 import Data.Semigroup ((<>))
-import Control.Monad (when, forM)
+import Control.Monad (when, forM, forM_)
 import Options.Applicative
 import Data.Csv (encodeDefaultOrderedByName)
 import qualified Data.ByteString.Lazy as BL
 
 import Types
 import Parser
+import Transformations
 import Analysis
 import Charts
+import MIDI
+import Discovery
 
 -- | Command-line options.
 data Options = Options { experts    :: Bool -- ^ analyze expert dataset
@@ -21,6 +24,7 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , verify     :: Bool -- ^ whether to verify hypothesis
                        }
 
+-- | Parsing command-line options.
 parseOpts :: Parser Options
 parseOpts = Options
   <$> switch (  long "experts"
@@ -48,6 +52,7 @@ parseOpts = Options
              <> short 'V'
              <> help "Verify equivalence-class hypothesis" )
 
+-- | Main function.
 main :: IO ()
 main = do
   op <- execParser opts
@@ -64,6 +69,7 @@ main = do
       run "docs/out/folk/algorithms" parseFolkAlgo
   when (random op) $
     run "docs/out/random" parseRandom
+
   where
     opts :: ParserInfo Options
     opts = info (parseOpts <**> helper)
@@ -72,6 +78,31 @@ main = do
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
 
+-- | Query patterns from the given song with given base pattern.
+-- e.g. "bach" ?? (transpositionOf ~~ 0.8) :@ (21,28)
+(??) :: Song -> UserQuery Pattern -> IO ()
+infix 0 ??
+song ?? (q :@ (startT, endT)) = do
+  -- parse the music piece
+  piece <- parseMusic song
+  putStrLn $ "Piece length: " ++ show (length piece)
+  let base = ( takeWhile ((<= endT)  . ontime)
+             . dropWhile ((< startT) . ontime)
+             ) piece
+  putStrLn $ "Base length: " ++ show (length base)
+
+  -- extract patterns (do not extract the base pattern again)
+  let pats = filter (/= base) $ query (q, base) piece
+  putStrLn $ "Found patterns: " ++ show (length pats)
+
+  -- export MIDI files
+  cd ("data/extracted/" ++ song ++ "/") $ do
+    emptyDirectory "."
+    writeToMidi "base.mid" base
+    forM_ (zip [1..] pats) $
+      \(i, p) -> writeToMidi ("occ" ++ show i ++ ".mid") p
+
+-- Analyse given music pattern dataset.
 runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
 runAnalysis (expo, pr, ver) f_root parser = do
     -- Parse dataset to retrieve all pattern groups.
@@ -111,10 +142,9 @@ runAnalysis (expo, pr, ver) f_root parser = do
 verifyEquivClassHypothesis :: [Pattern] -- ^ unclassified patterns
                            -> [Pattern] -- ^ possible bases
                            -> IO Int
-verifyEquivClassHypothesis []   _            = return 0
+verifyEquivClassHypothesis []   _           = return 0
 verifyEquivClassHypothesis uns []           = return (length uns)
 verifyEquivClassHypothesis uns (base:bases) = do
-  -- let uns = delete base uns0
   an <- analysePatternGroup False (PatternGroup "" "" "" base uns)
   let uns' = snd <$> unclassified an
   verifyEquivClassHypothesis uns' bases
