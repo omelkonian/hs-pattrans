@@ -174,7 +174,7 @@ approxEqWith del1 = Check go
 --    1. The occurence ignores (1-p)% notes of the base pattern
 --    2. (1-p)% notes of the occurence are additional notes (not in the base pattern)
 -- e.g. [A,C,F,A,B] (approxEq 80%) [A,C,G,A,B]
-approxEq :: (Show b, Num b, Eq b, a ~ [b]) => ApproxCheck a
+approxEq :: (Show a, Num a, Eq a) => ApproxCheck [a]
 approxEq
   | ?p == 1.0 = equal
   | otherwise = approxEqWith del1
@@ -194,7 +194,7 @@ approxEq
 -- and we count approximation by checking the initial lists
 -- e.g. * intervals from pitches
 --      * rhythm from durations
-approxEq2 :: (Show b, Ord b, Num b, Eq b, a ~ [b]) => ApproxCheck a
+approxEq2 :: (Show a, Ord a, Num a, Eq a) => ApproxCheck [a]
 approxEq2 = approxEqWith del1
   where
     -- reduces consecutive elements (second-order)

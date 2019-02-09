@@ -6,7 +6,7 @@ import Transformations
 type WindowSize = Int
 type TimePeriod = (Time, Time)
 data UserQuery a = Check a :@ TimePeriod
-type Query a = (Check a, Pattern)
+type Query a = (Check a, a)
 
 -- | An example query.
 testQuery :: UserQuery Pattern

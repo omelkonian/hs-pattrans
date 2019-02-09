@@ -21,7 +21,6 @@ writeToMidi fn = writeMidi fn . patternToMusic
     convert :: (MIDI, Time) -> Music AbsPitch
     convert (m, tt) = Prim $ M.Note (toRational tt) (fromInteger m)
 
-
 readFromMidi :: FilePath -> IO Pattern
 readFromMidi = fmap (musicToPattern . fromMidi2) . importFile
   where

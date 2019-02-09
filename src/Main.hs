@@ -107,7 +107,7 @@ runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
 runAnalysis (expo, pr, ver) f_root parser = do
     -- Parse dataset to retrieve all pattern groups.
     putStrLn $ "Parsing " ++ f_root ++ "..."
-    allPatternGroups <- parser
+    allPatternGroups <- filter (not . null . patterns) <$> parser
     putStrLn "Parsed."
     -- Analyse individual pattern groups.
     cd f_root $ do
