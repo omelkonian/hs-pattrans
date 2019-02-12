@@ -1,5 +1,8 @@
 default: analysis
 
+query:
+	stack repl
+
 build:
 	stack build
 

@@ -15,6 +15,7 @@ executable hs-mirex
                       Analysis,
                       Charts,
                       MIDI,
+                      EuterpeaUtils,
                       Discovery
   build-depends:      base >= 4.8,
                       parsec >= 3.1.13,

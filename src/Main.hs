@@ -1,17 +1,14 @@
-import Data.List ((\\), takeWhile, dropWhile)
+import Data.List ((\\))
 import Data.Semigroup ((<>))
-import Control.Monad (when, forM, forM_)
+import Control.Monad (when, forM)
 import Options.Applicative
 import Data.Csv (encodeDefaultOrderedByName)
 import qualified Data.ByteString.Lazy as BL
 
 import Types
 import Parser
-import Transformations
 import Analysis
 import Charts
-import MIDI
-import Discovery
 
 -- | Command-line options.
 data Options = Options { experts    :: Bool -- ^ analyze expert dataset
@@ -77,30 +74,6 @@ main = do
                 <> progDesc "Run analysis on the MIREX dataset"
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
-
--- | Query patterns from the given song with given base pattern.
--- e.g. "bach" ?? (transpositionOf ~~ 0.8) :@ (21,28)
-(??) :: Song -> UserQuery Pattern -> IO ()
-infix 0 ??
-song ?? (q :@ (startT, endT)) = do
-  -- parse the music piece
-  piece <- parseMusic song
-  putStrLn $ "Piece length: " ++ show (length piece)
-  let base = ( takeWhile ((<= endT)  . ontime)
-             . dropWhile ((< startT) . ontime)
-             ) piece
-  putStrLn $ "Base length: " ++ show (length base)
-
-  -- extract patterns (do not extract the base pattern again)
-  let pats = filter (/= base) $ query (q, base) piece
-  putStrLn $ "Found patterns: " ++ show (length pats)
-
-  -- export MIDI files
-  cd ("data/extracted/" ++ song ++ "/") $ do
-    emptyDirectory "."
-    writeToMidi "base.mid" base
-    forM_ (zip [1..] pats) $
-      \(i, p) -> writeToMidi ("occ" ++ show i ++ ".mid") p
 
 -- Analyse given music pattern dataset.
 runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
