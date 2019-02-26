@@ -70,4 +70,4 @@ instance ToPattern (Time, Time) where
 -- | Given a datatype that can be converted to Euterpea's core Music datatype,
 -- one can subsequently convert that to get a musical pattern.
 instance ToMusic1 a => ToPattern (Music a) where
-  toPattern _ x = musicToPattern (toMusic1 x)
+  toPattern _ = musicToPattern

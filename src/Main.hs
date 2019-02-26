@@ -1,6 +1,6 @@
-import Data.List ((\\))
+import Data.List ((\\), nub)
 import Data.Semigroup ((<>))
-import Control.Monad (when, forM)
+import Control.Monad (when, forM, forM_)
 import Options.Applicative
 import Data.Csv (encodeDefaultOrderedByName)
 import qualified Data.ByteString.Lazy as BL
@@ -19,6 +19,7 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , export     :: Bool -- ^ export MIDI files
                        , progress   :: Bool -- ^ whether to show progress bar
                        , verify     :: Bool -- ^ whether to verify hypothesis
+                       , toCompare  :: Bool -- ^ run cross-dataset comparison
                        }
 
 -- | Parsing command-line options.
@@ -48,6 +49,9 @@ parseOpts = Options
   <*> switch (  long "verify"
              <> short 'V'
              <> help "Verify equivalence-class hypothesis" )
+  <*> switch (  long "compare"
+             <> short 'M'
+             <> help "Compare expert annotations and algorithmic output" )
 
 -- | Main function.
 main :: IO ()
@@ -64,6 +68,9 @@ main = do
       run "docs/out/folk/experts" parseFolkExperts
     when (algorithms op) $
       run "docs/out/folk/algorithms" parseFolkAlgo
+    when (toCompare op) $ do
+      runComparison
+
   when (random op) $
     run "docs/out/random" parseRandom
 
@@ -74,6 +81,53 @@ main = do
                 <> progDesc "Run analysis on the MIREX dataset"
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
+
+runComparison :: IO ()
+runComparison = do
+  -- parse expert annotations
+  putStrLn $ "Parsing docs/out/folk/experts..."
+  pgsE <- filter (not . null . patterns) <$> parseFolkExperts
+  putStrLn "Parsed."
+
+  -- parse algorithmic output
+  putStrLn $ "Parsing docs/out/folk/algorithms..."
+  pgsA <- filter (not . null . patterns) <$> parseFolkAlgo
+  putStrLn "Parsed."
+
+  let algs   = nub (expert_name <$> pgsA)
+  let pieces = nub (piece_name  <$> pgsA)
+
+  -- for each song
+  forM_ pieces $ \piece -> do
+    let pgsE' = filter ((== piece) . piece_name) pgsE
+    let expertPrs = basePattern <$> pgsE'
+
+    -- for each algorithm
+    forM_ algs $ \alg -> do
+      let pgsA' = filter (\pg -> (piece_name  pg == piece)
+                              && (expert_name pg == alg )) pgsA
+      let algPrototypes = basePattern <$> pgsA'
+
+      -- for each expert prototype
+      analyses <- forM expertPrs $ \expertPrototype -> do
+        -- create a pattern group for analysis
+        let pg = PatternGroup { piece_name   = piece
+                              , expert_name  = alg
+                              , pattern_name = "-"
+                              , basePattern  = expertPrototype
+                              , patterns     = algPrototypes
+                              }
+        analysePatternGroup False pg
+
+      let finalAn = (combineAnalyses analyses) { name = "ALL" }
+      -- print finalAn
+
+      -- Output in CSV format
+      let f_root = "docs/out/folk/algorithms/" ++ piece ++ "/" ++ alg
+      cd f_root $
+        BL.writeFile "comparison.csv" $
+          encodeDefaultOrderedByName (finalAn:analyses)
+      putStrLn $ "Wrote " ++ f_root ++ "/comparison.csv"
 
 -- Analyse given music pattern dataset.
 runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()

@@ -14,6 +14,9 @@ transformation queries:
   3. view extracted MIDI at `data/extracted/bach/`
 
 
+- To run a cross-dataset comparison (between expert and algorithmic prototypes): `make compare`
+
+
 - To choose from options: `stack build && stack exec -- hs-mirex [-E|--experts] [-A|--algorithms] [-C|--classical] [-F|--folk] [-R|--random] [-X|--export]`
 
 

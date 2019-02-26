@@ -9,6 +9,9 @@ build:
 analysis: build
 	stack exec -- hs-mirex -PXRCFEA && ./prepare.sh
 
+compare: build
+	stack exec -- hs-mirex -FM
+
 docs: build
 	stack exec -- haddock --html \
 		src/Main.hs src/Types.hs src/Transformations.hs src/Parser.hs \
