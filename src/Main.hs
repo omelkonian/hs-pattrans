@@ -1,4 +1,4 @@
-import Data.List ((\\), nub)
+import Data.List ((\\), nub, elemIndices)
 import Data.Semigroup ((<>))
 import Control.Monad (when, forM, forM_)
 import Options.Applicative
@@ -62,14 +62,19 @@ main = do
     when (experts op) $
       run "docs/out/classical/experts" parseClassicExperts
     when (algorithms op) $
-      run "docs/out/classical/algorithms" parseClassiclAlgo
+      run "docs/out/classical/algorithms" parseClassicAlgo
+    when (toCompare op) $
+      runComparison ("docs/out/classical/experts", parseClassicExperts)
+                    ("docs/out/classical/algorithms", parseClassicAlgo)
   when (folk op) $ do
     when (experts op) $
       run "docs/out/folk/experts" parseFolkExperts
     when (algorithms op) $
       run "docs/out/folk/algorithms" parseFolkAlgo
     when (toCompare op) $ do
-      runComparison
+      runComparison ("docs/out/folk/experts", parseFolkExperts)
+                    ("docs/out/folk/algorithms", parseFolkAlgo)
+
 
   when (random op) $
     run "docs/out/random" parseRandom
@@ -82,28 +87,40 @@ main = do
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
 
-runComparison :: IO ()
-runComparison = do
+hasAlgName :: String -> AnalysisResult -> Bool
+hasAlgName alg (An {name = n}) =
+  snd (splitAt (last (elemIndices ':' n) + 1) n) == alg
+
+runComparison :: (FilePath, IO [PatternGroup]) -- ^ experts
+              -> (FilePath, IO [PatternGroup]) -- ^ algorithms
+              -> IO ()
+runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
   -- parse expert annotations
-  putStrLn $ "Parsing docs/out/folk/experts..."
-  pgsE <- filter (not . null . patterns) <$> parseFolkExperts
+  putStrLn $ "Parsing " ++ f_experts ++ "..."
+  pgsE <- filter (not . null . patterns) <$> parseExperts
   putStrLn "Parsed."
+  putStrLn $ "\tAlgsE: " ++ show (nub (expert_name <$> pgsE))
+  putStrLn $ "\tPiecesE: " ++ show (nub (piece_name <$> pgsE))
 
   -- parse algorithmic output
-  putStrLn $ "Parsing docs/out/folk/algorithms..."
-  pgsA <- filter (not . null . patterns) <$> parseFolkAlgo
+  putStrLn $ "Parsing " ++ f_algo ++ "..."
+  pgsA <- filter (not . null . patterns) <$> parseAlgo
   putStrLn "Parsed."
 
   let algs   = nub (expert_name <$> pgsA)
+  putStrLn $ "\tAlgs: " ++ show algs
   let pieces = nub (piece_name  <$> pgsA)
+  putStrLn $ "\tPieces: " ++ show pieces
+
 
   -- for each song
-  forM_ pieces $ \piece -> do
+  pieceAnalyses' <- forM pieces $ \piece -> do
     let pgsE' = filter ((== piece) . piece_name) pgsE
     let expertPrs = basePattern <$> pgsE'
+    putStrLn $ "\tExpertPrototypes: " ++ show expertPrs
 
     -- for each algorithm
-    forM_ algs $ \alg -> do
+    algAnalyses <- forM algs $ \alg -> do
       let pgsA' = filter (\pg -> (piece_name  pg == piece)
                               && (expert_name pg == alg )) pgsA
       let algPrototypes = basePattern <$> pgsA'
@@ -119,15 +136,45 @@ runComparison = do
                               }
         analysePatternGroup False pg
 
-      let finalAn = (combineAnalyses analyses) { name = "ALL" }
+      -- Aggregate results for a particular piece/alg (containing all expert prototypes)
+      let finalAn = (combineAnalyses analyses) {name = "ALL:" ++ piece ++ ":" ++ alg}
       -- print finalAn
 
       -- Output in CSV format
-      let f_root = "docs/out/folk/algorithms/" ++ piece ++ "/" ++ alg
+      let f_root = f_algo ++ "/" ++ piece ++ "/" ++ alg
       cd f_root $
         BL.writeFile "comparison.csv" $
           encodeDefaultOrderedByName (finalAn:analyses)
-      putStrLn $ "Wrote " ++ f_root ++ "/comparison.csv"
+      putStrLn $ "\t\tWrote " ++ f_root ++ "/comparison.csv"
+      return finalAn
+
+    -- Aggregate results for a particular piece (containing all algorithms)
+    let allAlgAnalyses = (combineAnalyses algAnalyses) {name = "ALL:" ++ piece}
+    let f_root = f_algo ++ "/" ++ piece
+    cd f_root $
+      BL.writeFile "comparison.csv" $
+        encodeDefaultOrderedByName [allAlgAnalyses]
+    putStrLn $ "\tWrote " ++ f_root ++ "/comparison.csv"
+
+    return algAnalyses
+
+  -- Aggregate results for a particular algorithm (containing all pieces)
+  let pieceAnalyses = concat pieceAnalyses'
+  forM_ algs $ \alg -> do
+    let algPieceAnalyses = filter (hasAlgName alg) pieceAnalyses
+    let algAn = (combineAnalyses algPieceAnalyses) {name = "ALL:" ++ alg}
+    let f_name = alg ++ ".csv"
+    cd f_algo $
+      BL.writeFile f_name $
+        encodeDefaultOrderedByName [algAn]
+    putStrLn $ "Wrote " ++ f_algo ++ "/" ++ f_name
+
+  -- Aggregate all results
+  let finalAn = (combineAnalyses pieceAnalyses) {name = "ALL"}
+  cd f_algo $
+    BL.writeFile "comparison.csv" $
+      encodeDefaultOrderedByName [finalAn]
+  putStrLn $ "\tWrote " ++ f_algo ++ "/comparison.csv"
 
 -- Analyse given music pattern dataset.
 runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()

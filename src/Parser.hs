@@ -1,4 +1,4 @@
-module Parser ( parseClassicExperts, parseClassiclAlgo
+module Parser ( parseClassicExperts, parseClassicAlgo
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
@@ -53,8 +53,8 @@ parseClassicExperts = cd "data/pieces" $ do
   return $ concat res
 
 -- | Parse all (algorithmic) pattern groups from the classical dataset.
-parseClassiclAlgo :: IO [PatternGroup]
-parseClassiclAlgo = cd "data/algOutput" $ do
+parseClassicAlgo :: IO [PatternGroup]
+parseClassicAlgo = cd "data/algOutput" $ do
   f_algs <- listDirs
   allPgs <- forM f_algs $ \f_alg -> cd f_alg $ do
     f_versions <- listDirs
