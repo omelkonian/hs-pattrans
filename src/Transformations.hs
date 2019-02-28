@@ -45,7 +45,7 @@ type ApproxCheck a = (?p :: Float) => Check a
 -- | Exact repetition: move a pattern in time.
 -- (AKA horizontal translation)
 exactOf :: ApproxCheck Pattern
-exactOf = rhythm >$< approxEq {-approxEq2-}
+exactOf = rhythm >$< approxEq2
        <> pitch  >$< approxEq
 
 -- | Transposition: move a pattern in pitch.

@@ -160,7 +160,7 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
 
   -- Aggregate results for a particular algorithm (containing all pieces)
   let pieceAnalyses = concat pieceAnalyses'
-  forM_ algs $ \alg -> do
+  algAnalyses <- forM algs $ \alg -> do
     let algPieceAnalyses = filter (hasAlgName alg) pieceAnalyses
     let algAn = (combineAnalyses algPieceAnalyses) {name = "ALL:" ++ alg}
     let f_name = alg ++ ".csv"
@@ -168,12 +168,18 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
       BL.writeFile f_name $
         encodeDefaultOrderedByName [algAn]
     putStrLn $ "Wrote " ++ f_algo ++ "/" ++ f_name
+    return algAn
 
-  -- Aggregate all results
-  let finalAn = (combineAnalyses pieceAnalyses) {name = "ALL"}
+  -- Aggregate all results (coming from piece aggregations)
   cd f_algo $
     BL.writeFile "comparison.csv" $
-      encodeDefaultOrderedByName [finalAn]
+      encodeDefaultOrderedByName [(combineAnalyses pieceAnalyses) {name = "ALL"}]
+  putStrLn $ "\tWrote " ++ f_algo ++ "/comparison.csv"
+
+  -- Aggregate all results (coming from algorithm aggregations)
+  cd f_algo $
+    BL.writeFile "comparisonA.csv" $
+      encodeDefaultOrderedByName [(combineAnalyses algAnalyses) {name = "ALL"}]
   putStrLn $ "\tWrote " ++ f_algo ++ "/comparison.csv"
 
 -- Analyse given music pattern dataset.
