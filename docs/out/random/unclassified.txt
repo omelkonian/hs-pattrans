@@ -33,6 +33,7 @@ EenSoudaanHadEenDochtertje:RAND:nonpatmidiname0:11
 EenSoudaanHadEenDochtertje:RAND:nonpatmidiname0:20
 EenSoudaanHadEenDochtertje:RAND:nonpatmidiname0:22
 EenSoudaanHadEenDochtertje:RAND:nonpatmidiname0:26
+EnErWarenEensTweeZoeteliefjes:RAND:nonpatmidiname0:9
 EnErWarenEensTweeZoeteliefjes:RAND:nonpatmidiname0:74
 ErReedErEensEenRuiter:RAND:nonpatmidiname0:24
 ErReedErEensEenRuiter:RAND:nonpatmidiname0:28

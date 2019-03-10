@@ -1,6 +1,6 @@
 import Data.List ((\\), nub, elemIndices)
 import Data.Semigroup ((<>))
-import Control.Monad (when, forM, forM_)
+import Control.Monad (when, forM)
 import Options.Applicative
 import Data.Csv (encodeDefaultOrderedByName)
 import qualified Data.ByteString.Lazy as BL
@@ -17,7 +17,6 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
                        , random     :: Bool -- ^ analyze random datasets
                        , export     :: Bool -- ^ export MIDI files
-                       , progress   :: Bool -- ^ whether to show progress bar
                        , verify     :: Bool -- ^ whether to verify hypothesis
                        , toCompare  :: Bool -- ^ run cross-dataset comparison
                        }
@@ -43,9 +42,6 @@ parseOpts = Options
   <*> switch (  long "export"
              <> short 'X'
              <> help "Export MIDI files" )
-  <*> switch (  long "progress"
-             <> short 'P'
-             <> help "Show progress bar" )
   <*> switch (  long "verify"
              <> short 'V'
              <> help "Verify equivalence-class hypothesis" )
@@ -57,7 +53,7 @@ parseOpts = Options
 main :: IO ()
 main = do
   op <- execParser opts
-  let run = runAnalysis (export op, progress op, verify op)
+  let run = runAnalysis (export op, verify op)
   when (classical op) $ do
     when (experts op) $
       run "docs/out/classical/experts" parseClassicExperts
@@ -99,8 +95,6 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
   putStrLn $ "Parsing " ++ f_experts ++ "..."
   pgsE <- filter (not . null . patterns) <$> parseExperts
   putStrLn "Parsed."
-  putStrLn $ "\tAlgsE: " ++ show (nub (expert_name <$> pgsE))
-  putStrLn $ "\tPiecesE: " ++ show (nub (piece_name <$> pgsE))
 
   -- parse algorithmic output
   putStrLn $ "Parsing " ++ f_algo ++ "..."
@@ -108,16 +102,12 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
   putStrLn "Parsed."
 
   let algs   = nub (expert_name <$> pgsA)
-  putStrLn $ "\tAlgs: " ++ show algs
   let pieces = nub (piece_name  <$> pgsA)
-  putStrLn $ "\tPieces: " ++ show pieces
-
 
   -- for each song
   pieceAnalyses' <- forM pieces $ \piece -> do
     let pgsE' = filter ((== piece) . piece_name) pgsE
     let expertPrs = basePattern <$> pgsE'
-    putStrLn $ "\tExpertPrototypes: " ++ show expertPrs
 
     -- for each algorithm
     algAnalyses <- forM algs $ \alg -> do
@@ -134,7 +124,7 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
                               , basePattern  = expertPrototype
                               , patterns     = algPrototypes
                               }
-        analysePatternGroup False pg
+        analysePatternGroup pg
 
       -- Aggregate results for a particular piece/alg (containing all expert prototypes)
       let finalAn = (combineAnalyses analyses) {name = "ALL:" ++ piece ++ ":" ++ alg}
@@ -180,11 +170,11 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
   cd f_algo $
     BL.writeFile "comparisonA.csv" $
       encodeDefaultOrderedByName [(combineAnalyses algAnalyses) {name = "ALL"}]
-  putStrLn $ "\tWrote " ++ f_algo ++ "/comparison.csv"
+  putStrLn $ "\tWrote " ++ f_algo ++ "/comparisonA.csv"
 
 -- Analyse given music pattern dataset.
-runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
-runAnalysis (expo, pr, ver) f_root parser = do
+runAnalysis :: (Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
+runAnalysis (expo, ver) f_root parser = do
     -- Parse dataset to retrieve all pattern groups.
     putStrLn $ "Parsing " ++ f_root ++ "..."
     allPatternGroups <- filter (not . null . patterns) <$> parser
@@ -193,7 +183,7 @@ runAnalysis (expo, pr, ver) f_root parser = do
     cd f_root $ do
       analyses <-
         forM allPatternGroups $ \pg -> do
-          an <- analysePatternGroup pr pg
+          an <- analysePatternGroup pg
 
           putStrLn (name an)
           -- print an -- display on terminal
@@ -225,6 +215,6 @@ verifyEquivClassHypothesis :: [Pattern] -- ^ unclassified patterns
 verifyEquivClassHypothesis []   _           = return 0
 verifyEquivClassHypothesis uns []           = return (length uns)
 verifyEquivClassHypothesis uns (base:bases) = do
-  an <- analysePatternGroup False (PatternGroup "" "" "" base uns)
+  an <- analysePatternGroup (PatternGroup "" "" "" base uns)
   let uns' = snd <$> unclassified an
   verifyEquivClassHypothesis uns' bases

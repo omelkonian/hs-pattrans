@@ -4,8 +4,6 @@
 
 module Analysis where
 
-import qualified System.ProgressBar as P
-
 import Data.List (foldl')
 import Text.Printf (printf)
 
@@ -96,17 +94,9 @@ singleAn :: AnalysisResult
 singleAn = defAn {total = 1}
 
 -- | Analyze a single pattern group.
-analysePatternGroup :: Bool -> PatternGroup -> IO AnalysisResult
-analysePatternGroup showProgress pg@(PatternGroup _ _ _ base pats)
-  | showProgress
-  = do  h <- fst <$> P.startProgress P.percentage P.exact (13 +  60) (toInteger $ length pats)
-        res <- pforM (zip [2..] pats) $ \p -> do
-          let !res = check p
-          P.incProgress h 1
-          return res
-        returnAnalyses res
-  | otherwise
-  = returnAnalyses $ pmap check (zip [2..] pats)
+analysePatternGroup :: PatternGroup -> IO AnalysisResult
+analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
+  returnAnalyses $ pmap check (zip [2..] pats)
   where
     returnAnalyses res = return (combineAnalyses res) { name = show pg }
 

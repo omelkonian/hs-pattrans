@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, ImplicitParams, Rank2Types #-}
+{-# LANGUAGE ImplicitParams, Rank2Types #-}
 module Transformations where
 
 import qualified Data.Set as S
@@ -142,7 +142,7 @@ trRetrogradeOf = rhythm    >$< (reverse $< approxEq2)
 equal :: Eq a => Check a
 equal = Check (==)
 
-approxEqWith :: (Show b, Num b, Eq b, a ~ [b])
+approxEqWith :: (Show b, Num b, Eq b)
              => (b -> [b] -> Maybe ([b], [b]))
                 -- ^ function that deletes an element from a list, possibly
                 -- reducing (summing) consecutive elements to be equal to the
@@ -151,21 +151,20 @@ approxEqWith :: (Show b, Num b, Eq b, a ~ [b])
                 --   * Nothing,   if there was no deletion
                 --   * Just(l,r), otherwise, where l/r are the remaining
                 --                lists before/after the deletion point
-             -> ApproxCheck a
+             -> ApproxCheck [b]
 approxEqWith del1 = Check go
   where
     go xs' ys' =
-      let [xs, ys] = sortOn length [xs', ys']
-          [n, m]   = length <$> [xs, ys]
+      let [xs, ys]            = sortOn length [xs', ys']
+          [n, m]              = length <$> [xs, ys]
           (remained, ignored) = ys `del` xs
-          toF      =  fromIntegral
-      in  (toF ignored <= (1 - ?p) * toF n) && (toF remained <= (1 - ?p) * toF m)
+          toF                 =  fromIntegral
+      in (toF ignored <= (1 - ?p) * toF n) && (toF remained <= (1 - ?p) * toF m)
 
-    del ys [] = (length ys, 0)
-    del [] xs = (0, length xs)
-    del ys (x:xs)
-      | Just (_, ys_r) <- del1 x ys = del ys_r xs
-      | otherwise                   = (+ 1) <$> del ys xs
+    del ys []     = (length ys, 0)
+    del [] xs     = (0, length xs)
+    del ys (x:xs) | Just (_, ys_r) <- del1 x ys = del ys_r xs
+                  | otherwise                   = (+ 1) <$> del ys xs
 
 -- | First-order approximate equality of lists.
 --
@@ -175,9 +174,8 @@ approxEqWith del1 = Check go
 --    2. (1-p)% notes of the occurence are additional notes (not in the base pattern)
 -- e.g. [A,C,F,A,B] (approxEq 80%) [A,C,G,A,B]
 approxEq :: (Show a, Num a, Eq a) => ApproxCheck [a]
-approxEq
-  | ?p == 1.0 = equal
-  | otherwise = approxEqWith del1
+approxEq | ?p == 1.0 = equal
+         | otherwise = approxEqWith del1
   where
     -- does not reduce consecutive elements (first-order)
     del1 _ []     = Nothing
@@ -195,7 +193,8 @@ approxEq
 -- e.g. * intervals from pitches
 --      * rhythm from durations
 approxEq2 :: (Show a, Ord a, Num a, Eq a) => ApproxCheck [a]
-approxEq2 = approxEqWith del1
+approxEq2 | ?p == 1.0 = equal
+          | otherwise = approxEqWith del1
   where
     -- reduces consecutive elements (second-order)
     del1 _ [] = Nothing

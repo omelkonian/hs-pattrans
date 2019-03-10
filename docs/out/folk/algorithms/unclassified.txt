@@ -361,7 +361,6 @@ OGodIkLeefInNood:SIAF1:pattern27:2
 OGodIkLeefInNood:SIAF1:pattern28:2
 OGodIkLeefInNood:SIAF1:pattern31:4
 WatZagIkDaarVanVerre:SIAF1:pattern5:5
-WatZagIkDaarVanVerre:SIAF1:pattern27:3
 ZolangDeBoomZalBloeien:SIAF1:pattern19:2
 ZolangDeBoomZalBloeien:SIAF1:pattern19:3
 ZolangDeBoomZalBloeien:SIAF1:pattern19:4
@@ -518,6 +517,10 @@ HetVrouwtjeVanStavoren:SIAP:pattern6:2
 HetVrouwtjeVanStavoren:SIAP:pattern7:2
 HetWasOpEenDriekoningenavond:SIAP:pattern2:48
 HetWasOpEenDriekoningenavond:SIAP:pattern2:49
+HetWasOpEenDriekoningenavond:SIAP:pattern2:50
+HetWasOpEenDriekoningenavond:SIAP:pattern2:51
+HetWasOpEenDriekoningenavond:SIAP:pattern2:52
+HetWasOpEenDriekoningenavond:SIAP:pattern2:54
 KomLaatOnsNuZoStilNietZijn:SIAP:pattern2:2
 KomLaatOnsNuZoStilNietZijn:SIAP:pattern3:2
 KomLaatOnsNuZoStilNietZijn:SIAP:pattern5:25
@@ -669,6 +672,8 @@ EnErWarenEensTweeZoeteliefjes:SIAR:pattern16:3
 EnErWarenEensTweeZoeteliefjes:SIAR:pattern16:4
 EnErWarenEensTweeZoeteliefjes:SIAR:pattern16:5
 EnErWarenEensTweeZoeteliefjes:SIAR:pattern16:6
+EnErWarenEensTweeZoeteliefjes:SIAR:pattern18:6
+EnErWarenEensTweeZoeteliefjes:SIAR:pattern18:7
 EnErWarenEensTweeZoeteliefjes:SIAR:pattern21:3
 EnErWarenEensTweeZoeteliefjes:SIAR:pattern21:6
 EnErWarenEensTweeZoeteliefjes:SIAR:pattern23:5
@@ -835,6 +840,7 @@ VaarwelBruidjeSchoon:SIAR:pattern14:5
 VaarwelBruidjeSchoon:SIAR:pattern14:6
 VaarwelBruidjeSchoon:SIAR:pattern14:7
 VaarwelBruidjeSchoon:SIAR:pattern14:8
+VaarwelBruidjeSchoon:SIAR:pattern14:9
 VaarwelBruidjeSchoon:SIAR:pattern14:10
 VaarwelBruidjeSchoon:SIAR:pattern31:3
 WatZagIkDaarVanVerre:SIAR:pattern11:6
@@ -1102,7 +1108,6 @@ DaarReedEenJonkheer:VM1:pattern1:385
 DaarReedEenJonkheer:VM1:pattern1:392
 DaarReedEenJonkheer:VM1:pattern1:394
 DaarReedEenJonkheer:VM1:pattern1:396
-DaarReedEenJonkheer:VM1:pattern1:397
 DaarReedEenJonkheer:VM1:pattern1:399
 DaarReedEenJonkheer:VM1:pattern1:403
 DaarReedEenJonkheer:VM1:pattern1:411
@@ -5284,6 +5289,7 @@ ErWasEenMeisjeVanZestienJaren:VM1:pattern1:375
 ErWasEenMeisjeVanZestienJaren:VM1:pattern1:388
 ErWasEenMeisjeVanZestienJaren:VM1:pattern1:393
 ErWasEenMeisjeVanZestienJaren:VM1:pattern1:397
+ErWasEenMeisjeVanZestienJaren:VM1:pattern1:398
 ErWasEenMeisjeVanZestienJaren:VM1:pattern1:399
 ErWasEenMeisjeVanZestienJaren:VM1:pattern1:400
 ErWasEenMeisjeVanZestienJaren:VM1:pattern1:404
@@ -8381,7 +8387,11 @@ IkKwamLaatstEensInDeStad:VM1:pattern1:572
 IkKwamLaatstEensInDeStad:VM1:pattern1:573
 IkKwamLaatstEensInDeStad:VM1:pattern1:830
 IkKwamLaatstEensInDeStad:VM1:pattern1:840
+IkKwamLaatstEensInDeStad:VM1:pattern1:842
+IkKwamLaatstEensInDeStad:VM1:pattern1:843
 IkKwamLaatstEensInDeStad:VM1:pattern1:862
+IkKwamLaatstEensInDeStad:VM1:pattern1:883
+IkKwamLaatstEensInDeStad:VM1:pattern1:884
 KomLaatOnsNuZoStilNietZijn:VM1:pattern1:2
 KomLaatOnsNuZoStilNietZijn:VM1:pattern1:3
 KomLaatOnsNuZoStilNietZijn:VM1:pattern1:6
@@ -12063,6 +12073,7 @@ DaarGingEenHeer:VM2:pattern1:56
 DaarGingEenHeer:VM2:pattern1:75
 DaarGingEenHeer:VM2:pattern1:114
 DaarGingEenHeer:VM2:pattern1:115
+DaarGingEenHeer:VM2:pattern1:133
 DaarReedEenJonkheer:VM2:pattern1:2
 DaarReedEenJonkheer:VM2:pattern1:4
 DaarReedEenJonkheer:VM2:pattern1:5
@@ -12081,7 +12092,6 @@ DaarReedEenJonkheer:VM2:pattern1:53
 DaarReedEenJonkheer:VM2:pattern1:55
 DaarReedEenJonkheer:VM2:pattern1:57
 DaarReedEenJonkheer:VM2:pattern1:62
-DaarReedEenJonkheer:VM2:pattern1:70
 DaarReedEenJonkheer:VM2:pattern1:74
 DaarWasLaatstmaalEenRuiter:VM2:pattern1:28
 DaarWasLaatstmaalEenRuiter:VM2:pattern1:29
@@ -12131,6 +12141,7 @@ EnErWarenEensTweeZoeteliefjes:VM2:pattern1:145
 EnErWarenEensTweeZoeteliefjes:VM2:pattern1:149
 EnErWarenEensTweeZoeteliefjes:VM2:pattern1:201
 EnErWarenEensTweeZoeteliefjes:VM2:pattern1:214
+EnErWarenEensTweeZoeteliefjes:VM2:pattern2:3
 ErReedErEensEenRuiter:VM2:pattern1:45
 ErReedErEensEenRuiter:VM2:pattern1:46
 ErReedErEensEenRuiter:VM2:pattern1:63
@@ -12187,17 +12198,13 @@ ErWasEenMeisjeVanZestienJaren:VM2:pattern1:28
 ErWasEenMeisjeVanZestienJaren:VM2:pattern1:40
 ErWasEenMeisjeVanZestienJaren:VM2:pattern1:199
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:11
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:28
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:48
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:72
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:86
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:87
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:101
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:102
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:104
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:117
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:121
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:128
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:130
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:133
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:134
@@ -12205,11 +12212,7 @@ ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:145
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:146
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:154
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:156
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:159
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:160
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:162
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:163
-ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:171
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:172
 ErWoondeEenVrouwtjeAlOverHetBos:VM2:pattern1:173
 FemmesVoulezVousEprouver:VM2:pattern1:2
