@@ -22,12 +22,11 @@ var handleFile = function(file0) {
   // remove 'docs/' prefix
   var file = file0.slice(5);
   // classical -> 0/1, folk -> 2/3, random -> 4
-  var n = 0;
-  if file.indexOf("random") { n = 4; }
-  else {
-    n = file.indexOf("folk") !== -1 ? 2 : 0;
-    n += file.indexOf("algorithms") !== -1 ? 1 : 0;
-  }
+  var n = file.indexOf("classical") && file.indexOf("algorithm") ? 1
+        : file.indexOf("classical")                              ? 0
+        : file.indexOf("folk")      && file.indexOf("algorithm") ? 3
+        : file.indexOf("classical")                              ? 2
+        : 4
   $(`#chart${n}`).append(
     `<a class='gallery' href="${file}"> <img src="${file}"> </a>`
   );
