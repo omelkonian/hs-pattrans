@@ -1,4 +1,4 @@
-{-# LANGUAGE ImplicitParams, Rank2Types #-}
+{-# LANGUAGE ImplicitParams, Rank2Types, ScopedTypeVariables #-}
 module Transformations where
 
 import qualified Data.Set as S
@@ -6,7 +6,7 @@ import qualified Data.Map as M
 import Data.List (maximumBy, sortOn)
 import Data.Semigroup
 import Data.Functor.Contravariant hiding ((>$<), (>$), ($<))
-import Control.Arrow (first)
+import Control.Arrow (first, second)
 
 import Types
 
@@ -142,29 +142,37 @@ trRetrogradeOf = rhythm    >$< (reverse $< approxEq2)
 equal :: Eq a => Check a
 equal = Check (==)
 
-approxEqWith :: (Show b, Num b, Eq b)
-             => (b -> [b] -> Maybe ([b], [b]))
+approxEqWith :: forall b. (Show b, Num b, Eq b)
+             => (b -> [b] -> Maybe (Int, [b]))
                 -- ^ function that deletes an element from a list, possibly
                 -- reducing (summing) consecutive elements to be equal to the
                 -- element being deleted
                 -- returns:
                 --   * Nothing,   if there was no deletion
-                --   * Just(l,r), otherwise, where l/r are the remaining
-                --                lists before/after the deletion point
+                --   * Just(l,r), otherwise, where l are the ignored elements
+                --                and r the remaining list
              -> ApproxCheck [b]
-approxEqWith del1 = Check go
+approxEqWith del1
+  | ?p == 1.0 = equal -- short-circuit for faster results
+  | otherwise = Check go
   where
     go xs' ys' =
       let [xs, ys]            = sortOn length [xs', ys']
           [n, m]              = length <$> [xs, ys]
           (remained, ignored) = ys `del` xs
-          toF                 =  fromIntegral
+          toF                 = fromIntegral
       in (toF ignored <= (1 - ?p) * toF n) && (toF remained <= (1 - ?p) * toF m)
 
+    del :: [b] -> [b] -> (Int, Int)
     del ys []     = (length ys, 0)
     del [] xs     = (0, length xs)
-    del ys (x:xs) | Just (_, ys_r) <- del1 x ys = del ys_r xs
-                  | otherwise                   = (+ 1) <$> del ys xs
+    del ys (x:xs) | Just (ys_ln, ys_r) <- del1 x ys
+                  = (+ ys_ln) `first` del ys_r xs
+                    {-if ys_ln < ??
+                      then (+ ys_ln) `first`  del ys_r xs
+                      else (+ 1)     `second` del ys xs-}
+                  | otherwise
+                  = (+ 1) `second` del ys xs
 
 -- | First-order approximate equality of lists.
 --
@@ -174,14 +182,13 @@ approxEqWith del1 = Check go
 --    2. (1-p)% notes of the occurence are additional notes (not in the base pattern)
 -- e.g. [A,C,F,A,B] (approxEq 80%) [A,C,G,A,B]
 approxEq :: (Show a, Num a, Eq a) => ApproxCheck [a]
-approxEq | ?p == 1.0 = equal
-         | otherwise = approxEqWith del1
+approxEq = approxEqWith del1
   where
     -- does not reduce consecutive elements (first-order)
     del1 _ []     = Nothing
     del1 x (y:ys)
-      | x == y    = Just ([], ys)
-      | otherwise = first (y:) <$> del1 x ys
+      | x == y    = Just (0, ys)
+      | otherwise = first (+ 1) <$> del1 x ys
 
 -- | Second-order approximate equality of lists.
 --
@@ -193,15 +200,14 @@ approxEq | ?p == 1.0 = equal
 -- e.g. * intervals from pitches
 --      * rhythm from durations
 approxEq2 :: (Show a, Ord a, Num a, Eq a) => ApproxCheck [a]
-approxEq2 | ?p == 1.0 = equal
-          | otherwise = approxEqWith del1
+approxEq2 = approxEqWith del1
   where
     -- reduces consecutive elements (second-order)
     del1 _ [] = Nothing
     del1 x (y:ys)
-      | x == y                         = Just ([], ys)
-      | Just i <- findIndex 0 x (y:ys) = Just ([], snd $ splitAt i ys)
-      | otherwise                      = first (y:) <$> del1 x ys
+      | x == y                         = Just (0, ys)
+      | Just i <- findIndex 0 x (y:ys) = Just (0, snd $ splitAt i ys)
+      | otherwise                      = first (+ 1) <$> del1 x ys
 
     findIndex i 0 _  = Just i
     findIndex _ _ [] = Nothing

@@ -24,8 +24,8 @@ renderAll expo s an = do
   -- Render overview chart
   render "ALL" ("ALL: " ++ s) an
   -- Store unclassified patterns
-  emptyDirectory "unclassified"
   when expo $ do
+    emptyDirectory "unclassified"
     let uncls = unclassified an
     writeFile "unclassified.txt" $ unlines (fst <$> uncls)
     cd "unclassified" $
