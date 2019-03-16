@@ -1,6 +1,6 @@
 name,total,exact,transposed,tonalTransped,inverted,augmented,retrograded,rotated,trInverted,trAugmented,trRetrograded,exact8,transposed8,tonalTransped8,inverted8,augmented8,retrograded8,rotated8,trInverted8,trAugmented8,trRetrograded8,exact6,transposed6,tonalTransped6,inverted6,augmented6,retrograded6,rotated6,trInverted6,trAugmented6,trRetrograded6,exact4,transposed4,tonalTransped4,inverted4,augmented4,retrograded4,rotated4,trInverted4,trAugmented4,trRetrograded4,exact2,transposed2,tonalTransped2,inverted2,augmented2,retrograded2,rotated2,trInverted2,trAugmented2,trRetrograded2,unclassified
-ALL:chopinOp24No4:2016DM:SIATECCompressR,192,0,0,0,0,0,0,0,0,0,0,2,0,7,0,0,0,2,0,0,1,9,12,20,0,1,4,6,0,0,8,9,9,8,0,1,13,2,0,0,0,20,5,12,0,0,13,2,0,0,0,26
-chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,1,0,0,1,2,4,3,0,0,3,3,0,0,2,2,1,1,0,0,4,1,0,0,0,4,1,0,0,0,8,0,0,0,0,4
-chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1,0,0,0,6,3,1,0,0,1,3,0,0,2,2,2,1,0,0,8,1,0,0,0,5,3,0,0,0,4,0,0,0,0,3
-chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,0,0,0,0,3,0,3,0,1,0,0,0,0,0,10,0,8,0,0,0,1,0,0,0,8
-chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,0,0,0,0,0,1,5,2,0,1,0,0,0,0,4,2,6,3,0,0,1,0,0,0,0,1,1,4,0,0,1,1,0,0,0,11
+ALL:chopinOp24No4:2016DM:SIATECCompressR,192,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,12,7,9,0,0,0,3,0,0,0,148
+chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,4,1,0,0,0,0,1,0,0,0,40
+chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,3,0,0,0,0,0,0,0,38
+chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,2,2,4,0,0,0,1,0,0,0,30
+chopinOp24No4:2016DM:SIATECCompressR:-,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,4,2,0,0,0,1,0,0,0,40

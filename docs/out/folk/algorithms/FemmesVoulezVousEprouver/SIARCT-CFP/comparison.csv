@@ -1,6 +1,6 @@
 name,total,exact,transposed,tonalTransped,inverted,augmented,retrograded,rotated,trInverted,trAugmented,trRetrograded,exact8,transposed8,tonalTransped8,inverted8,augmented8,retrograded8,rotated8,trInverted8,trAugmented8,trRetrograded8,exact6,transposed6,tonalTransped6,inverted6,augmented6,retrograded6,rotated6,trInverted6,trAugmented6,trRetrograded6,exact4,transposed4,tonalTransped4,inverted4,augmented4,retrograded4,rotated4,trInverted4,trAugmented4,trRetrograded4,exact2,transposed2,tonalTransped2,inverted2,augmented2,retrograded2,rotated2,trInverted2,trAugmented2,trRetrograded2,unclassified
-ALL:FemmesVoulezVousEprouver:SIARCT-CFP,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,2,0,3,0,0,0,0,0,3,3,1,1,0,6,3,0,1,0,0,1,1,0,1,5,3,0,0,0,0,0,0,0,0,27
-FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,1,0,0,1,0,1,0,0,0,1,0,1,2,0,0,0,0,0,0,0,0,0,6
-FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,0,0,0,3,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,7
-FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,1,0,0,2,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,7
-FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,7
+ALL:FemmesVoulezVousEprouver:SIARCT-CFP,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,9,0,0,1,0,3,1,0,0,43
+FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,1,0,0,0,11
+FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,1,0,1,0,0,0,10
+FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,1,0,0,11
+FemmesVoulezVousEprouver:SIARCT-CFP:-,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,1,0,0,0,11

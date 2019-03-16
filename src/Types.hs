@@ -61,5 +61,6 @@ pmap = parMap rpar
 pforM :: Traversable t => t a -> (a -> IO b) -> IO (t b)
 pforM = forConcurrently
 
+-- | Parallel mapM.
 pmapM :: Traversable t => (a -> IO b) -> t a -> IO (t b)
 pmapM = mapConcurrently

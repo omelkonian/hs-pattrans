@@ -96,7 +96,7 @@ singleAn = defAn {total = 1}
 -- | Analyze a single pattern group.
 analysePatternGroup :: PatternGroup -> IO AnalysisResult
 analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
-  returnAnalyses $ pmap check (zip [2..] pats)
+  returnAnalyses $ map check (zip [2..] pats)
   where
     returnAnalyses res = return (combineAnalyses res) { name = show pg }
 

@@ -2,6 +2,7 @@ module Charts (renderOne, renderAll) where
 
 import Control.Monad (forM_, when)
 
+import Data.Char (isDigit)
 import Data.Colour
 import Data.Colour.Names
 import Graphics.Rendering.Chart.Easy hiding (render)
@@ -16,13 +17,13 @@ import MIDI (writeToMidi)
 renderOne :: PatternGroup -> AnalysisResult -> IO ()
 renderOne (PatternGroup piece_n expert_n pattern_n _ _) an =
   cd (piece_n ++ "/" ++ expert_n) $
-    render pattern_n (piece_n ++ ":" ++ expert_n ++ ":" ++ pattern_n) an
+    render pattern_n an
 
 -- | Visualize the result of analyzing multiple pattern groups in a single pie chart.
-renderAll :: Bool -> String -> AnalysisResult -> IO ()
-renderAll expo s an = do
+renderAll :: Bool -> AnalysisResult -> IO ()
+renderAll expo an = do
   -- Render overview chart
-  render "ALL" ("ALL: " ++ s) an
+  render "ALL" an
   -- Store unclassified patterns
   when expo $ do
     emptyDirectory "unclassified"
@@ -31,15 +32,16 @@ renderAll expo s an = do
     cd "unclassified" $
       forM_ uncls $ \(f, p) -> writeToMidi (f ++ ".mid") p
 
-render :: String -> String -> AnalysisResult -> IO ()
-render fname title an
+render :: String -> AnalysisResult -> IO ()
+render fname an
   | total an == 0
   = return ()
   | otherwise
   = do toFile def (fname ++ ".png") $ do
-         pie_title .= title
-         pie_plot . pie_data .= values
+         pie_plot . pie_data   .= values
          pie_plot . pie_colors .= map opaque colours
+         pie_plot . pie_label_line_style . line_width  .= 0.5
+         pie_plot . pie_label_style      . font_size   .= 14
   where
     colours :: [Colour Double]
     colours =
@@ -50,9 +52,9 @@ render fname title an
 
     values :: [PieItem]
     values =
-      [ pitem_value .~ v
-      $ pitem_label .~ (if v > 0 then s else "")
-      $ pitem_offset .~ 40
+      [ pitem_value  .~ v
+      $ pitem_label  .~ (if v > 2 then formatLabel s else "")
+      $ pitem_offset .~ 30
       $ def
       | let xs = (percentage an <$>) <$> [ ("exact", exact)
                                          , ("transposed", transposed)
@@ -108,4 +110,8 @@ render fname title an
       , (s, v) <- xs ++ [("other", otherPercentage an)]
       ]
 
-
+    formatLabel :: String -> String
+    formatLabel s = trS ++ case n of
+                             [] -> ""
+                             _  -> " ~ " ++ show ((read n :: Int) * 10) ++ "%"
+      where (trS, n) = break isDigit s

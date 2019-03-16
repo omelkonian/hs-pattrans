@@ -1,4 +1,4 @@
-{-# LANGUAGE ImplicitParams, Rank2Types, ScopedTypeVariables #-}
+{-# LANGUAGE ImplicitParams, Rank2Types, ScopedTypeVariables, BangPatterns #-}
 module Transformations where
 
 import qualified Data.Set as S
@@ -6,7 +6,6 @@ import qualified Data.Map as M
 import Data.List (maximumBy, sortOn)
 import Data.Semigroup
 import Data.Functor.Contravariant hiding ((>$<), (>$), ($<))
-import Control.Arrow (first, second)
 
 import Types
 
@@ -20,7 +19,7 @@ newtype Check a = Check { getCheck :: a -> a -> Bool }
 (x <=> y) p = getCheck p x y
 
 instance Semigroup (Check a) where
-  p <> q = Check $ \x y -> and (x <=> y `pmap` [p, q])
+  p <> q = Check $ \x y -> and (x <=> y `map` [p, q])
 
 instance Contravariant Check where
   contramap f p = Check $ \x y -> (f x <=> f y) p
@@ -142,37 +141,60 @@ trRetrogradeOf = rhythm    >$< (reverse $< approxEq2)
 equal :: Eq a => Check a
 equal = Check (==)
 
+-- | Influences the accuracy of `approxEq`, but also dramatically reduces
+-- execution time of the analysis.
+maxLookahead :: Int
+maxLookahead = 5
+
 approxEqWith :: forall b. (Show b, Num b, Eq b)
-             => (b -> [b] -> Maybe (Int, [b]))
+             => (  b                -- ^ the element to delete
+                -> [b]              -- ^ the initial list
+                -> Int              -- ^ maximum elements to ignore
+                -> Maybe (Int, [b]) -- ^ * Nothing, if there was no deletion
+                                    --   * Just(# of ignored,tail), otherwise
+                )
                 -- ^ function that deletes an element from a list, possibly
                 -- reducing (summing) consecutive elements to be equal to the
                 -- element being deleted
-                -- returns:
-                --   * Nothing,   if there was no deletion
-                --   * Just(l,r), otherwise, where l are the ignored elements
-                --                and r the remaining list
              -> ApproxCheck [b]
 approxEqWith del1
   | ?p == 1.0 = equal -- short-circuit for faster results
   | otherwise = Check go
   where
     go xs' ys' =
-      let [xs, ys]            = sortOn length [xs', ys']
-          [n, m]              = length <$> [xs, ys]
-          (remained, ignored) = ys `del` xs
-          toF                 = fromIntegral
-      in (toF ignored <= (1 - ?p) * toF n) && (toF remained <= (1 - ?p) * toF m)
+      let [xs, ys]   = sortOn length [xs', ys']
+          [n, m]     = length <$> [xs, ys]
+          maxIgnored = floor $ (1 - ?p) * fromIntegral n
+          maxAdded   = floor $ (1 - ?p) * fromIntegral m
+      in  del ys xs (maxIgnored, maxAdded)
 
-    del :: [b] -> [b] -> (Int, Int)
-    del ys []     = (length ys, 0)
-    del [] xs     = (0, length xs)
-    del ys (x:xs) | Just (ys_ln, ys_r) <- del1 x ys
-                  = (+ ys_ln) `first` del ys_r xs
-                    {-if ys_ln < ??
-                      then (+ ys_ln) `first`  del ys_r xs
-                      else (+ 1)     `second` del ys xs-}
-                  | otherwise
-                  = (+ 1) `second` del ys xs
+    del :: [b] -> [b] -> (Int {-ignored-}, Int {-added-}) -> Bool
+    del ys []     (maxI, maxA) = 0         <= maxI && length ys <= maxA
+    del [] xs     (maxI, maxA) = length xs <= maxI && 0         <= maxA
+    del ys (x:xs) (maxI, maxA)
+      -- surpassed the limits, abort
+      | maxI < 0 || maxA < 0
+      = False
+
+      -- no more additions/ignores allowed, resort to simple equality
+      | maxI + maxA == 0
+      = ys == x:xs
+
+      -- found the prototype element in the occurrence (possibly adding elements)
+      -- NB: maybe it's better to ignore it though, thus the second case
+      | Just (maxA', ys') <- del1 x ys maxA
+      , maxA' >= 0
+      , maxA - maxA' <= maxLookahead
+      = del ys' xs (maxI, maxA')
+      -- || (maxI > 0 && del ys xs (maxI - 1, maxA)) -- too slow...
+
+      -- did not find element, ignore if possible
+      | maxI > 0
+      = del ys xs (maxI - 1, maxA)
+
+      -- did not find element and cannot ignore it, abort
+      | otherwise
+      = False
 
 -- | First-order approximate equality of lists.
 --
@@ -185,10 +207,11 @@ approxEq :: (Show a, Num a, Eq a) => ApproxCheck [a]
 approxEq = approxEqWith del1
   where
     -- does not reduce consecutive elements (first-order)
-    del1 _ []     = Nothing
-    del1 x (y:ys)
-      | x == y    = Just (0, ys)
-      | otherwise = first (+ 1) <$> del1 x ys
+    del1 _ []     _    = Nothing
+    del1 x (y:ys) maxA
+      | maxA < 0  = Nothing
+      | x == y    = Just (maxA, ys)
+      | otherwise = del1 x ys $! (maxA - 1)
 
 -- | Second-order approximate equality of lists.
 --
@@ -203,33 +226,24 @@ approxEq2 :: (Show a, Ord a, Num a, Eq a) => ApproxCheck [a]
 approxEq2 = approxEqWith del1
   where
     -- reduces consecutive elements (second-order)
-    del1 _ [] = Nothing
-    del1 x (y:ys)
-      | x == y                         = Just (0, ys)
-      | Just i <- findIndex 0 x (y:ys) = Just (0, snd $ splitAt i ys)
-      | otherwise                      = first (+ 1) <$> del1 x ys
+    del1 _ []     _    = Nothing
+    del1 x (y:ys) maxA
+      | maxA < 0
+      = Nothing
+      | x == y
+      = Just (maxA, ys)
+      | Just i <- findIndex 0 x (y:ys) maxLookahead -- NB: fixed look-ahead
+      , maxA >= i
+      = Just (maxA - i, snd $ splitAt i ys)
+      | otherwise
+      = del1 x ys $! (maxA - 1)
 
-    findIndex i 0 _  = Just i
-    findIndex _ _ [] = Nothing
-    findIndex i acc (y:ys)
-      | acc >= y  = findIndex (i + 1) (acc - y) ys
+    findIndex i 0   _      _ = Just i
+    findIndex _ _   _      0 = Nothing
+    findIndex _ _   []     _ = Nothing
+    findIndex i acc (y:ys) maxAc
+      | acc >= y  = findIndex (i + 1) (acc - y) ys (maxAc - 1)
       | otherwise = Nothing
-
-{- ^^^ COMPUTATIONALLY INFEASIBLE (even when threaded, due to space leaks) ^^^
-approxEq2 :: (Semigroup b, Eq b, a ~ [b], ?p :: Float) => Check a
-approxEq2
-  | ?p == 1.0 = equal
-  | otherwise = Check $ \x y ->
-      or $ parMap rpar (\y' -> (x <=> y') approxEq) (ndShrink y)
-  where
-    -- | Non-deterministically combine consecutive elements of the array.
-    ndShrink :: Semigroup a => [a] -> [[a]]
-    ndShrink []     = [[]]
-    ndShrink (x:xs) = ((x:) <$> rest) ++ (merge <$> rest)
-      where rest = ndShrink xs
-            merge []     = []
-            merge (y:ys) = (x <> y) : ys
--}
 
 -- | Negate the values of a numeric list.
 inverse :: Num a => [a] -> [a]

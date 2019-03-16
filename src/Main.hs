@@ -202,7 +202,7 @@ runAnalysis (expo, ver) f_root parser = do
       -- Combine all individual analyses and render in one chart.
       let finalAn = (combineAnalyses analyses) { name = "ALL" }
       print finalAn
-      renderAll expo f_root finalAn
+      renderAll expo finalAn
 
       -- Output in CSV format
       BL.writeFile "output.csv" $ encodeDefaultOrderedByName (finalAn:analyses)

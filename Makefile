@@ -7,7 +7,7 @@ build:
 	stack build
 
 analysis: build
-	stack exec -- hs-mirex -XRCFEA && ./prepare.sh
+	stack exec -- hs-mirex -RCFEA && ./prepare.sh
 
 compare: build
 	stack exec -- hs-mirex -MCF
