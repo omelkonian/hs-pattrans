@@ -1,13 +1,13 @@
-name          : hs-mirex
+name          : hs-pattrans
 version       : 0.1.0.0
 synopsis      : A pattern language, based on the MIREX "Discovery of Repeated Themes & Sections" task.
-homepage      : https://github.com/omelkonian/hs-mirex
+homepage      : https://github.com/omelkonian/hs-pattrans
 author        : Orestis Melkonian
 category      : Language
 build-type    : Simple
 cabal-version : >= 1.10
 
-executable hs-mirex
+executable hs-pattrans
   main-is:            Main.hs
   other-modules:      Types,
                       Transformations,

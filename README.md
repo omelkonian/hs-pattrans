@@ -17,7 +17,7 @@ transformation queries:
 - To run a cross-dataset comparison (between expert and algorithmic prototypes): `make compare`
 
 
-- To choose from options: `stack build && stack exec -- hs-mirex [-E|--experts] [-A|--algorithms] [-C|--classical] [-F|--folk] [-R|--random] [-X|--export]`
+- To choose from options: `stack build && stack exec -- hs-pattrans [-E|--experts] [-A|--algorithms] [-C|--classical] [-F|--folk] [-R|--random] [-X|--export]`
 
 
 - To update the docs: `make docs`

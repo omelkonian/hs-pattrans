@@ -7,10 +7,10 @@ build:
 	stack build
 
 analysis: build
-	stack exec -- hs-mirex -RCFEA && ./prepare.sh
+	stack exec -- hs-pattrans -RCFEA && ./prepare.sh
 
 compare: build
-	stack exec -- hs-mirex -MCF
+	stack exec -- hs-pattrans -MCF
 
 docs: build
 	stack exec -- haddock --html src/*.hs --hyperlinked-source --odir=docs/haddock
