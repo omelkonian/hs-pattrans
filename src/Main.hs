@@ -1,4 +1,4 @@
-import Data.List ((\\), nub, elemIndices)
+import Data.List ((\\), nub, elemIndices, isInfixOf)
 import Data.Semigroup ((<>))
 import Control.Monad (when, forM)
 import Options.Applicative
@@ -83,10 +83,6 @@ main = do
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
 
-hasAlgName :: String -> AnalysisResult -> Bool
-hasAlgName alg (An {name = n}) =
-  snd (splitAt (last (elemIndices ':' n) + 1) n) == alg
-
 runComparison :: (FilePath, IO [PatternGroup]) -- ^ experts
               -> (FilePath, IO [PatternGroup]) -- ^ algorithms
               -> IO ()
@@ -127,7 +123,8 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
         analysePatternGroup pg
 
       -- Aggregate results for a particular piece/alg (containing all expert prototypes)
-      let finalAn = (combineAnalyses analyses) {name = "ALL:" ++ piece ++ ":" ++ alg}
+      let finalAn = (combineAnalyses analyses)
+                    {name = "ALL(" ++ piece ++ ":" ++ alg ++ ")"}
       -- print finalAn
 
       -- Output in CSV format
@@ -139,7 +136,8 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
       return finalAn
 
     -- Aggregate results for a particular piece (containing all algorithms)
-    let allAlgAnalyses = (combineAnalyses algAnalyses) {name = "ALL:" ++ piece}
+    let allAlgAnalyses = (combineAnalyses algAnalyses)
+                         {name = "ALL(" ++ piece ++ ")"}
     let f_root = f_algo ++ "/" ++ piece
     cd f_root $
       BL.writeFile "comparison.csv" $
@@ -151,8 +149,8 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
   -- Aggregate results for a particular algorithm (containing all pieces)
   let pieceAnalyses = concat pieceAnalyses'
   algAnalyses <- forM algs $ \alg -> do
-    let algPieceAnalyses = filter (hasAlgName alg) pieceAnalyses
-    let algAn = (combineAnalyses algPieceAnalyses) {name = "ALL:" ++ alg}
+    let algPieceAnalyses = filter (isInfixOf alg . name) pieceAnalyses
+    let algAn = (combineAnalyses algPieceAnalyses) {name = "ALL(" ++ alg ++ ")"}
     let f_name = alg ++ ".csv"
     cd f_algo $
       BL.writeFile f_name $
