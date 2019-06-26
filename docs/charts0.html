@@ -17,29 +17,49 @@
 
 <script type="text/javascript">
 
+// Gather all images (script 'prepare.sh' will insert the actual filenames)
+var files = [
+  %%%
+];
+
 // Attach every chart to the appropriate gallery
-var handleFile = function(file0) {
-  // remove 'docs/' prefix
-  var file = file0.slice(5);
-  // classical -> 0/1, folk -> 2/3, random -> 4
-  var n = file.indexOf("classical") && file.indexOf("algorithm") ? 1
-        : file.indexOf("classical")                              ? 0
-        : file.indexOf("folk")      && file.indexOf("algorithm") ? 3
-        : file.indexOf("classical")                              ? 2
-        : 4
-  $(`#chart${n}`).append(
-    `<a class='gallery' href="${file}"> <img src="${file}"> </a>`
-  );
+var handleFiles = function() {
+  var filesByGroup = [[], [], [], [], []];
+
+  files.forEach(function (file0) {
+    // remove 'docs/' prefix
+    var file = file0.slice(5);
+    // classical -> 0/1, folk -> 2/3, random -> 4
+    if (file.indexOf("classical") != -1 && file.indexOf("algorithm") != -1)
+      filesByGroup[1].push(file);
+    else if (file.indexOf("classical") != -1)
+      filesByGroup[0].push(file);
+    else if (file.indexOf("folk") != -1 && file.indexOf("algorithm") != -1)
+      filesByGroup[3].push(file);
+    else if (file.indexOf("folk") != -1)
+      filesByGroup[2].push(file);
+    else if (file.indexOf("random") != -1)
+      filesByGroup[4].push(file);
+    else
+      console.log("***ERROR*** invalid image filename");
+  });
+
+  console.log(filesByGroup);
+
+  for (var i = 0; i < 5; i++) {
+    var images = ``;
+    filesByGroup[i].forEach(function (f) {
+      images += `<a class='gallery' href="${f}"> <img src="${f}"> </a>`;
+    });
+    console.log(i);
+    console.log(images);
+    $(`#chart${i}`).append(images);
+    $(`#chart${i}`).justifiedGallery('norewind');
+  }
 }
 
-
 // Justify chart galleries
-window.onload = function() {
-  // Gather all images (script will insert the actual chart filenames)
-  var files = [
-    %%%
-  ];
-  files.forEach(handleFile);
+$(document).ready(function() {
   // Format gallery
   for (var i = 0; i < 5; i++) {
     $(`#chart${i}`).justifiedGallery({
@@ -51,7 +71,9 @@ window.onload = function() {
   $('a.gallery').colorbox();
   // Enable accordion
   $('#accordion').accordion({header: "h2", active:false, collapsible: true});
-}
+  // Append images
+  handleFiles();
+});
 
 </script>
 </head>
