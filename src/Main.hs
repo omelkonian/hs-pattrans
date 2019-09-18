@@ -8,6 +8,9 @@ import qualified Data.ByteString.Lazy as BL
 import Types
 import Parser
 import Analysis
+-- import CompoAnalysis
+-- import ExactAnalysis
+-- import ProtoAnalysis
 import Charts
 
 -- | Command-line options.
