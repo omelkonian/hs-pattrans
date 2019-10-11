@@ -79,35 +79,43 @@ augmentationOf = normalRhythm >$< approxEq2
 -----------------------
 -- Tonal transposition
 
-type Degree = Integer
-type Scale = M.Map MIDI Degree
+type Degree    = Integer
+type ScaleType = [Interval]
+type Scale     = M.Map MIDI Degree
 
 -- | Octave-agnostic tonal transposition, wrt a scale that 'fits' the base pattern
 -- e.g. [I, IV, V] tonalTranspOf [III, VI, VII]
 tonalTranspOf :: ApproxCheck Pattern
 tonalTranspOf =  rhythm >$< approxEq2
-              <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale xs)
+              <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale $ xs ++ ys)
                                                >$< (intervals >$< approxEq2)))
   where
     toDegree :: MIDI -> Scale -> Degree
     toDegree = M.findWithDefault 0 -- 'outside' note
 
-    cMajor :: Scale
-    cMajor = M.fromList [ (24 + (oct * 12) + m, i)
-                        | oct <- [1..7]
-                        , (i, m) <- zip [1..7] [0,2,2,1,2,2,2] ]
+    major, harmonicMinor, melodicMinor :: ScaleType
+    major         = [0,2,4,5,7,9,11]
+    melodicMinor  = [0,2,3,5,7,9,11]
+    harmonicMinor = [0,2,3,5,7,8,11]
+
+    createScaleInC :: ScaleType -> Scale
+    createScaleInC scType = M.fromList [ (24 + (oct * 12) + m, i)
+                                       | oct <- [0..7]
+                                       , (i, m) <- zip [1..7] scType ]
 
     allScales :: [Scale]
-    allScales = [ M.mapKeys (+ transp) cMajor | transp <- [0..11] ]
+    allScales = [ M.mapKeys (+ transp) (createScaleInC scType)
+                | scType <- [major, harmonicMinor, melodicMinor]
+                , transp <- [0..11] ]
 
     guessScale :: Pattern -> Scale
-    guessScale xs = fst $ maximumBy (\(_,s1) (_,s2) -> if s1 > s2 then GT
+    guessScale xs =
+      let scales = [ (sc, S.size $ M.keysSet sc `S.intersection` S.fromList (pitch xs))
+                   | sc <- allScales ]
+      in fst $ maximumBy (\(_,s1) (_,s2) -> if s1 > s2 then GT
                                                        else if s1 < s2 then LT
-                                                       else EQ)
-                        [ ( sc
-                          , S.size $ S.intersection (M.keysSet sc) (S.fromList $ pitch xs)
-                          )
-                        | sc <- allScales ]
+                                                       else EQ) scales
+
 
     applyScale :: Scale -> Pattern -> Pattern
     applyScale sc (Note tt m : xs) = Note tt (toDegree m sc) : applyScale sc xs
