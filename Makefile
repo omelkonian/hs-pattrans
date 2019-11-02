@@ -12,6 +12,9 @@ analysis: build
 compare: build
 	stack exec -- hs-pattrans -MCF
 
+test: build
+	stack test
+
 docs: build
 	stack exec -- haddock --html src/*.hs --hyperlinked-source --odir=docs/haddock
 
