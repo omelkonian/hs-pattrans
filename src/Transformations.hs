@@ -1,9 +1,7 @@
 {-# LANGUAGE ImplicitParams, Rank2Types, ScopedTypeVariables, BangPatterns #-}
 module Transformations where
 
-import qualified Data.Set as S
-import qualified Data.Map as M
-import Data.List (maximumBy, sortOn)
+import Data.List (sortOn)
 import Data.Semigroup
 import Data.Functor.Contravariant hiding ((>$<), (>$), ($<))
 
@@ -79,15 +77,13 @@ augmentationOf = normalRhythm >$< approxEq2
 -----------------------
 -- Tonal transposition
 
-type Degree = Integer
-type Scale = M.Map MIDI Degree
-
 -- | Octave-agnostic tonal transposition, wrt a scale that 'fits' the base pattern
 -- e.g. [I, IV, V] tonalTranspOf [III, VI, VII]
 tonalTranspOf :: ApproxCheck Pattern
 tonalTranspOf =  rhythm >$< approxEq2
-              <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale xs)
+              <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale $ xs ++ ys)
                                                >$< (intervals >$< approxEq2)))
+
 toDegree :: MIDI -> Scale -> Degree
 toDegree = M.findWithDefault 0 -- 'outside' note
 
@@ -146,7 +142,7 @@ trtonAugmentationOf = normalRhythm >$< approxEq2
 
 
 -----------------------
--- Utilities
+-- Approximate equality
 
 -- | Check that two elements are exactly equal (using `eq`).
 -- e.g. [a, c, b] equal [a, c, b]
@@ -256,59 +252,3 @@ approxEq2 = approxEqWith del1
     findIndex i acc (y:ys) maxAc
       | acc >= y  = findIndex (i + 1) (acc - y) ys (maxAc - 1)
       | otherwise = Nothing
-
--- | Negate the values of a numeric list.
-inverse :: Num a => [a] -> [a]
-inverse = fmap negate
-
--- | The base pitch of a pattern (the pitch of its first note).
--- e.g. basePitch [(25,1), (27,2), (25,2.5)] = Just 25
-basePitch :: Pattern -> Maybe MIDI
-basePitch (Note _ m:_) = Just m
-basePitch []           = Nothing
-
--- | The (real) pitch structure of a pattern.
--- e.g. pitch [(25,1), (27,2), (25,2.5)] = [25, 27, 25]
-pitch :: Pattern -> [MIDI]
-pitch = fmap midi
-
--- | The (relative) pitch structure of a pattern.
--- e.g. intervals [(25,1), (27,2), (25,2.5)] = [2, -2]
-intervals :: Pattern -> [Interval]
-intervals = fmap (\(Note _ m, Note _ m') -> m' - m) . pairs
-
--- | The (real) rhythmic structure of a pattern.
--- e.g. durations [(25,1), (27,2), (25,2.5)] = [1, 2, 2.5]
-durations :: Pattern -> [Time]
-durations = fmap ontime
-
--- | The (relative) rhythmic structure of a pattern.
--- e.g. rhythm [(25,1), (27,2), (25,2.5)] = [1, 1.5]
-rhythm :: Pattern -> [Time]
-rhythm = fmap (\(Note t1 _, Note t2 _) -> t2 - t1) . pairs
-
--- | Normalized (relative) rhythmic structure of a pattern.
--- e.g. normalRhythm [(A,2), (C#,6), (Eb,8), (B,1), (A,2)] = [1, 3, 4, 1/2, 1]
-normalRhythm :: Pattern -> [Time]
-normalRhythm = normalizeTime . rhythm
-  where
-    -- | Convert times to ratios wrt the first time unit used.
-    -- e.g. normalizeTime [2, 6, 8, 6, 1, 2] = [1, 3, 4, 1/2, 1]
-    normalizeTime :: [Time] -> [Time]
-    normalizeTime (tt : ts)  = 1 : ((/ tt) <$> ts)
-    normalizeTime []         = []
-
--- | Translate a note horizontally (in time).
--- e.g. translateH (-0.5) [(25,1), (27,2), (25,2.5)] = [(25,0.5), (27,1.5), (25,2)]
-translateH :: Time -> Note -> Note
-translateH dt (Note tInit m) = Note (tInit + dt) m
-
--- | Translate a note vertically (in pitch).
--- e.g. translateV (-20) [(25,1), (27,2), (25,2.5)] = [(5,1), (7,2), (5,2.5)]
-translateV :: Interval -> Note -> Note
-translateV dm (Note tt mInit) = Note tt (mInit + dm)
-
--- | Get list as pairs of consecutive elements.
--- e.g. pairs [a, b, c, d] = [(a, b), (b, c), (c, d)]
-pairs :: [a] -> [(a, a)]
-pairs xs = zip xs (tail xs)

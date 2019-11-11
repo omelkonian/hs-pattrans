@@ -9,7 +9,6 @@ import           Euterpea.Music as Export hiding (Rest, Note, pitch)
 import qualified Euterpea.Music as M
 
 import Types
-import Transformations
 
 -- | Convert our Pattern datatype to Euterpea's music datatype.
 patternToMusic :: Pattern -> Music AbsPitch

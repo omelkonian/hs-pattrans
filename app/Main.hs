@@ -1,4 +1,4 @@
-import Data.List ((\\), nub, elemIndices, isInfixOf)
+import Data.List ((\\), nub, isInfixOf)
 import Data.Semigroup ((<>))
 import Control.Monad (when, forM)
 import Options.Applicative
