@@ -84,30 +84,6 @@ tonalTranspOf =  rhythm >$< approxEq2
               <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale $ xs ++ ys)
                                                >$< (intervals >$< approxEq2)))
 
-toDegree :: MIDI -> Scale -> Degree
-toDegree = M.findWithDefault 0 -- 'outside' note
-
-cMajor :: Scale
-cMajor = M.fromList [ (24 + (oct * 12) + m, i)
-                    | oct <- [1..7]
-                    , (i, m) <- zip [1..7] [0,2,2,1,2,2,2] ]
-
-allScales :: [Scale]
-allScales = [ M.mapKeys (+ transp) cMajor | transp <- [0..11] ]
-
-guessScale :: Pattern -> Scale
-guessScale xs = fst $ maximumBy (\(_,s1) (_,s2) -> if s1 > s2 then GT
-                                                    else if s1 < s2 then LT
-                                                    else EQ)
-                    [ ( sc
-                      , S.size $ S.intersection (M.keysSet sc) (S.fromList $ pitch xs)
-                      )
-                    | sc <- allScales ]
-
-applyScale :: Scale -> Pattern -> Pattern
-applyScale sc (Note tt m : xs) = Note tt (toDegree m sc) : applyScale sc xs
-applyScale _  []               = []
-
 -----------------------
 -- Combinations
 
