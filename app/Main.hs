@@ -16,7 +16,15 @@ import Charts
 -- | Command-line options.
 data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , algorithms :: Bool -- ^ analyze algorithm dataset
+                       
                        , vm1 :: Bool -- ^ analyze algorithm dataset: VM1
+                       , vm2 :: Bool -- ^ analyze algorithm dataset: VM1
+
+                       , mp :: Bool -- ^ analyze algorithm dataset: VM1
+                       , siacf1 :: Bool -- ^ analyze algorithm dataset: VM1
+                       , siacp :: Bool -- ^ analyze algorithm dataset: VM1
+                       , siacr :: Bool -- ^ analyze algorithm dataset: VM1
+                       
                        , classical  :: Bool -- ^ analyze classical dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
                        , random     :: Bool -- ^ analyze random datasets
@@ -37,6 +45,21 @@ parseOpts = Options
   <*> switch (  long "vm1"
              <> short '1'
              <> help "Analyze the algorithm dataset: VM1" )
+  <*> switch (  long "vm2"
+             <> short '2'
+             <> help "Analyze the algorithm dataset: VM2" )
+  <*> switch (  long "mp"
+             <> short '3'
+             <> help "Analyze the algorithm dataset: MP" )
+  <*> switch (  long "siacf1"
+             <> short '4'
+             <> help "Analyze the algorithm dataset: SIATECCompressF1" )
+  <*> switch (  long "siacp"
+             <> short '5'
+             <> help "Analyze the algorithm dataset: SIATECCompressP" )
+  <*> switch (  long "siacr"
+             <> short '6'
+             <> help "Analyze the algorithm dataset: SIATECCompressR" )
   <*> switch (  long "classical"
              <> short 'C'
              <> help "Analyze the classical dataset" )
@@ -68,7 +91,16 @@ main = do
       run "docs/out/classical/algorithms" parseClassicAlgo
     when (vm1 op) $
       run "docs/out/classical/vm1" parseClassicAlgoVM1
-
+    when (vm2 op) $
+      run "docs/out/classical/vm2" parseClassicAlgoVM2
+    when (mp op) $
+      run "docs/out/classical/mp" parseClassicAlgoMP
+    when (siacf1 op) $
+      run "docs/out/classical/siacf1" parseClassicAlgoSIACF1
+    when (siacp op) $
+      run "docs/out/classical/siacp" parseClassicAlgoSIACP
+    when (siacr op) $
+      run "docs/out/classical/siacr" parseClassicAlgoSIACR
     when (toCompare op) $
       runComparison ("docs/out/classical/experts", parseClassicExperts)
                     ("docs/out/classical/algorithms", parseClassicAlgo)

@@ -1,5 +1,5 @@
 module Parser ( parseClassicExperts, parseClassicAlgo
-              , parseClassicAlgoVM1
+              , parseClassicAlgoVM1, parseClassicAlgoVM2, parseClassicAlgoMP, parseClassicAlgoSIACF1, parseClassicAlgoSIACP, parseClassicAlgoSIACR
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
@@ -71,6 +71,31 @@ parseClassicAlgo = cd "data/algOutput" $ do
 parseClassicAlgoVM1 :: IO [PatternGroup]
 parseClassicAlgoVM1 = cd "data/algOutput/2016GV/VM1/" $ do
   allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "VM1")) 
+  return allPgs
+
+parseClassicAlgoVM2 :: IO [PatternGroup]
+parseClassicAlgoVM2 = cd "data/algOutput/2016GV/VM2/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "VM2")) 
+  return allPgs
+
+parseClassicAlgoMP :: IO [PatternGroup]
+parseClassicAlgoMP = cd "data/algOutput/2016MP/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "MP")) 
+  return allPgs
+
+parseClassicAlgoSIACF1 :: IO [PatternGroup]
+parseClassicAlgoSIACF1 = cd "data/algOutput/2016DM/SIATECCompressF1/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACF1")) 
+  return allPgs
+
+parseClassicAlgoSIACP :: IO [PatternGroup]
+parseClassicAlgoSIACP = cd "data/algOutput/2016DM/SIATECCompressP/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACP")) 
+  return allPgs
+
+parseClassicAlgoSIACR :: IO [PatternGroup]
+parseClassicAlgoSIACR = cd "data/algOutput/2016DM/SIATECCompressR/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACR")) 
   return allPgs
 
 -- | Parse all (expert) pattern groups from the dutch folk dataset.
