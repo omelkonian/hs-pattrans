@@ -18,12 +18,13 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , algorithms :: Bool -- ^ analyze algorithm dataset
                        
                        , vm1 :: Bool -- ^ analyze algorithm dataset: VM1
-                       , vm2 :: Bool -- ^ analyze algorithm dataset: VM1
-
-                       , mp :: Bool -- ^ analyze algorithm dataset: VM1
-                       , siacf1 :: Bool -- ^ analyze algorithm dataset: VM1
-                       , siacp :: Bool -- ^ analyze algorithm dataset: VM1
-                       , siacr :: Bool -- ^ analyze algorithm dataset: VM1
+                       , vm2 :: Bool -- ^ analyze algorithm dataset: VM2
+                       , mp :: Bool -- ^ analyze algorithm dataset: MP
+                       , siacf1 :: Bool -- ^ analyze algorithm dataset: SIAF1
+                       , siacp :: Bool -- ^ analyze algorithm dataset: SIACP
+                       , siacr :: Bool -- ^ analyze algorithm dataset: SIACR
+                       , cosia :: Bool
+                       , cfp :: Bool
                        
                        , classical  :: Bool -- ^ analyze classical dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
@@ -42,6 +43,7 @@ parseOpts = Options
   <*> switch (  long "algorithms"
              <> short 'A'
              <> help "Analyze the algorithm dataset" )
+  
   <*> switch (  long "vm1"
              <> short '1'
              <> help "Analyze the algorithm dataset: VM1" )
@@ -60,6 +62,13 @@ parseOpts = Options
   <*> switch (  long "siacr"
              <> short '6'
              <> help "Analyze the algorithm dataset: SIATECCompressR" )
+  <*> switch (  long "cosia"
+             <> short '7'
+             <> help "Analyze the algorithm dataset: COSIA" )
+  <*> switch (  long "cfp"
+             <> short '8'
+             <> help "Analyze the algorithm dataset: CFP" )
+  
   <*> switch (  long "classical"
              <> short 'C'
              <> help "Analyze the classical dataset" )
@@ -109,6 +118,23 @@ main = do
       run "docs/out/folk/experts" parseFolkExperts
     when (algorithms op) $
       run "docs/out/folk/algorithms" parseFolkAlgo
+    when (vm1 op) $
+      run "docs/out/folk/vm1" parseFolkAlgoVM1
+    when (vm2 op) $
+      run "docs/out/folk/vm2" parseFolkAlgoVM2
+    when (mp op) $
+      run "docs/out/folk/mp" parseFolkAlgoMP
+    when (siacf1 op) $
+      run "docs/out/folk/siacf1" parseFolkAlgoSIACF1
+    when (siacp op) $
+      run "docs/out/folk/siacp" parseFolkAlgoSIACP
+    when (siacr op) $
+      run "docs/out/folk/siacr" parseFolkAlgoSIACR
+    when (cfp op) $
+      run "docs/out/folk/cfp" parseFolkAlgoSIACFP
+    when (cosia op) $
+      run "docs/out/folk/cosia" parseFolkAlgoCOSIA
+      
     when (toCompare op) $ do
       runComparison ("docs/out/folk/experts", parseFolkExperts)
                     ("docs/out/folk/algorithms", parseFolkAlgo)

@@ -1,5 +1,6 @@
 module Parser ( parseClassicExperts, parseClassicAlgo
               , parseClassicAlgoVM1, parseClassicAlgoVM2, parseClassicAlgoMP, parseClassicAlgoSIACF1, parseClassicAlgoSIACP, parseClassicAlgoSIACR
+              , parseFolkAlgoVM1, parseFolkAlgoVM2, parseFolkAlgoMP, parseFolkAlgoSIACF1, parseFolkAlgoSIACP, parseFolkAlgoSIACR, parseFolkAlgoCOSIA, parseFolkAlgoSIACFP
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
@@ -96,6 +97,48 @@ parseClassicAlgoSIACP = cd "data/algOutput/2016DM/SIATECCompressP/" $ do
 parseClassicAlgoSIACR :: IO [PatternGroup]
 parseClassicAlgoSIACR = cd "data/algOutput/2016DM/SIATECCompressR/" $ do
   allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACR")) 
+  return allPgs
+
+
+-- | Parse all (algorithmic, VM1) pattern groups from the folk dataset.
+parseFolkAlgoVM1 :: IO [PatternGroup]
+parseFolkAlgoVM1 = cd "data/MTC/patterns/alg/VM1/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "VM1")) 
+  return allPgs
+
+parseFolkAlgoVM2 :: IO [PatternGroup]
+parseFolkAlgoVM2 = cd "data/MTC/patterns/alg/VM2/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "VM2")) 
+  return allPgs
+
+parseFolkAlgoMP :: IO [PatternGroup]
+parseFolkAlgoMP = cd "data/MTC/patterns/alg/MP/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "MP")) 
+  return allPgs
+
+parseFolkAlgoSIACF1 :: IO [PatternGroup]
+parseFolkAlgoSIACF1 = cd "data/MTC/patterns/alg/SIAF1/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACF1")) 
+  return allPgs
+
+parseFolkAlgoSIACP :: IO [PatternGroup]
+parseFolkAlgoSIACP = cd "data/MTC/patterns/alg/SIAP/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACP")) 
+  return allPgs
+
+parseFolkAlgoSIACR :: IO [PatternGroup]
+parseFolkAlgoSIACR = cd "data/MTC/patterns/alg/SIAR/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACR")) 
+  return allPgs
+  
+parseFolkAlgoCOSIA :: IO [PatternGroup]
+parseFolkAlgoCOSIA = cd "data/MTC/patterns/alg/DM/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "COSIA")) 
+  return allPgs
+
+parseFolkAlgoSIACFP :: IO [PatternGroup]
+parseFolkAlgoSIACFP = cd "data/MTC/patterns/alg/SIARCT-CFP/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIACFP")) 
   return allPgs
 
 -- | Parse all (expert) pattern groups from the dutch folk dataset.
