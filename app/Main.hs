@@ -16,6 +16,7 @@ import Charts
 -- | Command-line options.
 data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , algorithms :: Bool -- ^ analyze algorithm dataset
+                       , vm1 :: Bool -- ^ analyze algorithm dataset: VM1
                        , classical  :: Bool -- ^ analyze classical dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
                        , random     :: Bool -- ^ analyze random datasets
@@ -33,6 +34,9 @@ parseOpts = Options
   <*> switch (  long "algorithms"
              <> short 'A'
              <> help "Analyze the algorithm dataset" )
+  <*> switch (  long "vm1"
+             <> short '1'
+             <> help "Analyze the algorithm dataset: VM1" )
   <*> switch (  long "classical"
              <> short 'C'
              <> help "Analyze the classical dataset" )
@@ -62,6 +66,9 @@ main = do
       run "docs/out/classical/experts" parseClassicExperts
     when (algorithms op) $
       run "docs/out/classical/algorithms" parseClassicAlgo
+    when (vm1 op) $
+      run "docs/out/classical/vm1" parseClassicAlgoVM1
+
     when (toCompare op) $
       runComparison ("docs/out/classical/experts", parseClassicExperts)
                     ("docs/out/classical/algorithms", parseClassicAlgo)

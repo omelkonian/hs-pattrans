@@ -1,4 +1,5 @@
 module Parser ( parseClassicExperts, parseClassicAlgo
+              , parseClassicAlgoVM1
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
@@ -66,6 +67,11 @@ parseClassicAlgo = cd "data/algOutput" $ do
             listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece $ f_alg ++ ":" ++ f_v)))
   return (concat allPgs)
 
+-- | Parse all (algorithmic, VM1) pattern groups from the classical dataset.
+parseClassicAlgoVM1 :: IO [PatternGroup]
+parseClassicAlgoVM1 = cd "data/algOutput/2016GV/VM1/" $ do
+  allPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "VM1")) 
+  return allPgs
 
 -- | Parse all (expert) pattern groups from the dutch folk dataset.
 parseFolkExperts :: IO [PatternGroup]
