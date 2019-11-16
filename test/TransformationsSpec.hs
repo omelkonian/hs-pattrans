@@ -1,7 +1,7 @@
 module TransformationsSpec (spec) where
 
 import Types           (Note(..), (.@), guessScale, createScaleInC, major)
-import Transformations ((<=>), (~~), tonalTranspOf)
+import Transformations ((<=>), (~~), tonalTranspOf, exactOf)
 
 import Test.QuickCheck
 import Test.Hspec
@@ -16,6 +16,9 @@ spec = do
   let h6 = (.@ 1) <$> [45,48,50,52,53,52,50,48]
   let h7 = (.@ 1) <$> [47,50,52,53,55,53,52,50]
 
+
+  let ho = (.@ 1) <$> [36,38,40,41,43,45,43,41,40]
+  
   describe "guessScale" $ do
     it "guesses the scale/mode of a musical sequence - concatenated Hanon" $
       guessScale (h1++h2) `shouldBe` createScaleInC major
@@ -43,3 +46,7 @@ spec = do
   describe "tonalTransposition" $ do
     it "correctly detects tonal transposition - Hanon bar 4-5" $
       (h4 <=> h6) (tonalTranspOf ~~ 1)
+  
+  describe "Approximation" $ do
+    it "correctly detects Approximation 0.8 - Hanon bar 1 with one more note" $
+      (h1 <=> ho) (exactOf ~~ 0.8)
