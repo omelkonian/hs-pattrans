@@ -82,7 +82,7 @@ augmentationOf = normalRhythm >$< approxEq2
 tonalTranspOf :: ApproxCheck Pattern
 tonalTranspOf =  rhythm >$< approxEq2
               <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale $ xs ++ ys)
-                                               >$< (intervals >$< approxEq2)))
+                                              >$< approxEq2))
 
 -----------------------
 -- Combinations
@@ -109,12 +109,12 @@ trRetrogradeOf = rhythm    >$< (reverse $< approxEq2)
 trtonRotationOf :: ApproxCheck Pattern
 trtonRotationOf = rhythm >$< (reverse $< approxEq2)
                    <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale xs)
-                                               >$< (intervals >$< approxEq2)))
+                                                   >$< approxEq2))
 
 trtonAugmentationOf :: ApproxCheck Pattern
 trtonAugmentationOf = normalRhythm >$< approxEq2
                    <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale xs)
-                                               >$< (intervals >$< approxEq2)))
+                                                   >$< approxEq2))
 
 
 -----------------------

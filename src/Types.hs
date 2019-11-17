@@ -74,7 +74,7 @@ pitch = fmap midi
 -- | The (relative) pitch structure of a pattern.
 -- e.g. intervals [(25,1), (27,2), (25,2.5)] = [2, -2]
 intervals :: Pattern -> [Interval]
-intervals = fmap (\(Note _ m, Note _ m') -> m' - m) . pairs
+intervals = fmap (uncurry (-)) . pairs . pitch
 
 -- | The (real) rhythmic structure of a pattern.
 -- e.g. durations [(25,1), (27,2), (25,2.5)] = [1, 2, 2.5]
@@ -84,7 +84,7 @@ durations = fmap ontime
 -- | The (relative) rhythmic structure of a pattern.
 -- e.g. rhythm [(25,1), (27,2), (25,2.5)] = [1, 1.5]
 rhythm :: Pattern -> [Time]
-rhythm = fmap (\(Note t1 _, Note t2 _) -> t2 - t1) . pairs
+rhythm = fmap (uncurry (-)) . pairs . durations
 
 -- | Normalized (relative) rhythmic structure of a pattern.
 -- e.g. normalRhythm [(A,2), (C#,6), (Eb,8), (B,1), (A,2)] = [1, 3, 4, 1/2, 1]
@@ -115,12 +115,10 @@ pairs xs = zip xs (tail xs)
 -----------------------
 -- Scales/modes
 
+type Octave    = Integer
 type Degree    = Integer
 type ScaleType = [Interval]
-type Scale     = M.Map MIDI Degree
-
-toDegree :: MIDI -> Scale -> Degree
-toDegree = M.findWithDefault 0 -- 'outside' note
+type Scale     = M.Map MIDI (Degree, Octave)
 
 major, harmonicMinor, melodicMinor :: ScaleType
 major         = [0,2,4,5,7,9,11]
@@ -128,7 +126,7 @@ melodicMinor  = [0,2,3,5,7,9,11]
 harmonicMinor = [0,2,3,5,7,8,11]
 
 createScaleInC :: ScaleType -> Scale
-createScaleInC scType = M.fromList [ (24 + (oct * 12) + m, i)
+createScaleInC scType = M.fromList [ (24 + (oct * 12) + m, (i, oct + 1))
                                    | oct <- [0..7]
                                    , (i, m) <- zip [1..7] scType ]
 
@@ -146,10 +144,13 @@ guessScale xs =
                                                    else EQ) scales
 
 
-applyScale :: Scale -> Pattern -> Pattern
-applyScale sc (Note tt m : xs) = Note tt (toDegree m sc) : applyScale sc xs
-applyScale _  []               = []
+toDegree :: Scale -> MIDI -> Integer
+toDegree sc m = i + (oct * 7)
+  where (i, oct) = M.findWithDefault (0, 0) m sc -- 0 for 'outside' note 
 
+applyScale :: Scale -> Pattern -> [Interval]
+applyScale sc = fmap (uncurry (-)) . pairs . fmap (toDegree sc) . pitch
+    
 -----------------------
 -- Parallel operations
 
