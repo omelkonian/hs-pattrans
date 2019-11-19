@@ -36,7 +36,108 @@ spec = do
     it "correctly detects Approximation 0.8 - Hanon bar 1 with one more note" $
       (h1 <=> ho) (exactOf ~~ 0.8)
 
+  describe "exact in SYMCHM" $ do
+    it "correctly compare pattern2 o2 and o3 in Daar ging een heer using SYMCHM" $
+      (o2 <=> o3) (exactOf ~~ 0.8)
+
+  describe "exact in SYMCHM" $ do
+    it "correctly compare pattern2 o1 and o2 in Daar ging een heer using SYMCHM" $
+      (o1 <=> o2) (exactOf ~~ 0.8)
+
+  describe "exact in SYMCHM" $ do
+    it "correctly compare pattern2 o1 and o3 in Daar ging een heer using SYMCHM" $
+      (o1 <=> o3) (exactOf ~~ 0.8)
+  
   where
+
+    o1 = (.@ 1) <$> [69
+        , 67
+        , 62
+        , 67
+        , 69
+        , 71
+        , 71
+        , 71
+        , 71
+        , 71
+        , 69
+        , 67
+        , 62
+        , 67
+        , 69
+        , 71
+        , 71
+        , 71
+        , 71
+        , 71
+        , 69
+        , 67
+        , 71
+        , 74
+        , 74
+        , 72
+        , 71
+        , 71
+        , 69]
+  
+    o2 = (.@ 1) <$> [ 69
+          , 67
+          , 62
+          , 67
+          , 69
+          , 71
+          , 71
+          , 71
+          , 71
+          , 71
+          , 69
+          , 67
+          , 62
+          , 67
+          , 69
+          , 71
+          , 71
+          , 71
+          , 71
+          , 71
+          , 69
+          , 67
+          , 71
+          , 74
+          , 74
+          , 72
+          , 71
+          , 71
+          , 69]
+    o3 = (.@ 1) <$> [ 69
+          , 67
+          , 62
+          , 67
+          , 69
+          , 71
+          , 71
+          , 71
+          , 71
+          , 71
+          , 69
+          , 67
+          , 62
+          , 67
+          , 69
+          , 71
+          , 71
+          , 71
+          , 71
+          , 71
+          , 69
+          , 67
+          , 71
+          , 74
+          , 72
+          , 71
+          , 71
+          , 69]
+  
     h1 = (.@ 1) <$> [36,40,41,43,45,43,41,40]
     h2 = (.@ 1) <$> [38,41,43,45,47,45,43,41]
     h3 = (.@ 1) <$> [40,43,45,47,48,47,45,43]
