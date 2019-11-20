@@ -66,7 +66,7 @@ spec = do
   
   describe "real transposition with approx" $ do
     it "correctly detects real transposition with approximation - deleted second note" $
-      (h1 <=> h1transdel2) (transpositionOf ~~ 0.8)
+      (h1 <=> h1transdel2) (transpositionOf ~~ 0.6)
 
   describe "tonal inversion" $ do
     it "correctly detects tonal inversion with hanon C" $
@@ -82,7 +82,7 @@ spec = do
       
   describe "transposed inversion" $ do
     it "correctly detects real transposed inversion with the triplet" $
-      (triplet <=> tripletrealinvtrans) (inversionOf ~~ 1)
+      (triplet <=> tripletrealinvtrans) (trInversionOf ~~ 1)
   
   describe "rotation" $ do
     it "correctly detects rotation with the triplet" $
