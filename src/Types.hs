@@ -3,7 +3,7 @@ module Types where
 import Control.Parallel.Strategies (parMap, rpar)
 import Control.Concurrent.Async    (forConcurrently, mapConcurrently)
 
-import Data.List (intersperse, maximumBy)
+import Data.List (intersperse, maximumBy, sort)
 import qualified Data.Map  as M
 import qualified Data.Set  as S
 
@@ -79,7 +79,7 @@ intervals = fmap (uncurry (-)) . pairs . pitch
 -- | The (real) rhythmic structure of a pattern.
 -- e.g. durations [(25,1), (27,2), (25,2.5)] = [1, 2, 2.5]
 durations :: Pattern -> [Time]
-durations = fmap ontime
+durations = sort . fmap ontime
 
 -- | The (relative) rhythmic structure of a pattern.
 -- e.g. rhythm [(25,1), (27,2), (25,2.5)] = [1, 0.5]
