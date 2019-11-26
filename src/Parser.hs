@@ -34,6 +34,41 @@ parseMusic song = cd ("data/pieces/" ++ sanitize song ++ "/monophonic/csv") $ do
                    <* (intP <* sepP) <* (floatP <* sepP)
                    <* intP <* newline
 
+parseHEMANAlgoSIACRD :: IO [PatternGroup]
+parseHEMANAlgoSIACRD = cd "data/HEMAN/patterns/alg/tlrd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIARD"))
+  return algPgs
+  
+parseHEMANAlgoSIACPD :: IO [PatternGroup]
+parseHEMANAlgoSIACPD = cd "data/HEMAN/patterns/alg/tlpd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAPD"))
+  return algPgs
+
+parseHEMANAlgoSIACF1D :: IO [PatternGroup]
+parseHEMANAlgoSIACF1D = cd "data/HEMAN/patterns/alg/tlf1d/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1D"))
+  return algPgs
+
+parseHEMANAlgoSIACR :: IO [PatternGroup]
+parseHEMANAlgoSIACR = cd "data/HEMAN/patterns/alg/tlr/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAR"))
+  return algPgs
+  
+parseHEMANAlgoSIACP :: IO [PatternGroup]
+parseHEMANAlgoSIACP = cd "data/HEMAN/patterns/alg/tlp/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAP"))
+  return algPgs
+
+parseHEMANAlgoSIACF1 :: IO [PatternGroup]
+parseHEMANAlgoSIACF1 = cd "data/HEMAN/patterns/alg/tlf1/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1"))
+  return algPgs
+
+parseHEMANAnnotations :: IO [PatternGroup]
+parseHEMANAnnotations = cd "data/HEMAN/patterns/annotations/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "Human"))
+  return algPgs
+  
 -- | Parse all (expert) pattern groups from the classical dataset.
 parseClassicExperts :: IO [PatternGroup]
 parseClassicExperts = cd "data/pieces" $ do
@@ -193,7 +228,7 @@ parseAlgoPiece algo_n fname =
 sanitize :: String -> String
 sanitize s
   -- Classical pieces
-  | ("bach" `isInfixOf` s) || ("wtc" `isInfixOf` s)           = "bachBWV889Fg"
+  | (("bach" `isInfixOf` s) || ("wtc" `isInfixOf` s)) && not ("1" `isInfixOf` s) && not ("2" `isInfixOf` s)  = "bachBWV889Fg"
   | ("beethoven" `isInfixOf` s) || ("sonata01" `isInfixOf` s) = "beethovenOp2No1Mvt3"
   | ("chopin" `isInfixOf` s) || ("mazurka" `isInfixOf` s)     = "chopinOp24No4"
   | ("gibbons" `isInfixOf` s) || ("silver" `isInfixOf` s)     = "gibbonsSilverSwan1612"
