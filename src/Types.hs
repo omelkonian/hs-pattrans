@@ -82,7 +82,7 @@ durations :: Pattern -> [Time]
 durations = fmap ontime
 
 -- | The (relative) rhythmic structure of a pattern.
--- e.g. rhythm [(25,1), (27,2), (25,2.5)] = [1, 1.5]
+-- e.g. rhythm [(25,1), (27,2), (25,2.5)] = [1, 0.5]
 rhythm :: Pattern -> [Time]
 rhythm = fmap (uncurry (-)) . pairs . durations
 
@@ -110,7 +110,7 @@ translateV dm (Note tt mInit) = Note tt (mInit + dm)
 -- | Get list as pairs of consecutive elements.
 -- e.g. pairs [a, b, c, d] = [(a, b), (b, c), (c, d)]
 pairs :: [a] -> [(a, a)]
-pairs xs = zip xs (tail xs)
+pairs xs = zip (tail xs) xs
 
 -----------------------
 -- Scales/modes
