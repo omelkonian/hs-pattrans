@@ -25,9 +25,14 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , siacr :: Bool -- ^ analyze algorithm dataset: SIACR
                        , cosia :: Bool
                        , cfp :: Bool
+
+                       , siacf1d :: Bool
+                       , siacpd :: Bool
+                       , siacrd :: Bool
                        
                        , classical  :: Bool -- ^ analyze classical dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
+                       , heman      :: Bool
                        , random     :: Bool -- ^ analyze random datasets
                        , export     :: Bool -- ^ export MIDI files
                        , verify     :: Bool -- ^ whether to verify hypothesis
@@ -68,6 +73,15 @@ parseOpts = Options
   <*> switch (  long "cfp"
              <> short '8'
              <> help "Analyze the algorithm dataset: CFP" )
+  <*> switch (  long "siacf1d"
+             <> short '9'
+             <> help "Analyze the algorithm dataset: SIACCompressF1 -d" )
+  <*> switch (  long "siacpd"
+             <> short 'q'
+             <> help "Analyze the algorithm dataset: SIACCompressP -d" )
+  <*> switch (  long "siacrd"
+             <> short 'w'
+             <> help "Analyze the algorithm dataset: SIACCompressR -d" )
   
   <*> switch (  long "classical"
              <> short 'C'
@@ -75,6 +89,9 @@ parseOpts = Options
   <*> switch (  long "folk"
              <> short 'F'
              <> help "Analyze the dutch folk dataset" )
+  <*> switch (  long "heman"
+             <> short 'H'
+             <> help "Analyze the HEMAN dataset" )
   <*> switch (  long "random"
              <> short 'R'
              <> help "Analyze the random datasets" )
@@ -134,6 +151,21 @@ main = do
       run "docs/out/folk/cfp" parseFolkAlgoSIACFP
     when (cosia op) $
       run "docs/out/folk/cosia" parseFolkAlgoCOSIA
+  when (heman op) $ do
+    when (experts op) $
+      run "docs/out/heman/annotations" parseHEMANAnnotations
+    when (siacf1 op) $
+      run "docs/out/heman/siacf1" parseHEMANAlgoSIACF1
+    when (siacp op) $
+      run "docs/out/heman/siacp" parseHEMANAlgoSIACP
+    when (siacr op) $
+      run "docs/out/heman/siacr" parseHEMANAlgoSIACR
+    when (siacf1d op) $
+      run "docs/out/heman/siacf1d" parseHEMANAlgoSIACF1D
+    when (siacpd op) $
+      run "docs/out/heman/siacpd" parseHEMANAlgoSIACPD
+    when (siacrd op) $
+      run "docs/out/heman/siacrd" parseHEMANAlgoSIACRD
       
     when (toCompare op) $ do
       runComparison ("docs/out/folk/experts", parseFolkExperts)

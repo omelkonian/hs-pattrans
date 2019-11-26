@@ -1,6 +1,6 @@
 module Parser ( parseClassicExperts, parseClassicAlgo
               , parseClassicAlgoVM1, parseClassicAlgoVM2, parseClassicAlgoMP, parseClassicAlgoSIACF1, parseClassicAlgoSIACP, parseClassicAlgoSIACR
-              , parseFolkAlgoVM1, parseFolkAlgoVM2, parseFolkAlgoMP, parseFolkAlgoSIACF1, parseFolkAlgoSIACP, parseFolkAlgoSIACR, parseFolkAlgoCOSIA, parseFolkAlgoSIACFP
+              , parseFolkAlgoVM1, parseFolkAlgoVM2, parseFolkAlgoMP, parseFolkAlgoSIACF1, parseFolkAlgoSIACP, parseFolkAlgoSIACR, parseFolkAlgoCOSIA, parseFolkAlgoSIACFP, parseHEMANAnnotations, parseHEMANAlgoSIACRD, parseHEMANAlgoSIACPD, parseHEMANAlgoSIACR, parseHEMANAlgoSIACP, parseHEMANAlgoSIACF1, parseHEMANAlgoSIACF1D
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
