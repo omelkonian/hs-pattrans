@@ -1,0 +1,263 @@
+pattern0
+occurrence0
+768, 72
+960, 74
+occurrence1
+3840, 72
+4032, 74
+pattern1
+occurrence0
+1152, 71
+1344, 72
+1440, 73
+occurrence1
+1536, 74
+1728, 75
+1824, 76
+occurrence2
+4608, 77
+4800, 78
+4896, 79
+pattern2
+occurrence0
+2016, 77
+2028, 79
+occurrence1
+2040, 77
+2052, 79
+occurrence2
+2064, 77
+2076, 79
+occurrence3
+2088, 77
+2100, 79
+occurrence4
+3552, 65
+3564, 67
+occurrence5
+3576, 65
+3588, 67
+occurrence6
+3600, 65
+3612, 67
+occurrence7
+3624, 65
+3636, 67
+pattern3
+occurrence0
+2424, 83
+2448, 81
+occurrence1
+2448, 81
+2472, 79
+occurrence2
+2472, 79
+2496, 77
+occurrence3
+2520, 76
+2544, 74
+occurrence4
+2544, 74
+2568, 72
+occurrence5
+2592, 71
+2616, 69
+occurrence6
+2616, 69
+2640, 67
+occurrence7
+2640, 67
+2664, 65
+pattern4
+occurrence0
+3360, 62
+3312, 60
+occurrence1
+3408, 64
+3360, 62
+pattern5
+occurrence0
+4224, 71
+4416, 72
+occurrence1
+1152, 71
+1344, 72
+occurrence2
+1536, 74
+1728, 75
+occurrence3
+4608, 77
+4800, 78
+occurrence4
+5760, 64
+5952, 65
+pattern6
+occurrence0
+5400, 76
+5424, 77
+5448, 78
+5472, 79
+occurrence1
+5592, 64
+5616, 65
+5640, 66
+5664, 67
+pattern7
+occurrence0
+5496, 71
+5520, 72
+5544, 74
+occurrence1
+5688, 59
+5712, 60
+5736, 62
+pattern8
+occurrence0
+6167.8, 62
+6179.6, 64
+occurrence1
+6144, 62
+6155.8, 64
+occurrence2
+6192, 62
+6203.8, 64
+occurrence3
+6240, 62
+6251.8, 64
+occurrence4
+6288, 62
+6299.8, 64
+occurrence5
+6336, 62
+6347.8, 64
+occurrence6
+6384, 62
+6395.8, 64
+occurrence7
+6432, 62
+6443.8, 64
+occurrence8
+6480, 62
+6491.8, 64
+pattern9
+occurrence0
+6311.8, 62
+6323.6, 64
+occurrence1
+6144, 62
+6155.8, 64
+occurrence2
+6192, 62
+6203.8, 64
+occurrence3
+6240, 62
+6251.8, 64
+occurrence4
+6288, 62
+6299.8, 64
+occurrence5
+6336, 62
+6347.8, 64
+occurrence6
+6384, 62
+6395.8, 64
+occurrence7
+6432, 62
+6443.8, 64
+occurrence8
+6480, 62
+6491.8, 64
+pattern10
+occurrence0
+6576, 79
+6624, 78
+occurrence1
+7728, 86
+7776, 85
+occurrence2
+9072, 84
+9120, 83
+occurrence3
+9264, 81
+9312, 80
+occurrence4
+9456, 79
+9504, 78
+occurrence5
+9600, 79
+9648, 78
+occurrence6
+10800, 72
+10848, 71
+pattern11
+occurrence0
+6672, 81
+6720, 79
+occurrence1
+7824, 88
+7872, 86
+occurrence2
+8880, 88
+8928, 86
+occurrence3
+9552, 81
+9600, 79
+occurrence4
+9648, 78
+9696, 76
+occurrence5
+9696, 76
+9744, 74
+pattern12
+occurrence0
+6768, 76
+6816, 77
+occurrence1
+7920, 83
+7968, 84
+pattern13
+occurrence0
+7200, 71
+7248, 74
+occurrence1
+6624, 78
+6672, 81
+occurrence2
+7776, 85
+7824, 88
+occurrence3
+8928, 86
+8976, 89
+occurrence4
+9120, 83
+9168, 86
+occurrence5
+9312, 80
+9360, 83
+occurrence6
+9504, 78
+9552, 81
+occurrence7
+10848, 71
+10896, 74
+pattern14
+occurrence0
+9984, 74
+10032, 74
+10080, 76
+10128, 73
+occurrence1
+10176, 74
+10224, 74
+10272, 76
+10320, 73
+occurrence2
+10368, 74
+10416, 74
+10464, 76
+10512, 73
+occurrence3
+10560, 74
+10608, 74
+10656, 76
+10704, 73

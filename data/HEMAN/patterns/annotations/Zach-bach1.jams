@@ -1,0 +1,212 @@
+pattern0
+occurrence0
+240, 53
+288, 57
+336, 53
+occurrence1
+2544, 53
+2592, 57
+2640, 53
+pattern1
+occurrence0
+504, 70
+528, 69
+552, 67
+576, 65
+occurrence1
+2808, 70
+2832, 69
+2856, 67
+2880, 65
+pattern2
+occurrence0
+7584, 57
+7560, 60
+7536, 60
+7488, 60
+occurrence1
+2208, 57
+2184, 60
+2160, 60
+2112, 60
+occurrence2
+4512, 57
+4488, 60
+4464, 60
+4416, 60
+pattern3
+occurrence0
+6600, 60
+6576, 60
+6528, 60
+6480, 53
+occurrence1
+7560, 60
+7536, 60
+7488, 60
+7440, 53
+pattern4
+occurrence0
+5952, 65
+5904, 67
+5856, 69
+occurrence1
+1824, 65
+1776, 67
+1728, 69
+occurrence2
+4128, 65
+4080, 67
+4032, 69
+pattern5
+occurrence0
+5832, 70
+5808, 72
+5760, 70
+occurrence1
+1032, 70
+1008, 72
+960, 70
+occurrence2
+3336, 70
+3312, 72
+3264, 70
+pattern6
+occurrence0
+5664, 72
+5712, 70
+5736, 69
+occurrence1
+6240, 67
+6288, 65
+6312, 64
+pattern7
+occurrence0
+5568, 65
+5616, 60
+5520, 60
+occurrence1
+1920, 65
+1968, 60
+1872, 60
+occurrence2
+4224, 65
+4272, 60
+4176, 60
+pattern8
+occurrence0
+4392, 53
+4368, 57
+4320, 60
+occurrence1
+2088, 53
+2064, 57
+2016, 60
+pattern9
+occurrence0
+3840, 65
+3984, 70
+3744, 72
+occurrence1
+1536, 65
+1680, 70
+1440, 72
+pattern10
+occurrence0
+3624, 69
+3600, 71
+3552, 72
+occurrence1
+1320, 69
+1296, 71
+1248, 72
+pattern11
+occurrence0
+3504, 72
+3456, 67
+occurrence1
+192, 65
+144, 60
+occurrence2
+1200, 72
+1152, 67
+occurrence3
+1920, 65
+1872, 60
+occurrence4
+2496, 65
+2448, 60
+occurrence5
+4224, 65
+4176, 60
+occurrence6
+5568, 65
+5520, 60
+pattern12
+occurrence0
+3408, 67
+3360, 69
+occurrence1
+1104, 67
+1056, 69
+occurrence2
+1776, 67
+1728, 69
+occurrence3
+1824, 65
+1776, 67
+occurrence4
+4080, 67
+4032, 69
+occurrence5
+4128, 65
+4080, 67
+occurrence6
+5904, 67
+5856, 69
+occurrence7
+5952, 65
+5904, 67
+pattern13
+occurrence0
+3240, 69
+3216, 67
+3168, 65
+occurrence1
+936, 69
+912, 67
+864, 65
+pattern14
+occurrence0
+3072, 69
+2928, 67
+2976, 69
+occurrence1
+768, 69
+624, 67
+672, 69
+pattern15
+occurrence0
+2784, 65
+2736, 60
+2688, 57
+occurrence1
+480, 65
+432, 60
+384, 57
+pattern16
+occurrence0
+2400, 67
+2304, 65
+occurrence1
+96, 67
+0, 65
+pattern17
+occurrence0
+2016, 60
+2064, 57
+2088, 53
+occurrence1
+4320, 60
+4368, 57
+4392, 53

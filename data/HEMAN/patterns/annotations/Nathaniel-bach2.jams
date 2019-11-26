@@ -1,0 +1,133 @@
+pattern0
+occurrence0
+96, 70
+192, 69
+0, 69
+occurrence1
+1632, 70
+1728, 69
+1536, 69
+pattern1
+occurrence0
+576, 70
+672, 69
+occurrence1
+96, 70
+192, 69
+occurrence2
+864, 70
+960, 69
+occurrence3
+1248, 70
+1344, 69
+occurrence4
+1632, 70
+1728, 69
+occurrence5
+2112, 70
+2208, 69
+occurrence6
+2400, 70
+2496, 69
+occurrence7
+2784, 70
+2880, 69
+occurrence8
+3264, 65
+3360, 64
+occurrence9
+4032, 70
+4128, 69
+occurrence10
+4320, 67
+4416, 66
+pattern2
+occurrence0
+528, 72
+576, 70
+672, 69
+occurrence1
+2064, 72
+2112, 70
+2208, 69
+pattern3
+occurrence0
+768, 72
+864, 70
+960, 69
+occurrence1
+1152, 72
+1248, 70
+1344, 69
+occurrence2
+2304, 72
+2400, 70
+2496, 69
+occurrence3
+2688, 72
+2784, 70
+2880, 69
+pattern4
+occurrence0
+768, 72
+864, 70
+960, 69
+1056, 67
+occurrence1
+1152, 72
+1248, 70
+1344, 69
+1440, 67
+occurrence2
+2304, 72
+2400, 70
+2496, 69
+2592, 67
+occurrence3
+2688, 72
+2784, 70
+2880, 69
+2976, 67
+pattern5
+occurrence0
+288, 67
+192, 69
+96, 70
+occurrence1
+1056, 67
+960, 69
+864, 70
+occurrence2
+1440, 67
+1344, 69
+1248, 70
+occurrence3
+1824, 67
+1728, 69
+1632, 70
+occurrence4
+2592, 67
+2496, 69
+2400, 70
+occurrence5
+2976, 67
+2880, 69
+2784, 70
+pattern6
+occurrence0
+4032, 70
+4128, 69
+4224, 70
+occurrence1
+4320, 67
+4416, 66
+4512, 67
+pattern7
+occurrence0
+3744, 69
+3648, 67
+3552, 65
+occurrence1
+3936, 67
+3984, 69
+3840, 65
