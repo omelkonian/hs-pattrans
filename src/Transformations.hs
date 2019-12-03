@@ -84,6 +84,14 @@ tonalTranspOf =  rhythm >$< approxEq2
               <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale $ xs ++ ys)
                                               >$< approxEq2))
 
+tonalTranspOfCan :: ApproxCheck Pattern
+tonalTranspOfCan = rhythm >$< approxEq2
+                 <> Check (\xs ys -> foldr (||) True (map (xs <=> ys) [checks >$< approxEq2 | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
+
+tonalTransCanOfCore :: Check Pattern
+tonalTransCanOfCore = Check (\xs ys -> foldr (||) True (map (xs <=> ys)
+             [checks >$< equal | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
+
 -----------------------
 -- Combinations
 
@@ -97,6 +105,7 @@ trInversionOf = rhythm    >$< approxEq2
 trAugmentationOf :: ApproxCheck Pattern
 trAugmentationOf = normalRhythm >$< approxEq2
                 <> intervals    >$< approxEq2
+
 
 -- | Transposition + Retrograde.
 -- (AKA vertical glide reflection)

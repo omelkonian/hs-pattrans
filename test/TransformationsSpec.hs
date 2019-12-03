@@ -5,7 +5,7 @@ import Control.Monad (forM_)
 import Test.Hspec
 
 import Types           ((.@), guessScale, createScaleInC, createScaleInD, major)
-import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf)
+import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf, tonalTranspOfCan)
 
 forAll :: Example r => [a] -> String -> (a -> r) -> SpecWith (Arg r)
 forAll xs title k = 
@@ -44,8 +44,14 @@ spec = do
   forAll2 neighDu5u "guess scale - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
     guessScale (x++y) `shouldBe` createScaleInD major
   
+  forAll2 neighDu5u "tonal transposition more candidates - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
+      (x <=> y) (tonalTranspOfCan ~~ 1)
+      
   forAll2 neighDu5d "tonal transposition - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
       (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 neighDu5d "tonal transposition more candidates - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
+      (x <=> y) (tonalTranspOfCan ~~ 1)
   
   forAll2 neighAd5d "tonal transposition - neighbour notes in A down a fifth and neighbouring down" $ \x y -> do
       (x <=> y) (tonalTranspOf ~~ 1)
