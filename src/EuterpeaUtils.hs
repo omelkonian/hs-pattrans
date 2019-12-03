@@ -15,7 +15,7 @@ patternToMusic :: Pattern -> Music AbsPitch
 patternToMusic = line . fmap convert . withDurations
   where
     withDurations :: Pattern -> [(MIDI, Time)]
-    withDurations ps = zip (pitch ps) (rhythm ps ++ [4])
+    withDurations ps = zip (pitch ps) (durations ps ++ [4])
 
     convert :: (MIDI, Time) -> Music AbsPitch
     convert (m, tt) = Prim $ M.Note (toRational tt) (fromInteger m)
@@ -37,5 +37,5 @@ musicToPattern = withDurations . convert . fmap (absPitch . fst) . toMusic1
     withDurations = snd . foldl go (0.0, [])
       where go :: (Double, [Note]) -> Either Time Note -> (Double, [Note])
             go (acc, ns) (Left tt)           = (acc + tt, ns)
-            go (acc, ns) (Right (Note tt m)) = (acc', ns ++ [Note acc' m])
+            go (acc, ns) (Right (Note tt m)) = (acc', ns ++ [Note acc m])
               where acc' = acc + tt
