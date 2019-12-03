@@ -4,7 +4,7 @@ import Control.Monad (forM_)
 
 import Test.Hspec
 
-import Types           ((.@), guessScale, createScaleInC, major)
+import Types           ((.@), guessScale, createScaleInC, createScaleInD, major)
 import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf)
 
 forAll :: Example r => [a] -> String -> (a -> r) -> SpecWith (Arg r)
@@ -29,9 +29,39 @@ spec = do
   forAll2 hs "guessScale" $ \x y -> do
     guessScale (x++y) `shouldBe` createScaleInC major
 
-  forAll2 hs "tonal transposition" $ \x y -> do
+  forAll2 hs "tonal transposition - hanons" $ \x y -> do
       (x <=> y) (tonalTranspOf ~~ 1)
 
+  forAll2 tris "tonal transposition - triads" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 neighBb "tonal transposition - neighbour notes in Bb" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 neighDu5u "tonal transposition - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 neighDu5u "guess scale - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
+    guessScale (x++y) `shouldBe` createScaleInD major
+  
+  forAll2 neighDu5d "tonal transposition - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 neighAd5d "tonal transposition - neighbour notes in A down a fifth and neighbouring down" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 reachF "tonal transposition - reaching notes in F" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 escapeG "tonal transposition - escaping notes in G" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 launchingEb "tonal transposition - launching notes in Eb" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
+  forAll2 landingAm "tonal transposition - landing notes in A minor" $ \x y -> do
+      (x <=> y) (tonalTranspOf ~~ 1)
+  
   describe "Approximation" $ do
     it "correctly detects Approximation 0.8 - Hanon bar 1 with one more note" $
       (h1 <=> ho) (exactOf ~~ 0.8)
@@ -94,7 +124,7 @@ spec = do
 
   describe "trans augmentation" $ do
     it "correctly detects trans augmentation with the triplet" $
-      (triplet <=> tripletaugtrans) (augmentationOf ~~ 1)
+      (triplet <=> tripletaugtrans) (trAugmentationOf ~~ 1)
   
   where
     h1 = (.@ 1) <$> [36,40,41,43,45,43,41,40]
@@ -106,6 +136,58 @@ spec = do
     h7 = (.@ 1) <$> [47,50,52,53,55,53,52,50]
     hs = [h1, h2, h3, h4, h5, h6, h7]
 
+    triC = (.@ 1) <$> [36,40,43]
+    triD = (.@ 1) <$> [38,41,45]
+    triE = (.@ 1) <$> [40,43,47]
+    triF = (.@ 1) <$> [41,45,48]
+    triG = (.@ 1) <$> [43,47,50]
+    tris = [triC, triD, triE, triF, triG]
+
+    neighBb1 = (.@ 1) <$> [34,36,34]
+    neighBb2 = (.@ 1) <$> [36,38,36]
+    neighBb3 = (.@ 1) <$> [38,39,38]
+    neighBb4 = (.@ 1) <$> [39,41,39]
+    neighBb5 = (.@ 1) <$> [41,43,41]
+    neighBb = [neighBb1, neighBb2, neighBb3, neighBb4, neighBb5]
+    
+    neighD1u5d = (.@ 1) <$> [38,45,53,45]
+    neighD2u5d = (.@ 1) <$> [40,47,45,47]
+    neighD3u5d = (.@ 1) <$> [42,49,47,49]
+    neighD4u5d = (.@ 1) <$> [43,50,49,50]
+    neighDu5d = [neighD1u5d, neighD2u5d, neighD3u5d, neighD4u5d]
+  
+    neighD1u5u = (.@ 1) <$> [38,45,57,45]
+    neighD2u5u = (.@ 1) <$> [40,47,49,47]
+    neighD3u5u = (.@ 1) <$> [42,49,50,49]
+    neighD4u5u = (.@ 1) <$> [43,50,52,50]
+    neighDu5u = [neighD1u5u, neighD2u5u, neighD3u5u, neighD4u5u]
+  
+    neighA1d5d = (.@ 1) <$> [45,38,37,38]
+    neighA2d5d = (.@ 1) <$> [47,40,38,40]
+    neighA3d5d = (.@ 1) <$> [49,42,40,42]
+    neighA4d5d = (.@ 1) <$> [50,44,42,44]
+    neighAd5d = [neighA1d5d, neighA2d5d, neighA3d5d, neighA4d5d]
+  
+    reachF1 = (.@ 1) <$> [41,46,45]
+    reachF2 = (.@ 1) <$> [43,48,46]
+    reachF3 = (.@ 1) <$> [45,50,48]
+    reachF = [reachF1, reachF2, reachF3]
+
+    escapeG1 = (.@ 1) <$> [43,42,47]
+    escapeG2 = (.@ 1) <$> [45,43,48]
+    escapeG3 = (.@ 1) <$> [47,45,50]
+    escapeG = [escapeG1, escapeG2, escapeG3]
+
+    launchingEb1 = (.@ 1) <$> [39,41,46]
+    launchingEb2 = (.@ 1) <$> [41,43,48]
+    launchingEb3 = (.@ 1) <$> [43,44,50]
+    launchingEb = [launchingEb1, launchingEb2, launchingEb3]
+
+    landingAm1 = (.@ 1) <$> [33,38,40]
+    landingAm2 = (.@ 1) <$> [35,40,41]
+    landingAm3 = (.@ 1) <$> [36,41,43]
+    landingAm = [landingAm1, landingAm2, landingAm3]
+  
     hback1 = (.@ 1) <$> [60,57,55,53,52,53,55,57]
     hback2 = (.@ 1) <$> [59,55,53,52,50,52,53,55]
 
