@@ -1,6 +1,7 @@
 module Parser ( parseClassicExperts, parseClassicAlgo
               , parseClassicAlgoVM1, parseClassicAlgoVM2, parseClassicAlgoMP, parseClassicAlgoSIACF1, parseClassicAlgoSIACP, parseClassicAlgoSIACR
               , parseFolkAlgoVM1, parseFolkAlgoVM2, parseFolkAlgoMP, parseFolkAlgoSIACF1, parseFolkAlgoSIACP, parseFolkAlgoSIACR, parseFolkAlgoCOSIA, parseFolkAlgoSIACFP, parseHEMANAnnotations, parseHEMANAlgoSIACRD, parseHEMANAlgoSIACPD, parseHEMANAlgoSIACR, parseHEMANAlgoSIACP, parseHEMANAlgoSIACF1, parseHEMANAlgoSIACF1D
+              , parseEuroAlgoSIACF1, parseEuroAlgoSIACF1D, parseEuroAlgoSIACP, parseEuroAlgoSIACPD, parseEuroAlgoSIACR, parseEuroAlgoSIACRD
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
@@ -33,6 +34,47 @@ parseMusic song = cd ("data/pieces/" ++ sanitize song ++ "/monophonic/csv") $ do
     mirexP = Note <$> (floatP <* sepP) <*> (intP <* sepP)
                    <* (intP <* sepP) <* (floatP <* sepP)
                    <* intP <* newline
+
+parseHemanMusic :: Song -> IO MusicPiece
+parseHemanMusic song = cd ("data/HEMAN/piece/csv" ++ sanitize song) $ do
+  [f_music] <- listFiles
+  parseMany mirexP f_music
+  where
+    -- | Parse one entry from a MIREX piece of music.
+    mirexP :: Parser Note
+    mirexP = Note <$> (floatP <* sepP) <*> (intP <* sepP)
+                   <* (intP <* sepP) <* (floatP <* sepP)
+                   <* intP <* newline
+
+parseEuroAlgoSIACRD :: IO [PatternGroup]
+parseEuroAlgoSIACRD = cd "data/eurovision/patterns/alg/tlrd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIARD"))
+  return algPgs
+  
+parseEuroAlgoSIACPD :: IO [PatternGroup]
+parseEuroAlgoSIACPD = cd "data/eurovision/patterns/alg/tlpd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAPD"))
+  return algPgs
+
+parseEuroAlgoSIACF1D :: IO [PatternGroup]
+parseEuroAlgoSIACF1D = cd "data/eurovision/patterns/alg/tlf1d/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1D"))
+  return algPgs
+
+parseEuroAlgoSIACR :: IO [PatternGroup]
+parseEuroAlgoSIACR = cd "data/eurovision/patterns/alg/tlr/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAR"))
+  return algPgs
+  
+parseEuroAlgoSIACP :: IO [PatternGroup]
+parseEuroAlgoSIACP = cd "data/eurovision/patterns/alg/tlp/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAP"))
+  return algPgs
+
+parseEuroAlgoSIACF1 :: IO [PatternGroup]
+parseEuroAlgoSIACF1 = cd "data/eurovision/patterns/alg/tlf1/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1"))
+  return algPgs
 
 parseHEMANAlgoSIACRD :: IO [PatternGroup]
 parseHEMANAlgoSIACRD = cd "data/HEMAN/patterns/alg/tlrd/" $ do
@@ -233,6 +275,12 @@ sanitize s
   | ("chopin" `isInfixOf` s) || ("mazurka" `isInfixOf` s)     = "chopinOp24No4"
   | ("gibbons" `isInfixOf` s) || ("silver" `isInfixOf` s)     = "gibbonsSilverSwan1612"
   | ("mozart" `isInfixOf` s) || ("sonata04" `isInfixOf` s)    = "mozartK282Mvt2"
+  -- HEMAN pieces
+  | ("bach1" `isInfixOf` s) = "bach1"
+  | ("bach2" `isInfixOf` s) = "bach2"
+  | ("bee1" `isInfixOf` s) = "bee1"
+  | ("mo155" `isInfixOf` s) = "mo155"
+  | ("mo458" `isInfixOf` s) = "mo458"
   -- Folk pieces
   | ("Daar_g" `isInfixOf` s)          = "DaarGingEenHeer"
   | ("Daar_r" `isInfixOf` s)          = "DaarReedEenJonkheer"

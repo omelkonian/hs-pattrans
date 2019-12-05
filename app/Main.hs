@@ -33,6 +33,7 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , classical  :: Bool -- ^ analyze classical dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
                        , heman      :: Bool
+                       , eurovision :: Bool
                        , random     :: Bool -- ^ analyze random datasets
                        , export     :: Bool -- ^ export MIDI files
                        , verify     :: Bool -- ^ whether to verify hypothesis
@@ -92,6 +93,9 @@ parseOpts = Options
   <*> switch (  long "heman"
              <> short 'H'
              <> help "Analyze the HEMAN dataset" )
+  <*> switch (  long "eurovision"
+             <> short 'o'
+             <> help "Analyze the eurovision dataset" )
   <*> switch (  long "random"
              <> short 'R'
              <> help "Analyze the random datasets" )
@@ -130,6 +134,7 @@ main = do
     when (toCompare op) $
       runComparison ("docs/out/classical/experts", parseClassicExperts)
                     ("docs/out/classical/algorithms", parseClassicAlgo)
+      
   when (folk op) $ do
     when (experts op) $
       run "docs/out/folk/experts" parseFolkExperts
@@ -151,6 +156,7 @@ main = do
       run "docs/out/folk/cfp" parseFolkAlgoSIACFP
     when (cosia op) $
       run "docs/out/folk/cosia" parseFolkAlgoCOSIA
+      
   when (heman op) $ do
     when (experts op) $
       run "docs/out/heman/annotations" parseHEMANAnnotations
@@ -167,6 +173,20 @@ main = do
     when (siacrd op) $
       run "docs/out/heman/siacrd" parseHEMANAlgoSIACRD
       
+  when (eurovision op) $ do
+    when (siacf1 op) $
+      run "docs/out/eurovision/siacf1" parseEuroAlgoSIACF1
+    when (siacp op) $
+      run "docs/out/eurovision/siacp" parseEuroAlgoSIACP
+    when (siacr op) $
+      run "docs/out/eurovision/siacr" parseEuroAlgoSIACR
+    when (siacf1d op) $
+      run "docs/out/eurovision/siacf1d" parseEuroAlgoSIACF1D
+    when (siacpd op) $
+      run "docs/out/eurovision/siacpd" parseEuroAlgoSIACPD
+    when (siacrd op) $
+      run "docs/out/eurovision/siacrd" parseEuroAlgoSIACRD
+  
     when (toCompare op) $ do
       runComparison ("docs/out/folk/experts", parseFolkExperts)
                     ("docs/out/folk/algorithms", parseFolkAlgo)
