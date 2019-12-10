@@ -38,7 +38,7 @@ spec = do
   forAll2 neighBb "tonal transposition - neighbour notes in Bb" $ \x y -> do
       (x <=> y) (tonalTranspOf ~~ 1)
   
-  forAll2 neighDu5u "tonal transposition - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
+  forAll2 neighDu5u "This one will fail: use tonalTranspCan (the one after next test) instead. tonal transposition - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
       (x <=> y) (tonalTranspOf ~~ 1)
   
   forAll2 neighDu5u "guess scale - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
@@ -47,7 +47,7 @@ spec = do
   forAll2 neighDu5u "tonal transposition more candidates - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
       (x <=> y) (tonalTranspOfCan ~~ 1)
       
-  forAll2 neighDu5d "tonal transposition - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
+  forAll2 neighDu5d "This one will fail: use tonalTranspCan (next test) instead. tonal transposition - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
       (x <=> y) (tonalTranspOf ~~ 1)
   
   forAll2 neighDu5d "tonal transposition more candidates - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
@@ -84,14 +84,62 @@ spec = do
     it "correctly detects real transposition" $
       (h1 <=> h1trans) (transpositionOf ~~ 1)
 
-  describe "real transposition with approx" $ do
-    it "correctly detects real transposition with approximation - deleted first note" $
+  describe "exact approx" $ do
+    it "correctly detects exact repetition with approximation - deleted first note" $
+      (h1trans <=> h1transdel1) (exactOf ~~ 0.8)
+  
+  describe "exact approx" $ do
+    it "correctly detects exact repetition with approximation - deleted second note" $
+      (h1trans <=> h1transdel2) (exactOf ~~ 0.8)
+
+  describe "exact approx" $ do
+    it "correctly detects exact repetition with approximation - deleted third note" $
+      (h1trans <=> h1transdel3) (exactOf ~~ 0.8)
+  
+  describe "exact approx" $ do
+    it "correctly detects exact repetition with approximation - deleted last note" $
+      (h1trans <=> h1transdel4) (exactOf ~~ 0.8)
+  
+  describe "exact approx" $ do
+    it "correctly detects exact repetition with approximation - inserted first note" $
+      (h1trans <=> h1transins1) (exactOf ~~ 0.8)
+  
+  describe "exact approx" $ do
+    it "correctly detects exact repetition with approximation - inserted first three note" $
+      (h1trans <=> h1transins2) (exactOf ~~ 0.7)
+
+  describe "exact approx" $ do
+    it "correctly detects exact repetition with approximation - inserted last note" $
+      (h1trans <=> h1transins3) (exactOf ~~ 0.8)
+
+  describe "transposition approx" $ do
+    it "correctly detects real transformation with approximation - deleted first note" $
       (h1 <=> h1transdel1) (transpositionOf ~~ 0.8)
   
-  describe "real transposition with approx" $ do
-    it "correctly detects real transposition with approximation - deleted second note" $
-      (h1 <=> h1transdel2) (transpositionOf ~~ 0.6)
+  describe "transposition approx" $ do
+    it "correctly detects real transformation with approximation - deleted second note, middle notes are different from first and last note (changing two intervals ~~ 0.71)" $
+      (h1 <=> h1transdel2) (transpositionOf ~~ 0.71)
 
+  describe "transposition approx" $ do
+    it "correctly detects real transformation with approximation - deleted third note (changing two intervals ~~ 0.71)" $
+      (h1 <=> h1transdel3) (transpositionOf ~~ 0.71)
+  
+  describe "transposition approx" $ do
+    it "correctly detects real transformation with approximation - deleted last note" $
+      (h1 <=> h1transdel4) (transpositionOf ~~ 0.8)
+  
+  describe "transposition approx" $ do
+    it "correctly detects real transformation with approximation - inserted first note" $
+      (h1 <=> h1transins1) (transpositionOf ~~ 0.8)
+  
+  describe "transposition approx" $ do
+    it "correctly detects real transformation with approximation - inserted first three note" $
+      (h1 <=> h1transins2) (transpositionOf ~~ 0.7)
+
+  describe "transposition approx" $ do
+    it "correctly detects real transformation with approximation - inserted last note" $
+      (h1 <=> h1transins3) (transpositionOf ~~ 0.8)
+  
   describe "tonal inversion" $ do
     it "correctly detects tonal inversion with hanon C" $
       (h1 <=> hback1) (tonalInversionOfCan ~~ 1)
@@ -192,6 +240,11 @@ spec = do
     h1trans= (.@ 1) <$> [37,41,42,44,46,44,42,41]
     h1transdel1 = (.@ 1) <$> [41,42,44,46,44,42,41]
     h1transdel2 = (.@ 1) <$> [37,42,44,46,44,42,41]
+    h1transdel3 = (.@ 1) <$> [37,41,42,46,44,42,41]
+    h1transdel4 = (.@ 1) <$> [37,41,42,44,46,44,42]
+    h1transins1 = (.@ 1) <$> [36,37,41,42,44,46,44,42,41]
+    h1transins2 = (.@ 1) <$> [34,35,36,37,41,42,44,46,44,42,41]
+    h1transins3 = (.@ 1) <$> [37,41,42,44,46,44,42,41,40]
 
     triplet = (.@ 1) <$> [60,62,64]
     tripletrealinv = (.@ 1) <$> [60,58,56]
