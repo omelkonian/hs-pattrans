@@ -36,6 +36,7 @@ data AnalysisResult = An
   , trtonAugmented  :: !Int -- ^ # of tonal transposed augmentations
   -- , trtonRetrograded  :: !Int -- ^ # of tonal transposed retrogrades
   , trtonRotated  :: !Int -- ^ # of tonal transposed rotations
+  , transpositionp :: !Int
 
   -- 80%
   , exact8         :: !Int -- ^ # of exact occurences
@@ -48,6 +49,7 @@ data AnalysisResult = An
   , trInverted8    :: !Int -- ^ # of transposed inversions
   , trAugmented8   :: !Int -- ^ # of transposed augmentations
   , trRetrograded8 :: !Int -- ^ # of transposed retrogrades
+  , transpositionp8 :: !Int
 
   -- 60%
   , exact6         :: !Int -- ^ # of exact occurences
@@ -60,6 +62,8 @@ data AnalysisResult = An
   , trInverted6    :: !Int -- ^ # of transposed inversions
   , trAugmented6   :: !Int -- ^ # of transposed augmentations
   , trRetrograded6 :: !Int -- ^ # of transposed retrogrades
+  , transpositionp6 :: !Int
+
 
   , unclassified  :: ![(String, Pattern)] -- ^ filenames of all unclassified patterns
   }
@@ -71,7 +75,7 @@ instance ToField [(String, Pattern)] where
   toField = toField . length
 
 defAn :: AnalysisResult
-defAn = An "" 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
+defAn = An "" 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 []
 
 singleAn :: AnalysisResult
 singleAn = defAn {total = 1}
@@ -95,6 +99,8 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (trInversionOf ~~ 1)      = singleAn { trInverted = 1 }
       | (base <=> p) (trAugmentationOf ~~ 1)   = singleAn { trAugmented = 1 }
       | (base <=> p) (trRetrogradeOf ~~ 1)     = singleAn { trRetrograded = 1 }
+      | (base <=> p) (transpositionOfPitchOnly ~~ 1)         = singleAn { transpositionp = 1 }
+      
       | (base <=> p) (exactOf ~~ 0.8)          = singleAn { exact8 = 1 }
       | (base <=> p) (transpositionOf ~~ 0.8)  = singleAn { transposed8 = 1 }
       | (base <=> p) (tonalTranspOfCan ~~ 0.8)    = singleAn { tonalTransped8 = 1 }
@@ -105,6 +111,8 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (trInversionOf ~~ 0.8)    = singleAn { trInverted8 = 1 }
       | (base <=> p) (trAugmentationOf ~~ 0.8) = singleAn { trAugmented8 = 1 }
       | (base <=> p) (trRetrogradeOf ~~ 0.8)   = singleAn { trRetrograded8 = 1 }
+      | (base <=> p) (transpositionOfPitchOnly ~~ 0.8)         = singleAn { transpositionp8 = 1 }
+      
       | (base <=> p) (exactOf ~~ 0.6)          = singleAn { exact6 = 1 }
       | (base <=> p) (transpositionOf ~~ 0.6)  = singleAn { transposed6 = 1 }
       | (base <=> p) (tonalTranspOfCan ~~ 0.6)    = singleAn { tonalTransped6 = 1 }
@@ -115,6 +123,7 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (trInversionOf ~~ 0.6)    = singleAn { trInverted6 = 1 }
       | (base <=> p) (trAugmentationOf ~~ 0.6) = singleAn { trAugmented6 = 1 }
       | (base <=> p) (trRetrogradeOf ~~ 0.6)   = singleAn { trRetrograded6 = 1 }
+      | (base <=> p) (transpositionOfPitchOnly ~~ 0.6)         = singleAn { transpositionp6 = 1 }
       | otherwise
       = defAn {total = 1, unclassified = [(show pg ++ ":" ++ show i, p)]}
 
@@ -124,12 +133,12 @@ combineAnalyses = foldl' (<+>) defAn
   where
     An _ tot
        m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m20
-       m21 m22 m23 m24 m25 m26 m27 m28 m29 m30 m31 m32 m33  xs
+       m21 m22 m23 m24 m25 m26 m27 m28 m29 m30 m31 m32 m33 m34 m35 m36 xs
       <+> An _ tot' n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15 n16 n17 n18 n19 n20
-             n21 n22 n23 n24 n25 n26 n27 n28 n29 n30 n31 n32 n33  ys
+             n21 n22 n23 n24 n25 n26 n27 n28 n29 n30 n31 n32 n33 n34 n35 n36 ys
       = An "" (tot+tot') (m1+n1) (m2+n2) (m3+n3) (m4+n4) (m5+n5) (m6+n6) (m7+n7) (m8+n8) (m9+n9) (m10+n10)
               (m11+n11) (m12+n12) (m13+n13) (m14+n14) (m15+n15) (m16+n16) (m17+n17) (m18+n18) (m19+n19) (m20+n20)
-              (m21+n21) (m22+n22) (m23+n23) (m24+n24) (m25+n25) (m26+n26) (m27+n27) (m28+n28) (m29+n29) (m30+n30) (m31+n31) (m32+n32) (m33+n33)
+              (m21+n21) (m22+n22) (m23+n23) (m24+n24) (m25+n25) (m26+n26) (m27+n27) (m28+n28) (m29+n29) (m30+n30) (m31+n31) (m32+n32) (m33+n33) (m34+n34) (m35+n35) (m36+n36)
               (xs++ys)
 
 -- | Get the percentage of an equivalence class from an analysis result.
@@ -155,6 +164,7 @@ instance Show AnalysisResult where
               ++ "\n\ttrInverted: %.2f%% (%d)"
               ++ "\n\ttrAugmented: %.2f%% (%d)"
               ++ "\n\ttrRetrograded: %.2f%% (%d)"
+              ++ "\n\ttransposedPitchOnly: %.2f%% (%d)"
               ++ "\n\texact8: %.2f%% (%d)"
               ++ "\n\ttransposed8: %.2f%% (%d)"
               ++ "\n\ttonalTransped8: %.2f%% (%d)"
@@ -165,6 +175,7 @@ instance Show AnalysisResult where
               ++ "\n\ttrInverted8: %.2f%% (%d)"
               ++ "\n\ttrAugmented8: %.2f%% (%d)"
               ++ "\n\ttrRetrograded8: %.2f%% (%d)"
+              ++ "\n\ttransposedPitchOnly8: %.2f%% (%d)"
               ++ "\n\texact6: %.2f%% (%d)"
               ++ "\n\ttransposed6: %.2f%% (%d)"
               ++ "\n\ttonalTransped6: %.2f%% (%d)"
@@ -175,6 +186,7 @@ instance Show AnalysisResult where
               ++ "\n\ttrInverted6: %.2f%% (%d)"
               ++ "\n\ttrAugmented6: %.2f%% (%d)"
               ++ "\n\ttrRetrograded6: %.2f%% (%d)"
+              ++ "\n\ttransposedPitchOnly6: %.2f%% (%d)"
               ++ "\n\tother: %.2f%% (%s)"
               ++ "\n}")
            (name an) (total an)
@@ -188,6 +200,7 @@ instance Show AnalysisResult where
            (percentage an trInverted) (trInverted an)
            (percentage an trAugmented) (trAugmented an)
            (percentage an trRetrograded) (trRetrograded an)
+           (percentage an transpositionp) (transpositionp an)
            (percentage an exact8) (exact8 an)
            (percentage an transposed8) (transposed8 an)
            (percentage an tonalTransped8) (tonalTransped8 an)
@@ -198,6 +211,7 @@ instance Show AnalysisResult where
            (percentage an trInverted8) (trInverted8 an)
            (percentage an trAugmented8) (trAugmented8 an)
            (percentage an trRetrograded8) (trRetrograded8 an)
+           (percentage an transpositionp8) (transpositionp8 an)
            (percentage an exact6) (exact6 an)
            (percentage an transposed6) (transposed6 an)
            (percentage an tonalTransped6) (tonalTransped6 an)
@@ -208,6 +222,7 @@ instance Show AnalysisResult where
            (percentage an trInverted6) (trInverted6 an)
            (percentage an trAugmented6) (trAugmented6 an)
            (percentage an trRetrograded6) (trRetrograded6 an)
+           (percentage an transpositionp6) (transpositionp6 an)
            (otherPercentage an) (concatMap showTup (unclassified an))
 
 showPattern :: Pattern -> String

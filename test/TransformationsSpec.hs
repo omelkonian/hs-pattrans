@@ -4,7 +4,7 @@ import Control.Monad (forM_)
 
 import Test.Hspec
 
-import Types           ((.@), guessScale, createScaleInC, createScaleInD, major)
+import Types
 import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf, tonalTranspOfCan)
 
 forAll :: Example r => [a] -> String -> (a -> r) -> SpecWith (Arg r)
@@ -72,18 +72,6 @@ spec = do
     it "correctly detects Approximation 0.8 - Hanon bar 1 with one more note" $
       (h1 <=> ho) (exactOf ~~ 0.8)
 
-  describe "exact o2-o3 in SYMCHM" $ do
-    it "correctly compare pattern2 o2 and o3 in Daar ging een heer using SYMCHM" $
-      (o2 <=> o3) (exactOf ~~ 0.8)
-
-  describe "exact o1-o2 in SYMCHM" $ do
-    it "correctly compare pattern2 o1 and o2 in Daar ging een heer using SYMCHM" $
-      (o1 <=> o2) (exactOf ~~ 0.8)
-
-  describe "exact o1-o3 in SYMCHM" $ do
-    it "correctly compare pattern2 o1 and o3 in Daar ging een heer using SYMCHM" $
-      (o1 <=> o3) (exactOf ~~ 0.8)
-  
   describe "retrograde" $ do
     it "correctly detects self-retrograde with palindromeven" $
       (palindromeeven <=> palindromeeven) (retrogradeOf ~~ 1)
@@ -125,12 +113,13 @@ spec = do
       (triplet <=> tripletRI) (rotationOf ~~ 1)
 
   describe "augmentation" $ do
-    it "correctly detects augmentation with the triplet" $
-      (triplet <=> tripletaug) (augmentationOf ~~ 1)
+    it "correctly detects augmentation with the explicit notes" $
+      (cna <=> ca) (augmentationOf ~~ 1)
 
-  describe "trans augmentation" $ do
-    it "correctly detects trans augmentation with the triplet" $
-      (triplet <=> tripletaugtrans) (trAugmentationOf ~~ 1)
+  describe "augmentation" $ do
+    it "correctly detects trans augmentation with the explicit notes" $
+      (cat <=> ca) (trAugmentationOf ~~ 1)
+ 
   
   where
     h1 = (.@ 1) <$> [36,40,41,43,45,43,41,40]
@@ -207,98 +196,29 @@ spec = do
     triplet = (.@ 1) <$> [60,62,64]
     tripletrealinv = (.@ 1) <$> [60,58,56]
     tripletrealinvtrans = (.@ 1) <$> [59,57,55]
-    tripletaug = (.@ 2) <$> [60,62,64]
-    tripletaugtrans = (.@ 2) <$> [62,64,66]
     tripletRI = (.@ 1) <$> [56,58,60]
     
     ho = (.@ 1) <$> [36,38,40,41,43,45,43,41,40]
 
-    o1 = (.@ 1) <$> [69
-        , 67
-        , 62
-        , 67
-        , 69
-        , 71
-        , 71
-        , 71
-        , 71
-        , 71
-        , 69
-        , 67
-        , 62
-        , 67
-        , 69
-        , 71
-        , 71
-        , 71
-        , 71
-        , 71
-        , 69
-        , 67
-        , 71
-        , 74
-        , 74
-        , 72
-        , 71
-        , 71
-        , 69]
+    c1 = Note {ontime = 1, midi = 36}
+    c2 = Note {ontime = 2, midi = 40}
+    c3 = Note {ontime = 3, midi = 41}
+    c4 = Note {ontime = 4, midi = 43}
+    c5 = Note {ontime = 5, midi = 45}
+    c6 = Note {ontime = 6, midi = 43}
+    c7 = Note {ontime = 7, midi = 41}
+    c8 = Note {ontime = 8, midi = 40}
+    c = [c1, c2, c3, c4, c5, c6, c7, c8]
+    cna = [c1, c2, c3]
+
+    ca1 = Note {ontime = 1, midi = 36}
+    ca2 = Note {ontime = 3, midi = 40}
+    ca3 = Note {ontime = 5, midi = 41}
+    ca = [ca1, ca2, ca3]
   
-    o2 = (.@ 1) <$> [ 69
-          , 67
-          , 62
-          , 67
-          , 69
-          , 71
-          , 71
-          , 71
-          , 71
-          , 71
-          , 69
-          , 67
-          , 62
-          , 67
-          , 69
-          , 71
-          , 71
-          , 71
-          , 71
-          , 71
-          , 69
-          , 67
-          , 71
-          , 74
-          , 74
-          , 72
-          , 71
-          , 71
-          , 69]
-  
-    o3 = (.@ 1) <$> [ 69
-          , 67
-          , 62
-          , 67
-          , 69
-          , 71
-          , 71
-          , 71
-          , 71
-          , 71
-          , 69
-          , 67
-          , 62
-          , 67
-          , 69
-          , 71
-          , 71
-          , 71
-          , 71
-          , 71
-          , 69
-          , 67
-          , 71
-          , 74
-          , 72
-          , 71
-          , 71
-          , 69]
-  
+    cat1 = Note {ontime = 1, midi = 38}
+    cat2 = Note {ontime = 3, midi = 42}
+    cat3 = Note {ontime = 5, midi = 43}
+    cat = [cat1, cat2, cat3]
+
+     

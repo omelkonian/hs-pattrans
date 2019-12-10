@@ -51,6 +51,9 @@ transpositionOf :: ApproxCheck Pattern
 transpositionOf = rhythm    >$< approxEq2
                <> intervals >$< approxEq2
 
+transpositionOfPitchOnly :: ApproxCheck Pattern
+transpositionOfPitchOnly = intervals >$< approxEq2
+
 -- | Inversion: negate all pitch intervals (starting from the same base pitch).
 inversionOf :: ApproxCheck Pattern
 inversionOf = basePitch >$< equal
@@ -96,7 +99,6 @@ tonalTransCanOfCore = Check (\xs ys -> foldr (||) True (map (xs <=> ys)
 -- Combinations
 
 -- | Transposition + Inversion.
--- (AKA horizontal reflection)
 trInversionOf :: ApproxCheck Pattern
 trInversionOf = rhythm    >$< approxEq2
              <> intervals >$< (inverse $< approxEq2)
@@ -108,11 +110,9 @@ trAugmentationOf = normalRhythm >$< approxEq2
 
 
 -- | Transposition + Retrograde.
--- (AKA vertical glide reflection)
 trRetrogradeOf :: ApproxCheck Pattern
 trRetrogradeOf = rhythm    >$< (reverse $< approxEq2)
               <> intervals >$< (reverse . inverse $< approxEq2)
-
 
 -- | New tonal versions
 trtonRotationOf :: ApproxCheck Pattern
