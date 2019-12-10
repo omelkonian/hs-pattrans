@@ -3,7 +3,7 @@ module Types where
 import Control.Parallel.Strategies (parMap, rpar)
 import Control.Concurrent.Async    (forConcurrently, mapConcurrently)
 
-import Data.List (intersperse, maximumBy, sort)
+import Data.List (intersperse, maximumBy, sort, sortBy)
 import qualified Data.Map  as M
 import qualified Data.Set  as S
 
@@ -77,14 +77,17 @@ intervals :: Pattern -> [Interval]
 intervals = fmap (uncurry (-)) . pairs . pitch
 
 -- | The (real) rhythmic structure of a pattern.
--- e.g. durations [(25,1), (27,2), (25,2.5)] = [1, 2, 2.5]
-durations :: Pattern -> [Time]
-durations = sort . fmap ontime
+-- e.g. onset [(25,1), (27,2), (25,2.5)] = [1, 2, 2.5]
+onsets :: Pattern -> [Time]
+onsets = sort . fmap ontime
 
 -- | The (relative) rhythmic structure of a pattern.
 -- e.g. rhythm [(25,1), (27,2), (25,2.5)] = [1, 0.5]
+durations :: Pattern -> [Time]
+durations = fmap (uncurry (-)) . pairs . onsets
+
 rhythm :: Pattern -> [Time]
-rhythm = fmap (uncurry (-)) . pairs . durations
+rhythm = map (truncate' 2) . durations
 
 -- | Normalized (relative) rhythmic structure of a pattern.
 -- e.g. normalRhythm [(A,2), (C#,6), (Eb,8), (B,1), (A,2)] = [1, 3, 4, 1/2, 1]
@@ -112,6 +115,9 @@ translateV dm (Note tt mInit) = Note tt (mInit + dm)
 pairs :: [a] -> [(a, a)]
 pairs xs = zip (tail xs) xs
 
+truncate' :: Int -> Double -> Double
+truncate' n x = fromIntegral (floor (x * t)) / t
+    where t = 10^n
 -----------------------
 -- Scales/modes
 
@@ -130,6 +136,12 @@ createScaleInC scType = M.fromList [ (24 + (oct * 12) + m, (i, oct + 1))
                                    | oct <- [0..7]
                                    , (i, m) <- zip [1..7] scType ]
 
+
+createScaleInD :: ScaleType -> Scale
+createScaleInD scType = M.fromList [ (26 + (oct * 12) + m, (i, oct + 1))
+                                   | oct <- [0..7]
+                                   , (i, m) <- zip [1..7] scType ]
+
 allScales :: [Scale]
 allScales = [ M.mapKeys (+ transp) (createScaleInC scType)
             | scType <- [major, harmonicMinor, melodicMinor]
@@ -144,13 +156,21 @@ guessScale xs =
                                                    else EQ) scales
 
 
+guessScaleCandidates :: Int -> Pattern -> [Scale]
+guessScaleCandidates n xs =
+  let scales = [ (sc, S.size $ M.keysSet sc `S.intersection` S.fromList (pitch xs))
+               | sc <- allScales ]
+  in take n $ map fst (sortBy (\(_,s1) (_,s2) -> if s1 > s2 then GT
+                                                   else if s1 < s2 then LT
+                                                   else EQ) scales)
+
 toDegree :: Scale -> MIDI -> Integer
 toDegree sc m = i + (oct * 7)
   where (i, oct) = M.findWithDefault (0, 0) m sc -- 0 for 'outside' note 
 
 applyScale :: Scale -> Pattern -> [Interval]
 applyScale sc = fmap (uncurry (-)) . pairs . fmap (toDegree sc) . pitch
-    
+
 -----------------------
 -- Parallel operations
 
