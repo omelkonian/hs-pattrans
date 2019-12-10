@@ -87,14 +87,20 @@ tonalTranspOf =  rhythm >$< approxEq2
               <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale $ xs ++ ys)
                                               >$< approxEq2))
 
+-- | Taking into account of multiple possibilities of scales like in tonalTransCanofCore, but with approximation in the checking
 tonalTranspOfCan :: ApproxCheck Pattern
 tonalTranspOfCan = rhythm >$< approxEq2
                  <> Check (\xs ys -> foldr (||) True (map (xs <=> ys) [checks >$< approxEq2 | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
 
+-- | Instead guess one scale, then check the scale degrees, we guess three scales, and fold over all the possible scale degree checks with ||
+-- The core is a version that does not allow for approximation
 tonalTransCanOfCore :: Check Pattern
 tonalTransCanOfCore = Check (\xs ys -> foldr (||) True (map (xs <=> ys)
              [checks >$< equal | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
 
+tonalInversionOfCan :: ApproxCheck Pattern
+tonalInversionOfCan = rhythm >$< approxEq2
+                 <> Check (\xs ys -> foldr (||) True (map (xs <=> ys) [checks >$< (inverse $< approxEq2) | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
 -----------------------
 -- Combinations
 

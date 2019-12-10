@@ -5,7 +5,7 @@ import Control.Monad (forM_)
 import Test.Hspec
 
 import Types
-import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf, tonalTranspOfCan)
+import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf, tonalTranspOfCan, tonalInversionOfCan)
 
 forAll :: Example r => [a] -> String -> (a -> r) -> SpecWith (Arg r)
 forAll xs title k = 
@@ -94,11 +94,11 @@ spec = do
 
   describe "tonal inversion" $ do
     it "correctly detects tonal inversion with hanon C" $
-      (h1 <=> hback1) (inversionOf ~~ 0.2)
+      (h1 <=> hback1) (tonalInversionOfCan ~~ 1)
 
   describe "tonal inversion" $ do
     it "correctly detects tonal inversion with hanon D" $
-      (h2 <=> hback2) (inversionOf ~~ 0.2)
+      (h2 <=> hback2) (tonalInversionOfCan ~~ 1)
   
   describe "inversion" $ do
     it "correctly detects real inversion with the triplet" $
