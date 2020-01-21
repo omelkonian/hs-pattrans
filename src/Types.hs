@@ -13,7 +13,9 @@ type Time = Double
 type MIDI = Integer
 -- | Intervals are represented with integers (i.e. number of semitones).
 type Interval = Integer
+type ScaleDegree = Int
 
+type Length = Int
 -- | A pattern group is one of the patterns of a piece of music, identified by an expert
 -- or algorithm, and defined by a pattern prototype and other pattern occurences.
 data PatternGroup = PatternGroup
@@ -46,6 +48,9 @@ data Note = Note { ontime :: Time -- ^ onset time
 -- | Infix variant of the Note constructor.
 (.@) :: MIDI -> Time -> Note
 (.@) = flip Note
+
+(.@@) :: [Time] -> [MIDI] -> [Note]
+(.@@) = zipWith Note
 
 -- | A piece of music is a huge pattern.
 type MusicPiece = Pattern

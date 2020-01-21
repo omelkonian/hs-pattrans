@@ -24,6 +24,9 @@ query (checker, base) =
     slide :: WindowSize -> [a] -> [[a]]
     slide n xs = [ take n (drop m xs) | m <- [0..(length xs - n `max` 0)] ]
 
+queryMatchCount :: Query Pattern -> MusicPiece -> Int
+queryMatchCount q mp = length (query q mp)
+
 -- | Example queries.
 query1 :: UserQuery (Time, Time)
 query1 = (transpositionOf ~~ 0.5) :@ (21 `upTo` 28)
@@ -36,7 +39,7 @@ query2 = (transpositionOf ~~ 0.5) :@ (line $ map ($qn) [c 4, e 4, g 4, c 5])
 (??) :: ToPattern a => Song -> UserQuery a -> IO ()
 infix 0 ??
 song ?? q :@ base' = do
-  -- parse the music piecec
+  -- parse the music piece
   piece <- parseMusic song
   putStrLn $ "Piece length: " ++ show (length piece)
 

@@ -2,6 +2,7 @@ module Parser ( parseClassicExperts, parseClassicAlgo
               , parseClassicAlgoVM1, parseClassicAlgoVM2, parseClassicAlgoMP, parseClassicAlgoSIACF1, parseClassicAlgoSIACP, parseClassicAlgoSIACR
               , parseFolkAlgoVM1, parseFolkAlgoVM2, parseFolkAlgoMP, parseFolkAlgoSIACF1, parseFolkAlgoSIACP, parseFolkAlgoSIACR, parseFolkAlgoCOSIA, parseFolkAlgoSIACFP, parseHEMANAnnotations, parseHEMANAlgoSIACRD, parseHEMANAlgoSIACPD, parseHEMANAlgoSIACR, parseHEMANAlgoSIACP, parseHEMANAlgoSIACF1, parseHEMANAlgoSIACF1D
               , parseEuroAlgoSIACF1, parseEuroAlgoSIACF1D, parseEuroAlgoSIACP, parseEuroAlgoSIACPD, parseEuroAlgoSIACR, parseEuroAlgoSIACRD
+              , parsejazzAlgoSIACF1, parsejazzAlgoSIACF1D, parsejazzAlgoSIACP, parsejazzAlgoSIACPD, parsejazzAlgoSIACR, parsejazzAlgoSIACRD
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
@@ -45,7 +46,39 @@ parseHemanMusic song = cd ("data/HEMAN/piece/csv" ++ sanitize song) $ do
     mirexP = Note <$> (floatP <* sepP) <*> (intP <* sepP)
                    <* (intP <* sepP) <* (floatP <* sepP)
                    <* intP <* newline
+             
+-- ========
+parsejazzAlgoSIACRD :: IO [PatternGroup]
+parsejazzAlgoSIACRD = cd "data/jazz/patterns/alg/tlrd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIARD"))
+  return algPgs
+  
+parsejazzAlgoSIACPD :: IO [PatternGroup]
+parsejazzAlgoSIACPD = cd "data/jazz/patterns/alg/tlpd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAPD"))
+  return algPgs
 
+parsejazzAlgoSIACF1D :: IO [PatternGroup]
+parsejazzAlgoSIACF1D = cd "data/jazz/patterns/alg/tlf1d/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1D"))
+  return algPgs
+
+parsejazzAlgoSIACR :: IO [PatternGroup]
+parsejazzAlgoSIACR = cd "data/jazz/patterns/alg/tlr/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAR"))
+  return algPgs
+  
+parsejazzAlgoSIACP :: IO [PatternGroup]
+parsejazzAlgoSIACP = cd "data/jazz/patterns/alg/tlp/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAP"))
+  return algPgs
+
+parsejazzAlgoSIACF1 :: IO [PatternGroup]
+parsejazzAlgoSIACF1 = cd "data/jazz/patterns/alg/tlf1/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1"))
+  return algPgs
+
+ -- =======
 parseEuroAlgoSIACRD :: IO [PatternGroup]
 parseEuroAlgoSIACRD = cd "data/eurovision/patterns/alg/tlrd/" $ do
   algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIARD"))
@@ -76,6 +109,7 @@ parseEuroAlgoSIACF1 = cd "data/eurovision/patterns/alg/tlf1/" $ do
   algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1"))
   return algPgs
 
+-- ========
 parseHEMANAlgoSIACRD :: IO [PatternGroup]
 parseHEMANAlgoSIACRD = cd "data/HEMAN/patterns/alg/tlrd/" $ do
   algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIARD"))

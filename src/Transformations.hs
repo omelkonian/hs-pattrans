@@ -227,10 +227,8 @@ approxEq2 = approxEqWith del1
     -- reduces consecutive elements (second-order)
     del1 _ []     _    = Nothing
     del1 x (y:ys) maxA
-      | maxA < 0
-      = Nothing
-      | x == y
-      = Just (maxA, ys)
+      | maxA < 0 = Nothing
+      | x == y = Just (maxA, ys)
       | Just i <- findIndex 0 x (y:ys) maxLookahead -- NB: fixed look-ahead
       , maxA >= i
       = Just (maxA - i, snd $ splitAt i ys)

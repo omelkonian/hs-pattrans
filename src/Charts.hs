@@ -10,6 +10,7 @@ import Graphics.Rendering.Chart.Backend.Cairo
 
 import Types
 import Parser
+-- import Approx6Analysis
 import Analysis
 import MIDI (writeToMidi)
 
@@ -66,6 +67,8 @@ render fname an
                                          , ("trInverted", trInverted)
                                          , ("trAugmented", trAugmented)
                                          , ("trRetrograded", trRetrograded)
+                                         --, ("trRotated", trRotated)
+                                         -- , ("transP", transpositionp)
                                          , ("exact8", exact8)
                                          , ("transposed8", transposed8)
                                          , ("tonalTransped8", tonalTransped8)
@@ -76,6 +79,7 @@ render fname an
                                          , ("trInverted8", trInverted8)
                                          , ("trAugmented8", trAugmented8)
                                          , ("trRetrograded8", trRetrograded8)
+                                         --, ("transP8", transpositionp8)
                                          , ("exact6", exact6)
                                          , ("transposed6", transposed6)
                                          , ("tonalTransped6", tonalTransped6)
@@ -86,6 +90,7 @@ render fname an
                                          , ("trInverted6", trInverted6)
                                          , ("trAugmented6", trAugmented6)
                                          , ("trRetrograded6", trRetrograded6)
+                                         --, ("transP6", transpositionp6)
                                          , ("exact4", exact4)
                                          , ("transposed4", transposed4)
                                          , ("tonalTransped4", tonalTransped4)

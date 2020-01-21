@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 
-module NewAnalysis where
+module ExactAnalysis where
 
 import Data.List (foldl')
 import Text.Printf (printf)
