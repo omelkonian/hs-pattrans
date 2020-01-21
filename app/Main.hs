@@ -11,6 +11,7 @@ import Analysis
 -- import CompoAnalysis
 -- import ExactAnalysis
 -- import ProtoAnalysis
+-- import Approx6Analysis
 import Charts
 
 -- | Command-line options.
@@ -34,6 +35,7 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , folk       :: Bool -- ^ analyze dutch folk dataset
                        , heman      :: Bool
                        , eurovision :: Bool
+                       , jazz       :: Bool
                        , random     :: Bool -- ^ analyze random datasets
                        , export     :: Bool -- ^ export MIDI files
                        , verify     :: Bool -- ^ whether to verify hypothesis
@@ -96,6 +98,9 @@ parseOpts = Options
   <*> switch (  long "eurovision"
              <> short 'o'
              <> help "Analyze the eurovision dataset" )
+  <*> switch (  long "jazz"
+             <> short 'j'
+             <> help "Analyze the Omnibook from Klaus jazz dataset" )
   <*> switch (  long "random"
              <> short 'R'
              <> help "Analyze the random datasets" )
@@ -187,6 +192,20 @@ main = do
     when (siacrd op) $
       run "docs/out/eurovision/siacrd" parseEuroAlgoSIACRD
   
+  when (jazz op) $ do
+    when (siacf1 op) $
+      run "docs/out/jazz/siacf1" parsejazzAlgoSIACF1
+    when (siacp op) $
+      run "docs/out/jazz/siacp" parsejazzAlgoSIACP
+    when (siacr op) $
+      run "docs/out/jazz/siacr" parsejazzAlgoSIACR
+    when (siacf1d op) $
+      run "docs/out/jazz/siacf1d" parsejazzAlgoSIACF1D
+    when (siacpd op) $
+      run "docs/out/jazz/siacpd" parsejazzAlgoSIACPD
+    when (siacrd op) $
+      run "docs/out/jazz/siacrd" parsejazzAlgoSIACRD
+
     when (toCompare op) $ do
       runComparison ("docs/out/folk/experts", parseFolkExperts)
                     ("docs/out/folk/algorithms", parseFolkAlgo)
@@ -302,6 +321,7 @@ runAnalysis (expo, ver) f_root parser = do
       analyses <-
         forM allPatternGroups $ \pg -> do
           an <- analysePatternGroup pg
+          let anP = percentages an
 
           putStrLn (name an)
           -- print an -- display on terminal
@@ -315,16 +335,22 @@ runAnalysis (expo, ver) f_root parser = do
               putStrLn $ "Verified (" ++ show uns' ++ " / " ++ show tot ++ ")"
 
           renderOne pg an -- produce pie chart
-          return an
+          return (an,anP)
 
+      let counts = map fst analyses
+      let pers = map snd analyses
       -- Combine all individual analyses and render in one chart.
-      let finalAn = (combineAnalyses analyses) { name = "ALL" }
+      let finalAn = (combineAnalyses counts) { name = "ALL" }
+      let finalAnP = (percentages finalAn) { nameP = "ALL" }
       print finalAn
       renderAll expo finalAn
 
       -- Output in CSV format
-      BL.writeFile "output.csv" $ encodeDefaultOrderedByName (finalAn:analyses)
+      BL.writeFile "output.csv" $ encodeDefaultOrderedByName (finalAn:counts)
 
+      -- probs <- percentages analyses
+      BL.writeFile "outputP.csv" $ encodeDefaultOrderedByName (finalAnP:pers)
+ 
 -- | Verify the hypothesis that our transformations form equivalence classes.
 -- This is done by trying out other patterns in the group as base patterns.
 verifyEquivClassHypothesis :: [Pattern] -- ^ unclassified patterns

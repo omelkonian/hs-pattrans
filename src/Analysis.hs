@@ -93,6 +93,7 @@ defAn = An "" 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 singleAn :: AnalysisResult
 singleAn = defAn {total = 1}
 
+
 -- | Analyze a single pattern group.
 analysePatternGroup :: PatternGroup -> IO AnalysisResult
 analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
@@ -104,7 +105,7 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
     check (i, p)
       | (base <=> p) (exactOf ~~ 1)            = singleAn { exact = 1 }
       | (base <=> p) (transpositionOf ~~ 1)    = singleAn { transposed = 1 }
-      | (base <=> p) (tonalTranspOf ~~ 1)      = singleAn { tonalTransped = 1 }
+      | (base <=> p) (tonalTranspOfCan ~~ 1)      = singleAn { tonalTransped = 1 }
       | (base <=> p) (inversionOf ~~ 1)        = singleAn { inverted = 1 }
       | (base <=> p) (augmentationOf ~~ 1)     = singleAn { augmented = 1 }
       | (base <=> p) (retrogradeOf ~~ 1)       = singleAn { retrograded = 1 }
@@ -114,7 +115,7 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (trRetrogradeOf ~~ 1)     = singleAn { trRetrograded = 1 }
       | (base <=> p) (exactOf ~~ 0.8)          = singleAn { exact8 = 1 }
       | (base <=> p) (transpositionOf ~~ 0.8)  = singleAn { transposed8 = 1 }
-      | (base <=> p) (tonalTranspOf ~~ 0.8)    = singleAn { tonalTransped8 = 1 }
+      | (base <=> p) (tonalTranspOfCan ~~ 0.8)    = singleAn { tonalTransped8 = 1 }
       | (base <=> p) (inversionOf ~~ 0.8)      = singleAn { inverted8 = 1 }
       | (base <=> p) (augmentationOf ~~ 0.8)   = singleAn { augmented8 = 1 }
       | (base <=> p) (retrogradeOf ~~ 0.8)     = singleAn { retrograded8 = 1 }
@@ -124,7 +125,7 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (trRetrogradeOf ~~ 0.8)   = singleAn { trRetrograded8 = 1 }
       | (base <=> p) (exactOf ~~ 0.6)          = singleAn { exact6 = 1 }
       | (base <=> p) (transpositionOf ~~ 0.6)  = singleAn { transposed6 = 1 }
-      | (base <=> p) (tonalTranspOf ~~ 0.6)    = singleAn { tonalTransped6 = 1 }
+      | (base <=> p) (tonalTranspOfCan ~~ 0.6)    = singleAn { tonalTransped6 = 1 }
       | (base <=> p) (inversionOf ~~ 0.6)      = singleAn { inverted6 = 1 }
       | (base <=> p) (augmentationOf ~~ 0.6)   = singleAn { augmented6 = 1 }
       | (base <=> p) (retrogradeOf ~~ 0.6)     = singleAn { retrograded6 = 1 }
@@ -134,7 +135,7 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (trRetrogradeOf ~~ 0.6)   = singleAn { trRetrograded6 = 1 }
       | (base <=> p) (exactOf ~~ 0.4)          = singleAn { exact4 = 1 }
       | (base <=> p) (transpositionOf ~~ 0.4)  = singleAn { transposed4 = 1 }
-      | (base <=> p) (tonalTranspOf ~~ 0.4)    = singleAn { tonalTransped4 = 1 }
+      | (base <=> p) (tonalTranspOfCan ~~ 0.4)    = singleAn { tonalTransped4 = 1 }
       | (base <=> p) (inversionOf ~~ 0.4)      = singleAn { inverted4 = 1 }
       | (base <=> p) (augmentationOf ~~ 0.4)   = singleAn { augmented4 = 1 }
       | (base <=> p) (retrogradeOf ~~ 0.4)     = singleAn { retrograded4 = 1 }
@@ -144,7 +145,7 @@ analysePatternGroup pg@(PatternGroup _ _ _ base pats) =
       | (base <=> p) (trRetrogradeOf ~~ 0.4)   = singleAn { trRetrograded4 = 1 }
       | (base <=> p) (exactOf ~~ 0.2)          = singleAn { exact2 = 1 }
       | (base <=> p) (transpositionOf ~~ 0.2)  = singleAn { transposed2 = 1 }
-      | (base <=> p) (tonalTranspOf ~~ 0.2)    = singleAn { tonalTransped2 = 1 }
+      | (base <=> p) (tonalTranspOfCan ~~ 0.2)    = singleAn { tonalTransped2 = 1 }
       | (base <=> p) (inversionOf ~~ 0.2)      = singleAn { inverted2 = 1 }
       | (base <=> p) (augmentationOf ~~ 0.2)   = singleAn { augmented2 = 1 }
       | (base <=> p) (retrogradeOf ~~ 0.2)     = singleAn { retrograded2 = 1 }
@@ -290,3 +291,131 @@ instance Show AnalysisResult where
            (percentage an trAugmented2) (trAugmented2 an)
            (percentage an trRetrograded2) (trRetrograded2 an)
            (otherPercentage an) (length $ unclassified an)
+
+percentages :: AnalysisResult -> AnalysisPercentage
+percentages an = AnP
+          {
+           nameP = name an
+           , totalP = total an
+           
+           , exactP           =         percentage an exact
+           , transposedP     =     percentage an transposed
+           , tonalTranspedP  =  percentage an tonalTransped
+           , invertedP       =       percentage an inverted
+           , augmentedP      =      percentage an augmented
+           , retrogradedP    =    percentage an retrograded
+           , rotatedP        =        percentage an rotated
+           , trInvertedP     =     percentage an trInverted
+           , trAugmentedP    =    percentage an trAugmented
+           , trRetrogradedP  =  percentage an trRetrograded
+           -- 80P            =
+           , exact8P         =         percentage an exact8
+           , transposed8P    =    percentage an transposed8
+           , tonalTransped8P = percentage an tonalTransped8
+           , inverted8P      =      percentage an inverted8
+           , augmented8P     =     percentage an augmented8
+           , retrograded8P   =   percentage an retrograded8
+           , rotated8P       =       percentage an rotated8
+           , trInverted8P    =    percentage an trInverted8
+           , trAugmented8P   =   percentage an trAugmented8
+           , trRetrograded8P = percentage an trRetrograded8
+           -- 60P            =
+           , exact6P         =         percentage an exact6
+           , transposed6P    =    percentage an transposed6
+           , tonalTransped6P = percentage an tonalTransped6
+           , inverted6P      =      percentage an inverted6
+           , augmented6P     =     percentage an augmented6
+           , retrograded6P   =   percentage an retrograded6
+           , rotated6P       =       percentage an rotated6
+           , trInverted6P    =    percentage an trInverted6
+           , trAugmented6P   =   percentage an trAugmented6
+           , trRetrograded6P = percentage an trRetrograded6
+           -- 40P            =
+           , exact4P         =         percentage an exact4
+           , transposed4P    =    percentage an transposed4
+           , tonalTransped4P = percentage an tonalTransped4
+           , inverted4P      =      percentage an inverted4
+           , augmented4P     =     percentage an augmented4
+           , retrograded4P   =   percentage an retrograded4
+           , rotated4P       =       percentage an rotated4
+           , trInverted4P    =    percentage an trInverted4
+           , trAugmented4P   =   percentage an trAugmented4
+           , trRetrograded4P = percentage an trRetrograded4
+           -- 20P            =
+           , exact2P         =         percentage an exact2
+           , transposed2P    =    percentage an transposed2
+           , tonalTransped2P = percentage an tonalTransped2
+           , inverted2P      =      percentage an inverted2
+           , augmented2P     =     percentage an augmented2
+           , retrograded2P   =   percentage an retrograded2
+           , rotated2P       =       percentage an rotated2
+           , trInverted2P    =    percentage an trInverted2
+           , trAugmented2P   =   percentage an trAugmented2
+           , trRetrograded2P = percentage an trRetrograded2
+           , unclassifiedP   = otherPercentage an}
+
+-- | Analyzing a pattern group with a pattern prototype (occ1.csv).
+data AnalysisPercentage = AnP
+  { nameP           :: !String -- ^ name associated with the analysis
+  , totalP          :: !Int -- ^ all other occurences of the pattern
+  -- 100P%
+  , exactP          :: !Double -- ^ # of exact occurences
+  , transposedP     :: !Double -- ^ # of *atonal* transpositions
+  , tonalTranspedP  :: !Double -- ^ # of *tonal* transpositions
+  , invertedP       :: !Double -- ^ # of inversions
+  , augmentedP      :: !Double -- ^ # of augmentations
+  , retrogradedP    :: !Double -- ^ # of retrogrades
+  , rotatedP        :: !Double -- ^ # of rotations
+  , trInvertedP     :: !Double -- ^ # of transposed inversions
+  , trAugmentedP    :: !Double -- ^ # of transposed augmentations
+  , trRetrogradedP  :: !Double -- ^ # of transposed retrogrades
+  -- 80P%
+  , exact8P         :: !Double -- ^ # of exact occurences
+  , transposed8P    :: !Double -- ^ # of *atonal* transpositions
+  , tonalTransped8P :: !Double -- ^ # of *tonal* transpositions
+  , inverted8P      :: !Double -- ^ # of inversions
+  , augmented8P     :: !Double -- ^ # of augmentations
+  , retrograded8P   :: !Double -- ^ # of retrogrades
+  , rotated8P       :: !Double -- ^ # of rotations
+  , trInverted8P    :: !Double -- ^ # of transposed inversions
+  , trAugmented8P   :: !Double -- ^ # of transposed augmentations
+  , trRetrograded8P :: !Double -- ^ # of transposed retrogrades
+  -- 60P%
+  , exact6P         :: !Double -- ^ # of exact occurences
+  , transposed6P    :: !Double -- ^ # of *atonal* transpositions
+  , tonalTransped6P :: !Double -- ^ # of *tonal* transpositions
+  , inverted6P      :: !Double -- ^ # of inversions
+  , augmented6P     :: !Double -- ^ # of augmentations
+  , retrograded6P   :: !Double -- ^ # of retrogrades
+  , rotated6P       :: !Double -- ^ # of rotations
+  , trInverted6P    :: !Double -- ^ # of transposed inversions
+  , trAugmented6P   :: !Double -- ^ # of transposed augmentations
+  , trRetrograded6P :: !Double -- ^ # of transposed retrogrades
+  -- 40P%
+  , exact4P         :: !Double -- ^ # of exact occurences
+  , transposed4P    :: !Double -- ^ # of *atonal* transpositions
+  , tonalTransped4P :: !Double -- ^ # of *tonal* transpositions
+  , inverted4P      :: !Double -- ^ # of inversions
+  , augmented4P     :: !Double -- ^ # of augmentations
+  , retrograded4P   :: !Double -- ^ # of retrogrades
+  , rotated4P       :: !Double -- ^ # of rotations
+  , trInverted4P    :: !Double -- ^ # of transposed inversions
+  , trAugmented4P   :: !Double -- ^ # of transposed augmentations
+  , trRetrograded4P :: !Double -- ^ # of transposed retrogrades
+  -- 20P%
+  , exact2P         :: !Double -- ^ # of exact occurences
+  , transposed2P    :: !Double -- ^ # of *atonal* transpositions
+  , tonalTransped2P :: !Double -- ^ # of *tonal* transpositions
+  , inverted2P      :: !Double -- ^ # of inversions
+  , augmented2P     :: !Double -- ^ # of augmentations
+  , retrograded2P   :: !Double -- ^ # of retrogrades
+  , rotated2P       :: !Double -- ^ # of rotations
+  , trInverted2P    :: !Double -- ^ # of transposed inversions
+  , trAugmented2P   :: !Double -- ^ # of transposed augmentations
+  , trRetrograded2P :: !Double -- ^ # of transposed retrogrades
+  , unclassifiedP  :: !Double -- ^ filenames of all unclassified patterns
+  }
+  deriving (Generic)
+
+instance ToNamedRecord AnalysisPercentage
+instance DefaultOrdered AnalysisPercentage
