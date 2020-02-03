@@ -7,11 +7,11 @@ import qualified Data.ByteString.Lazy as BL
 
 import Types
 import Parser
-import Analysis
+-- import Analysis
 -- import CompoAnalysis
 -- import ExactAnalysis
 -- import ProtoAnalysis
--- import Approx6Analysis
+import Approx6Analysis
 import Charts
 
 -- | Command-line options.
@@ -36,6 +36,9 @@ data Options = Options { experts    :: Bool -- ^ analyze expert dataset
                        , heman      :: Bool
                        , eurovision :: Bool
                        , jazz       :: Bool
+                       , bachChorales :: Bool -- analyze a subset of the kern dataset
+                       , kern :: Bool -- analyze the kern dataset
+                       
                        , random     :: Bool -- ^ analyze random datasets
                        , export     :: Bool -- ^ export MIDI files
                        , verify     :: Bool -- ^ whether to verify hypothesis
@@ -101,6 +104,12 @@ parseOpts = Options
   <*> switch (  long "jazz"
              <> short 'j'
              <> help "Analyze the Omnibook from Klaus jazz dataset" )
+  <*> switch (  long "bachChorales"
+             <> short 'b'
+             <> help "Analyze the bach Chorales" )
+  <*> switch (  long "kern"
+             <> short 'k'
+             <> help "Analyze the kern dataset" )
   <*> switch (  long "random"
              <> short 'R'
              <> help "Analyze the random datasets" )
@@ -165,6 +174,8 @@ main = do
   when (heman op) $ do
     when (experts op) $
       run "docs/out/heman/annotations" parseHEMANAnnotations
+      -- run "docs/out/heman/annotationsHigh" parseHEMANAnnotationsHigh
+      -- run "docs/out/heman/annotationsLow" parseHEMANAnnotationsLow
     when (siacf1 op) $
       run "docs/out/heman/siacf1" parseHEMANAlgoSIACF1
     when (siacp op) $
@@ -206,7 +217,25 @@ main = do
     when (siacrd op) $
       run "docs/out/jazz/siacrd" parsejazzAlgoSIACRD
 
-    when (toCompare op) $ do
+  when (bachChorales op) $ do
+    when (siacf1 op) $
+      run "docs/out/kern/bachChorales/siacf1" parsekernBachChoralesAlgoSIACF1
+    when (siacp op) $
+      run "docs/out/kern/bachChorales/siacp" parsekernBachChoralesAlgoSIACP
+    when (siacr op) $
+      run "docs/out/kern/bachChorales/siacr" parsekernBachChoralesAlgoSIACR
+    when (siacf1d op) $
+      run "docs/out/kern/bachChorales/siacf1d" parsekernBachChoralesAlgoSIACF1D
+    when (siacpd op) $
+      run "docs/out/kern/bachChorales/siacpd" parsekernBachChoralesAlgoSIACPD
+    when (siacrd op) $
+      run "docs/out/kern/bachChorales/siacrd" parsekernBachChoralesAlgoSIACRD
+  
+  when (kern op) $ do
+    when (algorithms op) $
+     runManyKernSIAF1Analysis "data/kerns/patterns/algs" "docs/out/kern/algorithms" parseKernAlgs
+
+  when (toCompare op) $ do
       runComparison ("docs/out/folk/experts", parseFolkExperts)
                     ("docs/out/folk/algorithms", parseFolkAlgo)
 
@@ -309,6 +338,7 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
       encodeDefaultOrderedByName [(combineAnalyses algAnalyses) {name = "ALL"}]
   putStrLn $ "\tWrote " ++ f_algo ++ "/comparisonA.csv"
 
+
 -- Analyse given music pattern dataset.
 runAnalysis :: (Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
 runAnalysis (expo, ver) f_root parser = do
@@ -334,7 +364,7 @@ runAnalysis (expo, ver) f_root parser = do
               uns' <- verifyEquivClassHypothesis uns (patterns pg \\ uns)
               putStrLn $ "Verified (" ++ show uns' ++ " / " ++ show tot ++ ")"
 
-          renderOne pg an -- produce pie chart
+          -- renderOne pg an -- produce pie chart
           return (an,anP)
 
       let counts = map fst analyses
@@ -343,7 +373,7 @@ runAnalysis (expo, ver) f_root parser = do
       let finalAn = (combineAnalyses counts) { name = "ALL" }
       let finalAnP = (percentages finalAn) { nameP = "ALL" }
       print finalAn
-      renderAll expo finalAn
+      -- renderAll expo finalAn
 
       -- Output in CSV format
       BL.writeFile "output.csv" $ encodeDefaultOrderedByName (finalAn:counts)
@@ -351,6 +381,15 @@ runAnalysis (expo, ver) f_root parser = do
       -- probs <- percentages analyses
       BL.writeFile "outputP.csv" $ encodeDefaultOrderedByName (finalAnP:pers)
  
+runManyKernSIAF1Analysis :: FilePath -> FilePath -> (FilePath -> IO [PatternGroup]) -> IO ()
+runManyKernSIAF1Analysis input_root f_root parser = cd input_root $ do
+  flist <- listDirs
+  let inputdirs = map (++ "/tlf1d") flist
+  let parsed = map parser inputdirs
+  let outputdirs = map ((f_root++"/")++) flist
+  
+  sequence_ (zipWith (runAnalysis (False, False)) outputdirs parsed)
+
 -- | Verify the hypothesis that our transformations form equivalence classes.
 -- This is done by trying out other patterns in the group as base patterns.
 verifyEquivClassHypothesis :: [Pattern] -- ^ unclassified patterns

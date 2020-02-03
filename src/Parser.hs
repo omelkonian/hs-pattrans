@@ -1,8 +1,11 @@
 module Parser ( parseClassicExperts, parseClassicAlgo
               , parseClassicAlgoVM1, parseClassicAlgoVM2, parseClassicAlgoMP, parseClassicAlgoSIACF1, parseClassicAlgoSIACP, parseClassicAlgoSIACR
-              , parseFolkAlgoVM1, parseFolkAlgoVM2, parseFolkAlgoMP, parseFolkAlgoSIACF1, parseFolkAlgoSIACP, parseFolkAlgoSIACR, parseFolkAlgoCOSIA, parseFolkAlgoSIACFP, parseHEMANAnnotations, parseHEMANAlgoSIACRD, parseHEMANAlgoSIACPD, parseHEMANAlgoSIACR, parseHEMANAlgoSIACP, parseHEMANAlgoSIACF1, parseHEMANAlgoSIACF1D
+              , parseFolkAlgoVM1, parseFolkAlgoVM2, parseFolkAlgoMP, parseFolkAlgoSIACF1, parseFolkAlgoSIACP, parseFolkAlgoSIACR, parseFolkAlgoCOSIA, parseFolkAlgoSIACFP
+              , parseHEMANAnnotations, parseHEMANAlgoSIACRD, parseHEMANAlgoSIACPD, parseHEMANAlgoSIACR, parseHEMANAlgoSIACP, parseHEMANAlgoSIACF1, parseHEMANAlgoSIACF1D, parseHEMANAnnotationsHigh, parseHEMANAnnotationsLow
               , parseEuroAlgoSIACF1, parseEuroAlgoSIACF1D, parseEuroAlgoSIACP, parseEuroAlgoSIACPD, parseEuroAlgoSIACR, parseEuroAlgoSIACRD
               , parsejazzAlgoSIACF1, parsejazzAlgoSIACF1D, parsejazzAlgoSIACP, parsejazzAlgoSIACPD, parsejazzAlgoSIACR, parsejazzAlgoSIACRD
+              , parsekernBachChoralesAlgoSIACRD, parsekernBachChoralesAlgoSIACPD, parsekernBachChoralesAlgoSIACF1, parsekernBachChoralesAlgoSIACF1D, parsekernBachChoralesAlgoSIACP, parsekernBachChoralesAlgoSIACR
+              , parseKernAlgs, parseKernAllAlgs
               , parseFolkExperts, parseFolkAlgo, parseRandom
               , parseMusic
               , cd, listDirs, listFiles, emptyDirectory
@@ -46,7 +49,55 @@ parseHemanMusic song = cd ("data/HEMAN/piece/csv" ++ sanitize song) $ do
     mirexP = Note <$> (floatP <* sepP) <*> (intP <* sepP)
                    <* (intP <* sepP) <* (floatP <* sepP)
                    <* intP <* newline
-             
+
+-- ========
+parseKernAllAlgs :: IO [PatternGroup]
+parseKernAllAlgs = cd "data/kerns/patterns/algs" $ do
+  flist <- listDirs
+  allComposers <- forM flist $ \f_c -> cd f_c $ do
+    f_alg <- listDirs
+    concat <$> forM f_alg
+        (\f_v -> cd f_v $
+            listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece $ f_c ++ "-" ++ f_v)))
+  return (concat allComposers)
+
+parseKernAlgs :: FilePath -> IO [PatternGroup]
+parseKernAlgs filepath = cd filepath $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "Alg"))
+  return algPgs
+-- ========
+  
+parsekernBachChoralesAlgoSIACRD :: IO [PatternGroup]
+parsekernBachChoralesAlgoSIACRD = cd "data/kerns/patterns/bachChorales/alg/tlrd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIARD"))
+  return algPgs
+  
+parsekernBachChoralesAlgoSIACPD :: IO [PatternGroup]
+parsekernBachChoralesAlgoSIACPD = cd "data/kerns/patterns/bachChorales/alg/tlpd/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAPD"))
+  return algPgs
+
+parsekernBachChoralesAlgoSIACF1D :: IO [PatternGroup]
+parsekernBachChoralesAlgoSIACF1D = cd "data/kerns/patterns/bachChorales/alg/tlf1d/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1D"))
+  return algPgs
+
+parsekernBachChoralesAlgoSIACR :: IO [PatternGroup]
+parsekernBachChoralesAlgoSIACR = cd "data/kerns/patterns/bachChorales/alg/tlr/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAR"))
+  return algPgs
+  
+parsekernBachChoralesAlgoSIACP :: IO [PatternGroup]
+parsekernBachChoralesAlgoSIACP = cd "data/kerns/patterns/bachChorales/alg/tlp/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAP"))
+  return algPgs
+
+parsekernBachChoralesAlgoSIACF1 :: IO [PatternGroup]
+parsekernBachChoralesAlgoSIACF1 = cd "data/kerns/patterns/bachChorales/alg/tlf1/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "SIAF1"))
+  return algPgs
+
+          
 -- ========
 parsejazzAlgoSIACRD :: IO [PatternGroup]
 parsejazzAlgoSIACRD = cd "data/jazz/patterns/alg/tlrd/" $ do
@@ -145,6 +196,16 @@ parseHEMANAnnotations = cd "data/HEMAN/patterns/annotations/" $ do
   algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "Human"))
   return algPgs
   
+parseHEMANAnnotationsHigh :: IO [PatternGroup]
+parseHEMANAnnotationsHigh = cd "data/HEMAN/patterns/annoHigh/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "HumanHigh"))
+  return algPgs
+
+parseHEMANAnnotationsLow :: IO [PatternGroup]
+parseHEMANAnnotationsLow = cd "data/HEMAN/patterns/annoLow/" $ do
+  algPgs <- listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece "HumanLow"))
+  return algPgs
+
 -- | Parse all (expert) pattern groups from the classical dataset.
 parseClassicExperts :: IO [PatternGroup]
 parseClassicExperts = cd "data/pieces" $ do
@@ -176,7 +237,7 @@ parseClassicAlgo = cd "data/algOutput" $ do
     else
       concat <$> forM f_versions
         (\f_v -> cd f_v $
-            listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece $ f_alg ++ ":" ++ f_v)))
+            listFiles >>= ((concat <$>) . pmapM (parseAlgoPiece $ f_alg ++ "-" ++ f_v)))
   return (concat allPgs)
 
 -- | Parse all (algorithmic, VM1) pattern groups from the classical dataset.
