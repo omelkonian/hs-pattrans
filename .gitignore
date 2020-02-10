@@ -1,8 +1,10 @@
 # Stack
 .stack-work/
 
-# Extracted MIDI
-data/extracted/
+# Generated output
+docs/out/
+docs/haddock/
+docs/charts.html
 
 # TAGS
 TAGS
