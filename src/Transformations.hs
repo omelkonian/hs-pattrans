@@ -146,11 +146,11 @@ maxLookahead :: Int
 maxLookahead = 5
 
 approxEqWith :: forall b. (Show b, Num b, Eq b)
-             => (  b                -- ^ the element to delete
-                -> [b]              -- ^ the initial list
-                -> Int              -- ^ maximum elements to ignore
-                -> Maybe (Int, [b]) -- ^ * Nothing, if there was no deletion
-                                    --   * Just(# of ignored,tail), otherwise
+             => (  b                -- the element to delete
+                -> [b]              -- the initial list
+                -> Int              -- maximum elements to ignore
+                -> Maybe (Int, [b]) --  * Nothing, if there was no deletion
+                                    --  * Just(# of ignored,tail), otherwise
                 )
                 -- ^ function that deletes an element from a list, possibly
                 -- reducing (summing) consecutive elements to be equal to the
@@ -185,7 +185,7 @@ approxEqWith del1
       , maxA' >= 0
       , maxA - maxA' <= maxLookahead
       = del ys' xs (maxI, maxA')
-      -- || (maxI > 0 && del ys xs (maxI - 1, maxA)) -- too slow...
+      -- `|| (maxI > 0 && del ys xs (maxI - 1, maxA))` -- too slow...
 
       -- did not find element, ignore if possible
       | maxI > 0

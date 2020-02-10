@@ -13,7 +13,7 @@ library
                       Transformations,
                       Parser,
                       Analysis,
-                      Charts,
+                      Render,
                       MIDI,
                       EuterpeaUtils,
                       Discovery
@@ -27,6 +27,7 @@ library
                       containers,
                       Euterpea == 2.0.6,
                       HCodecs == 0.5.1,
+                      bytestring == 0.10.8.1,
                       cassava == 0.4.5.1,
                       parallel == 3.2.1.1,
                       async
@@ -39,7 +40,6 @@ executable hs-pattrans
   build-depends:      base,
                       hs-pattrans,
                       optparse-applicative == 0.13.2.0,
-                      cassava == 0.4.5.1,
                       bytestring == 0.10.8.1
   ghc-options:        -Wall -threaded -rtsopts -with-rtsopts=-N
                       -fno-warn-type-defaults -O2

@@ -1,29 +1,25 @@
-import Data.List ((\\), nub, isInfixOf)
-import Data.Semigroup ((<>))
 import Control.Monad (when, forM)
+
+import Data.List      ((\\), nub, isInfixOf)
+import Data.Semigroup ((<>))
+
 import Options.Applicative
-import Data.Csv (encodeDefaultOrderedByName)
-import qualified Data.ByteString.Lazy as BL
 
 import Types
 import Parser
 import Analysis
--- import CompoAnalysis
--- import ExactAnalysis
--- import ProtoAnalysis
--- import Approx6Analysis
-import Charts
+import Render
 
 -- | Command-line options.
-data Options = Options { experts    :: Bool -- ^ analyze expert dataset
-                       , algorithms :: Bool -- ^ analyze algorithm dataset
+data Options = Options { experts    :: Bool -- ^ analyse expert dataset
+                       , algorithms :: Bool -- ^ analyse algorithm dataset
                        
-                       , vm1 :: Bool -- ^ analyze algorithm dataset: VM1
-                       , vm2 :: Bool -- ^ analyze algorithm dataset: VM2
-                       , mp :: Bool -- ^ analyze algorithm dataset: MP
-                       , siacf1 :: Bool -- ^ analyze algorithm dataset: SIAF1
-                       , siacp :: Bool -- ^ analyze algorithm dataset: SIACP
-                       , siacr :: Bool -- ^ analyze algorithm dataset: SIACR
+                       , vm1 :: Bool -- ^ analyse algorithm dataset: VM1
+                       , vm2 :: Bool -- ^ analyse algorithm dataset: VM2
+                       , mp :: Bool -- ^ analyse algorithm dataset: MP
+                       , siacf1 :: Bool -- ^ analyse algorithm dataset: SIAF1
+                       , siacp :: Bool -- ^ analyse algorithm dataset: SIACP
+                       , siacr :: Bool -- ^ analyse algorithm dataset: SIACR
                        , cosia :: Bool
                        , cfp :: Bool
 
@@ -114,6 +110,19 @@ parseOpts = Options
              <> short 'M'
              <> help "Compare expert annotations and algorithmic output" )
 
+-- | Which kind of analysis to run?
+currentAnalysis :: Analysis
+currentAnalysis = fullAnalysis
+
+analysePg :: PatternGroup -> IO AnalysisResult
+analysePg = return . analysePatternGroup currentAnalysis
+
+printAn :: AnalysisResult -> IO ()
+printAn an = print (currentAnalysis, an)
+
+writeCSV :: String -> Bool -> [AnalysisResult] -> IO ()
+writeCSV fname expo as = dumpAnalyses fname expo currentAnalysis as
+
 -- | Main function.
 main :: IO ()
 main = do
@@ -137,7 +146,8 @@ main = do
     when (siacr op) $
       run "docs/out/classical/siacr" parseClassicAlgoSIACR
     when (toCompare op) $
-      runComparison ("docs/out/classical/experts", parseClassicExperts)
+      runComparison (export op)
+                    ("docs/out/classical/experts", parseClassicExperts)
                     ("docs/out/classical/algorithms", parseClassicAlgo)
       
   when (folk op) $ do
@@ -207,7 +217,8 @@ main = do
       run "docs/out/jazz/siacrd" parsejazzAlgoSIACRD
 
     when (toCompare op) $ do
-      runComparison ("docs/out/folk/experts", parseFolkExperts)
+      runComparison (export op)
+                    ("docs/out/folk/experts", parseFolkExperts)
                     ("docs/out/folk/algorithms", parseFolkAlgo)
 
 
@@ -222,10 +233,11 @@ main = do
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
 
-runComparison :: (FilePath, IO [PatternGroup]) -- ^ experts
+runComparison :: Bool
+              -> (FilePath, IO [PatternGroup]) -- ^ experts
               -> (FilePath, IO [PatternGroup]) -- ^ algorithms
               -> IO ()
-runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
+runComparison expo (f_experts, parseExperts) (f_algo, parseAlgo) = do
   -- parse expert annotations
   putStrLn $ "Parsing " ++ f_experts ++ "..."
   pgsE <- filter (not . null . patterns) <$> parseExperts
@@ -259,28 +271,26 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
                               , basePattern  = expertPrototype
                               , patterns     = algPrototypes
                               }
-        analysePatternGroup pg
+        analysePg pg
 
       -- Aggregate results for a particular piece/alg (containing all expert prototypes)
-      let finalAn = (combineAnalyses analyses)
+      let finalAn = (mconcat analyses)
                     {name = "ALL(" ++ piece ++ ":" ++ alg ++ ")"}
       -- print finalAn
 
       -- Output in CSV format
       let f_root = f_algo ++ "/" ++ piece ++ "/" ++ alg
       cd f_root $
-        BL.writeFile "comparison.csv" $
-          encodeDefaultOrderedByName (finalAn:analyses)
+        writeCSV "comparison" expo (finalAn:analyses)
       putStrLn $ "\t\tWrote " ++ f_root ++ "/comparison.csv"
       return finalAn
 
     -- Aggregate results for a particular piece (containing all algorithms)
-    let allAlgAnalyses = (combineAnalyses algAnalyses)
+    let allAlgAnalyses = (mconcat algAnalyses)
                          {name = "ALL(" ++ piece ++ ")"}
     let f_root = f_algo ++ "/" ++ piece
     cd f_root $
-      BL.writeFile "comparison.csv" $
-        encodeDefaultOrderedByName [allAlgAnalyses]
+      writeCSV "comparison" expo [allAlgAnalyses]
     putStrLn $ "\tWrote " ++ f_root ++ "/comparison.csv"
 
     return algAnalyses
@@ -289,24 +299,20 @@ runComparison (f_experts, parseExperts) (f_algo, parseAlgo) = do
   let pieceAnalyses = concat pieceAnalyses'
   algAnalyses <- forM algs $ \alg -> do
     let algPieceAnalyses = filter (isInfixOf alg . name) pieceAnalyses
-    let algAn = (combineAnalyses algPieceAnalyses) {name = "ALL(" ++ alg ++ ")"}
-    let f_name = alg ++ ".csv"
+    let algAn = (mconcat algPieceAnalyses) {name = "ALL(" ++ alg ++ ")"}
     cd f_algo $
-      BL.writeFile f_name $
-        encodeDefaultOrderedByName [algAn]
-    putStrLn $ "Wrote " ++ f_algo ++ "/" ++ f_name
+      writeCSV alg expo [algAn]
+    putStrLn $ "Wrote " ++ f_algo ++ "/" ++ alg
     return algAn
 
   -- Aggregate all results (coming from piece aggregations)
   cd f_algo $
-    BL.writeFile "comparison.csv" $
-      encodeDefaultOrderedByName [(combineAnalyses pieceAnalyses) {name = "ALL"}]
+    writeCSV "comparison" expo [(mconcat pieceAnalyses) {name = "ALL"}]
   putStrLn $ "\tWrote " ++ f_algo ++ "/comparison.csv"
 
   -- Aggregate all results (coming from algorithm aggregations)
   cd f_algo $
-    BL.writeFile "comparisonA.csv" $
-      encodeDefaultOrderedByName [(combineAnalyses algAnalyses) {name = "ALL"}]
+    writeCSV "comparisonA" expo [(mconcat algAnalyses) {name = "ALL"}]
   putStrLn $ "\tWrote " ++ f_algo ++ "/comparisonA.csv"
 
 -- Analyse given music pattern dataset.
@@ -320,11 +326,10 @@ runAnalysis (expo, ver) f_root parser = do
     cd f_root $ do
       analyses <-
         forM allPatternGroups $ \pg -> do
-          an <- analysePatternGroup pg
-          let anP = percentages an
+          an <- analysePg pg
 
-          putStrLn (name an)
-          -- print an -- display on terminal
+          -- putStrLn (name an)
+          printAn an -- display on terminal
 
           -- Verify (hope to be slow)
           when ver $ do
@@ -334,22 +339,16 @@ runAnalysis (expo, ver) f_root parser = do
               uns' <- verifyEquivClassHypothesis uns (patterns pg \\ uns)
               putStrLn $ "Verified (" ++ show uns' ++ " / " ++ show tot ++ ")"
 
-          renderOne pg an -- produce pie chart
-          return (an,anP)
+          renderOne currentAnalysis pg an -- produce pie chart
+          return an
 
-      let counts = map fst analyses
-      let pers = map snd analyses
       -- Combine all individual analyses and render in one chart.
-      let finalAn = (combineAnalyses counts) { name = "ALL" }
-      let finalAnP = (percentages finalAn) { nameP = "ALL" }
-      print finalAn
-      renderAll expo finalAn
+      let finalAn = (mconcat analyses) { name = "ALL" }
+      printAn finalAn
+      render currentAnalysis "ALL" finalAn
 
       -- Output in CSV format
-      BL.writeFile "output.csv" $ encodeDefaultOrderedByName (finalAn:counts)
-
-      -- probs <- percentages analyses
-      BL.writeFile "outputP.csv" $ encodeDefaultOrderedByName (finalAnP:pers)
+      writeCSV "output" expo (finalAn:analyses)
  
 -- | Verify the hypothesis that our transformations form equivalence classes.
 -- This is done by trying out other patterns in the group as base patterns.
@@ -359,6 +358,6 @@ verifyEquivClassHypothesis :: [Pattern] -- ^ unclassified patterns
 verifyEquivClassHypothesis []   _           = return 0
 verifyEquivClassHypothesis uns []           = return (length uns)
 verifyEquivClassHypothesis uns (base:bases) = do
-  an <- analysePatternGroup (PatternGroup "" "" "" base uns)
+  an <- analysePg (PatternGroup "" "" "" base uns)
   let uns' = snd <$> unclassified an
   verifyEquivClassHypothesis uns' bases
