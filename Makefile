@@ -7,7 +7,7 @@ build:
 	stack build
 
 analysis: build
-	stack exec -- hs-pattrans --print -CRFEA
+	stack exec -- hs-pattrans --print -CFEAR
 
 compare: build
 	stack exec -- hs-pattrans --print -MCF
@@ -19,7 +19,7 @@ docs: build
 	stack exec -- haddock --html src/*.hs --hyperlinked-source --odir=docs/haddock
 
 deploy: build docs
-	stack exec -- hs-pattrans -CE && ./prepare.sh
+	stack exec -- hs-pattrans -MCFEAR && ./prepare.sh
 
 clean:
 	stack clean && rm -rf docs/out && rm -rf docs/haddock && rm docs/charts.html
