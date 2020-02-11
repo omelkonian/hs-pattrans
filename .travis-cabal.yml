@@ -1,0 +1,40 @@
+sudo: true
+language: haskell
+
+git:
+  depth: 5
+
+cabal: 3.0
+
+addons:
+  apt:
+    packages:
+    - libasound2-dev # needed for PortMidi
+
+cache:
+  directories:
+  - "$HOME/.cabal/store"
+  # - "$HOME/.stack"
+  # - "$TRAVIS_BUILD_DIR/.stack-work"
+
+matrix:
+  include:
+    - ghc: 8.0.2
+      # env: STACK_YAML="$TRAVIS_BUILD_DIR/stack.yaml"
+
+install:
+  - ghc --version
+  - cabal --version
+  - cabal new-update
+  - cabal new-build --enable-tests --enable-benchmarks
+
+#   - curl -sSL https://get.haskellstack.org/ | sh # install stack
+#   - stack --version
+#   - stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks
+      
+script:
+  - cabal new-test --enable-tests
+  # - stack test --system-ghc
+
+notifications:
+  email: false

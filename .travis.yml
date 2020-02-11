@@ -1,0 +1,42 @@
+sudo: true
+language: haskell
+
+git:
+  depth: 5
+
+addons:
+  apt:
+    packages:
+    - libasound2-dev # needed for PortMidi
+
+cache:
+  directories:
+  - "$HOME/.stack"
+  - "$TRAVIS_BUILD_DIR/.stack-work"
+
+matrix:
+  include:
+    - ghc: 8.0.2
+      env: STACK_YAML="$TRAVIS_BUILD_DIR/stack.yaml"
+
+install:
+  - curl -sSL https://get.haskellstack.org/ | sh
+  - stack --version
+  - stack config set system-ghc --global true
+  - make build
+      
+script:
+  - make deploy
+  # - make test
+
+notifications:
+  email: false
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github_token: $GITHUB_TOKEN
+  target_branch: gh-pages
+  local_dir: ./docs
+  on:
+    branch: master

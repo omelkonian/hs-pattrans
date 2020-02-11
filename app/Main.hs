@@ -36,6 +36,7 @@ data Options = Options { experts    :: Bool -- ^ analyse expert dataset
                        , export     :: Bool -- ^ export MIDI files
                        , verify     :: Bool -- ^ whether to verify hypothesis
                        , toCompare  :: Bool -- ^ run cross-dataset comparison
+                       , toPrint    :: Bool -- ^ whether to print results
                        }
 
 -- | Parsing command-line options.
@@ -109,6 +110,9 @@ parseOpts = Options
   <*> switch (  long "compare"
              <> short 'M'
              <> help "Compare expert annotations and algorithmic output" )
+  <*> switch (  long "print"
+             <> short 'P'
+             <> help "Whether to print results in the terminal." )
 
 -- | Which kind of analysis to run?
 currentAnalysis :: Analysis
@@ -117,8 +121,8 @@ currentAnalysis = fullAnalysis
 analysePg :: PatternGroup -> IO AnalysisResult
 analysePg = return . analysePatternGroup currentAnalysis
 
-printAn :: AnalysisResult -> IO ()
-printAn an = print (currentAnalysis, an)
+printAn :: Bool -> AnalysisResult -> IO ()
+printAn toPrint an = if toPrint then print (currentAnalysis, an) else putStr "."
 
 writeCSV :: String -> Bool -> [AnalysisResult] -> IO ()
 writeCSV fname expo as = dumpAnalyses fname expo currentAnalysis as
@@ -127,7 +131,7 @@ writeCSV fname expo as = dumpAnalyses fname expo currentAnalysis as
 main :: IO ()
 main = do
   op <- execParser opts
-  let run = runAnalysis (export op, verify op)
+  let run = runAnalysis (export op, verify op, toPrint op)
   when (classical op) $ do
     when (experts op) $
       run "docs/out/classical/experts" parseClassicExperts
@@ -146,7 +150,7 @@ main = do
     when (siacr op) $
       run "docs/out/classical/siacr" parseClassicAlgoSIACR
     when (toCompare op) $
-      runComparison (export op)
+      runComparison (export op, toPrint op)
                     ("docs/out/classical/experts", parseClassicExperts)
                     ("docs/out/classical/algorithms", parseClassicAlgo)
       
@@ -217,7 +221,7 @@ main = do
       run "docs/out/jazz/siacrd" parsejazzAlgoSIACRD
 
     when (toCompare op) $ do
-      runComparison (export op)
+      runComparison (export op, toPrint op)
                     ("docs/out/folk/experts", parseFolkExperts)
                     ("docs/out/folk/algorithms", parseFolkAlgo)
 
@@ -233,11 +237,11 @@ main = do
                 <> header "hs-mirex: a tool for music pattern discovery"
                 )
 
-runComparison :: Bool
+runComparison :: (Bool, Bool)
               -> (FilePath, IO [PatternGroup]) -- ^ experts
               -> (FilePath, IO [PatternGroup]) -- ^ algorithms
               -> IO ()
-runComparison expo (f_experts, parseExperts) (f_algo, parseAlgo) = do
+runComparison (expo, toP) (f_experts, parseExperts) (f_algo, parseAlgo) = do
   -- parse expert annotations
   putStrLn $ "Parsing " ++ f_experts ++ "..."
   pgsE <- filter (not . null . patterns) <$> parseExperts
@@ -276,7 +280,7 @@ runComparison expo (f_experts, parseExperts) (f_algo, parseAlgo) = do
       -- Aggregate results for a particular piece/alg (containing all expert prototypes)
       let finalAn = (mconcat analyses)
                     {name = "ALL(" ++ piece ++ ":" ++ alg ++ ")"}
-      -- print finalAn
+      printAn toP finalAn
 
       -- Output in CSV format
       let f_root = f_algo ++ "/" ++ piece ++ "/" ++ alg
@@ -316,8 +320,8 @@ runComparison expo (f_experts, parseExperts) (f_algo, parseAlgo) = do
   putStrLn $ "\tWrote " ++ f_algo ++ "/comparisonA.csv"
 
 -- Analyse given music pattern dataset.
-runAnalysis :: (Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
-runAnalysis (expo, ver) f_root parser = do
+runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
+runAnalysis (expo, ver, toP) f_root parser = do
     -- Parse dataset to retrieve all pattern groups.
     putStrLn $ "Parsing " ++ f_root ++ "..."
     allPatternGroups <- filter (not . null . patterns) <$> parser
@@ -329,7 +333,7 @@ runAnalysis (expo, ver) f_root parser = do
           an <- analysePg pg
 
           -- putStrLn (name an)
-          printAn an -- display on terminal
+          printAn toP an -- display on terminal
 
           -- Verify (hope to be slow)
           when ver $ do
@@ -344,7 +348,7 @@ runAnalysis (expo, ver) f_root parser = do
 
       -- Combine all individual analyses and render in one chart.
       let finalAn = (mconcat analyses) { name = "ALL" }
-      printAn finalAn
+      printAn toP finalAn
       render currentAnalysis "ALL" finalAn
 
       -- Output in CSV format
