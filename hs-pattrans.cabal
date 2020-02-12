@@ -1,12 +1,21 @@
 name             : hs-pattrans
-version          : 0.1.0.0
-synopsis         : A pattern language, based on the MIREX "Discovery of Repeated Themes & Sections" task.
+version          : 0.1.0.2
 homepage         : https://github.com/omelkonian/hs-pattrans
-author           : Orestis Melkonian
+author           : Orestis Melkonian, Iris Yuping Ren
+maintainer       : Orestis Melkonian <melkon.or@gmail.com>
 category         : Language
 build-type       : Simple
 cabal-version    : >= 1.10
 tested-with      : GHC == 8.0.2
+license          : BSD3
+license-file     : LICENSE
+synopsis         : DSL for musical patterns and transformation, based on contravariant functors.
+description      :
+  A music DSL for defining pattern transformations, analyzing pattern datasets and detecting patterns.
+
+source-repository head
+    type: git
+    location: git://github.com/omelkonian/hs-pattrans.git
 
 library
   hs-source-dirs:     src
@@ -18,7 +27,7 @@ library
                       MIDI,
                       EuterpeaUtils,
                       Discovery
-  build-depends:      base >= 4.8,
+  build-depends:      base >= 4.8 && < 4.10 ,
                       parsec >= 3.1.13,
                       directory >= 1.3.1.5,
                       Chart >= 1.8,
@@ -32,7 +41,7 @@ library
                       cassava == 0.4.5.1,
                       parallel == 3.2.1.1,
                       async
-  ghc-options:        -Wall -fno-warn-type-defaults -O2
+  ghc-options:        -Wall -fno-warn-type-defaults
   default-language:   Haskell2010
 
 executable hs-pattrans
@@ -43,7 +52,7 @@ executable hs-pattrans
                       optparse-applicative == 0.13.2.0,
                       bytestring == 0.10.8.1
   ghc-options:        -Wall -threaded -rtsopts -with-rtsopts=-N
-                      -fno-warn-type-defaults -O2
+                      -fno-warn-type-defaults
   default-language:   Haskell2010
 
 test-suite spec
@@ -57,5 +66,5 @@ test-suite spec
   build-tool-depends: hspec-discover:hspec-discover
   type:               exitcode-stdio-1.0
   ghc-options:        -Wall -threaded -rtsopts -with-rtsopts=-N
-                      -fno-warn-type-defaults -O2
+                      -fno-warn-type-defaults
   default-language:   Haskell2010

@@ -122,7 +122,7 @@ analysePg :: PatternGroup -> IO AnalysisResult
 analysePg = return . analysePatternGroup currentAnalysis
 
 printAn :: Bool -> AnalysisResult -> IO ()
-printAn toPrint an = if toPrint then print (currentAnalysis, an) else putStr "."
+printAn toP an = if toP then print (currentAnalysis, an) else putStr "."
 
 writeCSV :: String -> Bool -> [AnalysisResult] -> IO ()
 writeCSV fname expo as = dumpAnalyses fname expo currentAnalysis as

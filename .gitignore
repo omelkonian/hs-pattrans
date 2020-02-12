@@ -1,9 +1,11 @@
 # Stack
 .stack-work/
 
+# Cabal
+dist-newstyle/
+
 # Generated output
 docs/out/
-docs/haddock/
 docs/charts.html
 
 # TAGS
