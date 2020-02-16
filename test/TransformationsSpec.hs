@@ -5,7 +5,7 @@ import Control.Monad (forM_)
 import Test.Hspec
 
 import Types
-import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf, tonalTranspOfCan, tonalInversionOfCan)
+import Transformations ((<=>), (~~), tonalTranspOf, exactOf, retrogradeOf, inversionOf, transpositionOf, rotationOf, augmentationOf, trInversionOf, trAugmentationOf, tonalTranspOfCan, tonalInversionOfCan, trtonCanAugmentationOf)
 
 forAll :: Example r => [a] -> String -> (a -> r) -> SpecWith (Arg r)
 forAll xs title k = 
@@ -66,7 +66,7 @@ spec = do
   forAll2 neighDu5u "tonal transposition more candidates - neighbour notes in D up a fifth and neighbouring up" $ \x y -> do
       (x <=> y) (tonalTranspOfCan ~~ 1)
       
-  forAll2 neighDu5d "This one will fail: use tonalTranspCan (next test) instead. tonal transposition - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
+  forAll2 neighDu5d "This one will fail with small number of notes: use tonalTranspCan (next test) instead. tonal transposition - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
       (x <=> y) (tonalTranspOf ~~ 1)
   
   forAll2 neighDu5d "tonal transposition more candidates - neighbour notes in D up a fifth and neighbouring down" $ \x y -> do
@@ -182,10 +182,23 @@ spec = do
   describe "augmentation" $ do
     it "correctly detects trans augmentation with the explicit notes" $
       (cat <=> ca) (trAugmentationOf ~~ 1)
- 
+
+  describe "second order approximation" $ do
+    it "correctly detects second order approximation: C chord vs C scale" $
+      (ori <=> orna) (exactOf ~~ 0.40)
+
+  describe "bach query examples" $ do
+    it "checking occurrences from bach satisfying trtonCanAugmentationOf" $
+      (bach <=> bacho) (trtonCanAugmentationOf ~~ 1.0)
   
   where
+    bach = (.@@) [1..] [76, 72, 77, 68]
+    bacho = (.@@) [1..] [76, 72, 69, 66]
+    ori = (.@@) [1..] (createPitchesfromScaleDegree 3 36 major [1,3,5])
+    orna = (.@@) [1..] (createPitchesfromScaleDegree 6 36 major [1,2,3,4,5,6])
+    
     h = createPitchesfromScaleDegree 8 36 major [1,3,4,5,6,5,4,3]
+    
     h1 = (.@@) [1..] h
     h2 = (.@@) [1..] [38,41,43,45,47,45,43,41]
     h3 = (.@@) [1..] [40,43,45,47,48,47,45,43]
@@ -208,12 +221,16 @@ spec = do
     neighBb4 = (.@@) [1..] [39,41,39]
     neighBb5 = (.@@) [1..] [41,43,41]
     neighBb = [neighBb1, neighBb2, neighBb3, neighBb4, neighBb5]
+
+    d1u5d = createPitchesfromScaleDegree 10 38 major [1,5,4,5]
+    d2u5d = createPitchesfromScaleDegree 10 38 major [2,6,5,6]
+    d3u5d = createPitchesfromScaleDegree 10 38 major [3,7,6,7]
     
-    neighD1u5d = (.@@) [1..] [38,45,53,45]
-    neighD2u5d = (.@@) [1..] [40,47,45,47]
-    neighD3u5d = (.@@) [1..] [42,49,47,49]
-    neighD4u5d = (.@@) [1..] [43,50,49,50]
-    neighDu5d = [neighD1u5d, neighD2u5d, neighD3u5d, neighD4u5d]
+    neighD1u5d = (.@@) [1..] d1u5d 
+    neighD2u5d = (.@@) [1..] d2u5d
+    neighD3u5d = (.@@) [1..] d3u5d
+    -- neighD4u5d = (.@@) [1..] [43,50,49,50]
+    neighDu5d = [neighD1u5d, neighD2u5d, neighD3u5d]
   
     neighD1u5u = (.@@) [1..] [38,45,57,45]
     neighD2u5u = (.@@) [1..] [40,47,49,47]

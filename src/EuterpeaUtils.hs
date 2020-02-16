@@ -8,6 +8,7 @@ module EuterpeaUtils
 import           Euterpea.Music as Export hiding (Rest, Note, pitch)
 import qualified Euterpea.Music as M
 
+
 import Types
 
 -- | Convert our Pattern datatype to Euterpea's music datatype.
@@ -15,10 +16,10 @@ patternToMusic :: Pattern -> Music AbsPitch
 patternToMusic = line . fmap convert . withDurations
   where
     withDurations :: Pattern -> [(MIDI, Time)]
-    withDurations ps = zip (pitch ps) (durations ps ++ [4])
+    withDurations ps = zip (pitch ps) (durations ps)
 
     convert :: (MIDI, Time) -> Music AbsPitch
-    convert (m, tt) = Prim $ M.Note (toRational tt) (fromInteger m)
+    convert (m, tt) = Prim $ M.Note ((toRational tt / 4) ) (fromInteger m)
 
 -- | Convert from Euterpea's music datatype to our pattern datatype.
 musicToPattern :: ToMusic1 a => Music a -> Pattern

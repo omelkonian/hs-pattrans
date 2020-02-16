@@ -32,6 +32,9 @@ data Options = Options { experts    :: Bool -- ^ analyse expert dataset
                        , heman      :: Bool
                        , eurovision :: Bool
                        , jazz       :: Bool
+                       , bachChorales :: Bool -- analyze a subset of the kern dataset
+                       , kern :: Bool -- analyze the kern dataset
+                       
                        , random     :: Bool -- ^ analyze random datasets
                        , export     :: Bool -- ^ export MIDI files
                        , verify     :: Bool -- ^ whether to verify hypothesis
@@ -98,6 +101,12 @@ parseOpts = Options
   <*> switch (  long "jazz"
              <> short 'j'
              <> help "Analyze the Omnibook from Klaus jazz dataset" )
+  <*> switch (  long "bachChorales"
+             <> short 'b'
+             <> help "Analyze the bach Chorales" )
+  <*> switch (  long "kern"
+             <> short 'k'
+             <> help "Analyze the kern dataset" )
   <*> switch (  long "random"
              <> short 'R'
              <> help "Analyze the random datasets" )
@@ -179,6 +188,8 @@ main = do
   when (heman op) $ do
     when (experts op) $
       run "docs/out/heman/annotations" parseHEMANAnnotations
+      -- run "docs/out/heman/annotationsHigh" parseHEMANAnnotationsHigh
+      -- run "docs/out/heman/annotationsLow" parseHEMANAnnotationsLow
     when (siacf1 op) $
       run "docs/out/heman/siacf1" parseHEMANAlgoSIACF1
     when (siacp op) $
@@ -220,6 +231,23 @@ main = do
     when (siacrd op) $
       run "docs/out/jazz/siacrd" parsejazzAlgoSIACRD
 
+  when (bachChorales op) $ do
+    when (siacf1 op) $
+      run "docs/out/kern/bachChorales/siacf1" parsekernBachChoralesAlgoSIACF1
+    when (siacp op) $
+      run "docs/out/kern/bachChorales/siacp" parsekernBachChoralesAlgoSIACP
+    when (siacr op) $
+      run "docs/out/kern/bachChorales/siacr" parsekernBachChoralesAlgoSIACR
+    when (siacf1d op) $
+      run "docs/out/kern/bachChorales/siacf1d" parsekernBachChoralesAlgoSIACF1D
+    when (siacpd op) $
+      run "docs/out/kern/bachChorales/siacpd" parsekernBachChoralesAlgoSIACPD
+    when (siacrd op) $
+      run "docs/out/kern/bachChorales/siacrd" parsekernBachChoralesAlgoSIACRD
+  
+  when (kern op) $ do
+    when (algorithms op) $
+      runManyKernSIAF1Analysis "data/kerns/patterns/algs" "docs/out/kern/algorithms" parseKernAlgs
     when (toCompare op) $ do
       runComparison (export op, toPrint op)
                     ("docs/out/folk/experts", parseFolkExperts)
@@ -319,6 +347,7 @@ runComparison (expo, toP) (f_experts, parseExperts) (f_algo, parseAlgo) = do
     writeCSV "comparisonA" expo [(mconcat algAnalyses) {name = "ALL"}]
   putStrLn $ "\tWrote " ++ f_algo ++ "/comparisonA.csv"
 
+
 -- Analyse given music pattern dataset.
 runAnalysis :: (Bool, Bool, Bool) -> FilePath -> IO [PatternGroup] -> IO ()
 runAnalysis (expo, ver, toP) f_root parser = do
@@ -343,6 +372,7 @@ runAnalysis (expo, ver, toP) f_root parser = do
               uns' <- verifyEquivClassHypothesis uns (patterns pg \\ uns)
               putStrLn $ "Verified (" ++ show uns' ++ " / " ++ show tot ++ ")"
 
+
           renderOne currentAnalysis pg an -- produce pie chart
           return an
 
@@ -354,6 +384,15 @@ runAnalysis (expo, ver, toP) f_root parser = do
       -- Output in CSV format
       writeCSV "output" expo (finalAn:analyses)
  
+runManyKernSIAF1Analysis :: FilePath -> FilePath -> (FilePath -> IO [PatternGroup]) -> IO ()
+runManyKernSIAF1Analysis input_root f_root parser = cd input_root $ do
+  flist <- listDirs
+  let inputdirs = map (++ "/tlf1d") flist
+  let parsed = map parser inputdirs
+  let outputdirs = map ((f_root++"/")++) flist
+  
+  sequence_ (zipWith (runAnalysis (False, False, False)) outputdirs parsed)
+
 -- | Verify the hypothesis that our transformations form equivalence classes.
 -- This is done by trying out other patterns in the group as base patterns.
 verifyEquivClassHypothesis :: [Pattern] -- ^ unclassified patterns

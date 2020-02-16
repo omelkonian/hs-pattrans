@@ -44,6 +44,9 @@ type ApproxCheck a = (?p :: Float) => Check a
 exactOf :: ApproxCheck Pattern
 exactOf = rhythm >$< approxEq2
        <> pitch  >$< approxEq
+       
+exactOfRhythmOnly :: ApproxCheck Pattern
+exactOfRhythmOnly = rhythm >$< approxEq2
 
 -- | Transposition: move a pattern in pitch.
 -- (AKA horizontal+vertical translation)
@@ -53,6 +56,9 @@ transpositionOf = rhythm    >$< approxEq2
 
 transpositionOfPitchOnly :: ApproxCheck Pattern
 transpositionOfPitchOnly = intervals >$< approxEq2
+
+tontaltranspositionOfPitchOnly :: ApproxCheck Pattern
+tontaltranspositionOfPitchOnly = Check (\xs ys -> foldr (||) True (map (xs <=> ys) [checks >$< approxEq2 | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
 
 -- | Inversion: negate all pitch intervals (starting from the same base pitch).
 inversionOf :: ApproxCheck Pattern
@@ -83,14 +89,14 @@ augmentationOf = normalRhythm >$< approxEq2
 -- | Octave-agnostic tonal transposition, wrt a scale that 'fits' the base pattern
 -- e.g. [I, IV, V] tonalTranspOf [III, VI, VII]
 tonalTranspOf :: ApproxCheck Pattern
-tonalTranspOf =  rhythm >$< approxEq2
+tonalTranspOf =  normalRhythm >$< approxEq2
               <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale $ xs ++ ys)
                                               >$< approxEq2))
 
 -- | Taking into account of multiple possibilities of scales like in tonalTransCanofCore, but with approximation in the checking
 tonalTranspOfCan :: ApproxCheck Pattern
-tonalTranspOfCan = rhythm >$< approxEq2
-                 <> Check (\xs ys -> foldr (||) True (map (xs <=> ys) [checks >$< approxEq2 | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
+tonalTranspOfCan = normalRhythm >$< approxEq2
+                 <> Check (\xs ys -> foldr (||) True (map (xs <=> ys) [checks >$< approxEq2 | checks <- (map applyScale (guessScaleCandidates 2 $ xs ++ ys))]))
 
 -- | Instead guess one scale, then check the scale degrees, we guess three scales, and fold over all the possible scale degree checks with ||
 -- The core is a version that does not allow for approximation
