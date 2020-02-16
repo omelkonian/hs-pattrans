@@ -391,7 +391,7 @@ runManyKernSIAF1Analysis input_root f_root parser = cd input_root $ do
   let parsed = map parser inputdirs
   let outputdirs = map ((f_root++"/")++) flist
   
-  sequence_ (zipWith (runAnalysis (False, False)) outputdirs parsed)
+  sequence_ (zipWith (runAnalysis (False, False, False)) outputdirs parsed)
 
 -- | Verify the hypothesis that our transformations form equivalence classes.
 -- This is done by trying out other patterns in the group as base patterns.
