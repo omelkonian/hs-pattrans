@@ -33,8 +33,6 @@ queryMatchCount q mp = length (query q mp)
 -- query1 :: UserQuery (Time, Time)
 -- query1 = (transpositionOf ~~ 0.5) :@ (21 `upTo` 28)
 
-query2 :: UserQuery (Music Pitch)
-query2 = ((tontaltranspositionOfPitchOnly ~~ 1.0), (line $ map ($qn) [e 5, c 5, f 5, gs 4]))
 
 -- for eurovision
 query3 :: UserQuery (Music Pitch)
@@ -49,6 +47,15 @@ query4 = ((exactOf ~~ 1.0), line $ [c 5 qn, c 5 qn, d 5 qn, e 5 dhn, f 5 qn])
 
 query42 :: UserQuery (Music Pitch)
 query42 = ((exactOfRhythmOnly ~~ 1.0), line $ [c 5 qn, c 5 qn, d 5 qn, e 5 dhn, f 5 qn])
+
+-- for bach
+query2 :: UserQuery (Music Pitch)
+-- query2 = ((tontaltranspositionOfPitchOnly ~~ 1.0), (line $ map ($qn) [e 5, c 5, f 5, gs 4]))
+query2 = ((tonalTranspOfCan ~~ 1.0), (line $ map ($qn) [e 5, c 5, f 5, gs 4]))
+-- query2 = ((trtonCanAugmentationOf ~~ 1.0), (line $ map ($qn) [e 5, c 5, f 5, gs 4]))
+-- query2 = ((exacttonCanAugmentationOf ~~ 1.0), (line $ map ($qn) [e 5, c 5, f 5, gs 4]))
+-- query2 = ((trAugmentationOf ~~ 1.0), (line $ map ($qn) [e 5, c 5, f 5, gs 4]))
+-- query2 = ((trtonAugmentationOf ~~ 1.0), (line $ map ($qn) [e 5, c 5, f 5, gs 4]))
 
 -- for synth data
 query5 :: UserQuery (Music Pitch)
