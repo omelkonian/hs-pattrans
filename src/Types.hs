@@ -171,11 +171,13 @@ guessScaleCandidates n xs =
 
 toDegree :: Scale -> MIDI -> Integer
 toDegree sc m = i + (oct * 7)
-  where (i, oct) = M.findWithDefault (0, 0) m sc -- 0 for 'outside' note 
+  where (i, oct) = M.findWithDefault (-1000, 1000) m sc -- 0 for 'outside' note 
 
 applyScale :: Scale -> Pattern -> [Interval]
 applyScale sc = fmap (uncurry (-)) . pairs . fmap (toDegree sc) . pitch
 
+applyScaleM :: Scale -> Pattern -> [MIDI]
+applyScaleM sc = fmap (toDegree sc) . pitch
 -----------------------
 -- Parallel operations
 

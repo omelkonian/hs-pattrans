@@ -1,11 +1,13 @@
-{-# LANGUAGE ImplicitParams, Rank2Types, ScopedTypeVariables, BangPatterns #-}
+{-# LANGUAGE ImplicitParams      #-}
+{-# LANGUAGE Rank2Types          #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Transformations where
 
-import Data.List (sortOn)
-import Data.Semigroup
-import Data.Functor.Contravariant hiding ((>$<), (>$), ($<))
+import           Data.Functor.Contravariant hiding (($<), (>$), (>$<))
+import           Data.List                  (sortOn)
+import           Data.Semigroup
 
-import Types
+import           Types
 
 --------------------
 -- Combinator DSL
@@ -45,6 +47,9 @@ exactOf :: ApproxCheck Pattern
 exactOf = rhythm >$< approxEq2
        <> pitch  >$< approxEq
 
+exactOfRhythmOnly :: ApproxCheck Pattern
+exactOfRhythmOnly = rhythm >$< approxEq2
+
 -- | Transposition: move a pattern in pitch.
 -- (AKA horizontal+vertical translation)
 transpositionOf :: ApproxCheck Pattern
@@ -53,6 +58,10 @@ transpositionOf = rhythm    >$< approxEq2
 
 transpositionOfPitchOnly :: ApproxCheck Pattern
 transpositionOfPitchOnly = intervals >$< approxEq2
+
+tontaltranspositionOfPitchOnly :: ApproxCheck Pattern
+tontaltranspositionOfPitchOnly = Check (\xs ys -> foldr (||) True
+                    (map (xs <=> ys) [checks >$< approxEq2 | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
 
 -- | Inversion: negate all pitch intervals (starting from the same base pitch).
 inversionOf :: ApproxCheck Pattern
@@ -131,6 +140,14 @@ trtonAugmentationOf = normalRhythm >$< approxEq2
                    <> Check (\xs ys -> (xs <=> ys) (applyScale (guessScale xs)
                                                    >$< approxEq2))
 
+
+trtonCanAugmentationOf :: ApproxCheck Pattern
+trtonCanAugmentationOf = normalRhythm >$< approxEq2
+                   <> Check (\xs ys -> foldr (||) False (map (xs <=> ys) [checks >$< approxEq2 | checks <- (map applyScale (guessScaleCandidates 3 $ xs ++ ys))]))
+
+exacttonCanAugmentationOf :: ApproxCheck Pattern
+exacttonCanAugmentationOf = normalRhythm >$< approxEq2
+                   <> Check (\xs ys -> foldr (||) False (map (xs <=> ys) [checks >$< approxEq | checks <- (map applyScaleM (guessScaleCandidates 3 $ xs ++ ys))]))
 
 -----------------------
 -- Approximate equality
