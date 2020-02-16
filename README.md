@@ -1,8 +1,6 @@
-# Build instructions
-
+# Build instructions [![Build Status](https://travis-ci.com/omelkonian/hs-pattrans.svg?branch=master)](https://travis-ci.com/omelkonian/hs-pattrans) [![Hackage](https://img.shields.io/hackage/v/hs-pattrans.svg)](http://hackage.haskell.org/package/hs-pattrans)
 
 - To run the analysis: `make analysis`
-
 
 - To run an interactive shell, where you can discover patterns using
 transformation queries:
@@ -13,16 +11,10 @@ transformation queries:
 
   3. view extracted MIDI at `data/extracted/bach/`
 
-
 - To run a cross-dataset comparison (between expert and algorithmic prototypes): `make compare`
 
-
-- To choose from options: `stack build && stack exec -- hs-pattrans [-E|--experts] [-A|--algorithms] [-C|--classical] [-F|--folk] [-R|--random] [-X|--export]`
-
-
-- To update the docs: `make docs`
-
-
-- To view the charts/docs online:
-  1. Commit and push changes
-  2. Go [here](https://omelkonian.github.io/hs-pattrans/)
+- To update online resources:
+  1. `make deploy`
+  2. Commit and push changes
+  3. View generated graphs on the repo's [Github page](https://omelkonian.github.io/hs-pattrans/)
+  4. If version changes, view updated package on [Hackage](http://hackage.haskell.org/package/hs-pattrans)

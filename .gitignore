@@ -1,8 +1,12 @@
 # Stack
 .stack-work/
 
-# Extracted MIDI
-data/extracted/
+# Cabal
+dist-newstyle/
+
+# Generated output
+docs/out/
+docs/charts.html
 
 # Confidential data
 data/HEMAN/patterns/
@@ -17,3 +21,6 @@ stack.yaml.lock
 
 # docs
 docs/
+
+# extracted patterns
+data/extracted/

@@ -66,9 +66,16 @@ $(document).ready(function() {
       rowHeight : 140,
       lastRow : 'nojustify',
       margins : 3
+    }).on('jg.complete', function () {
+      $(this).find('a').colorbox({
+        maxWidth : '80%',
+        maxHeight : '80%',
+        opacity : 0.8,
+        transition : 'elastic',
+        current : ''
+      });
     });
   }
-  $('a.gallery').colorbox();
   // Enable accordion
   $('#accordion').accordion({header: "h2", active:false, collapsible: true});
   // Append images
