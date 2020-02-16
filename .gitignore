@@ -4,8 +4,16 @@
 # Extracted MIDI
 data/extracted/
 
+# Confidential data
+data/HEMAN/patterns/
+data/HEMAN/pieces/csv/
+data/HEMAN/pieces/mid/
+data/queryDataset/
+data/querys/
+
 # TAGS
 TAGS
+stack.yaml.lock
 
 # docs
 docs/
