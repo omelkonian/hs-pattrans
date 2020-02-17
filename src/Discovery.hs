@@ -3,6 +3,8 @@ module Discovery where
 
 import Control.Monad (forM_)
 
+import Data.List (isInfixOf)
+
 import Types
 import Parser
 import Transformations
@@ -64,42 +66,17 @@ query5 = ((exactOf ~~ 1.0), line $ [c 4 qn, d 4 qn, e 4 qn, f 4 qn, g 4 qn])
 timeUnitConv :: Note -> Note
 timeUnitConv (Note time p) = Note (time * 4) p
 
--- | Query patterns from the given song with given base pattern.
--- e.g. "bach" ?? query1/query2
-(??) :: ToPattern a => String -> UserQuery a -> IO ()
 infix 0 ??
-song ?? q = do
+
+-- | Query patterns from the given song with given base pattern.
+-- e.g. (<dataset>, <song>) ?? query1/query2
+(??) :: ToPattern a => (String, String) -> UserQuery a -> IO ()
+(s, song) ?? q = do
+  -- which dataset?
+  let dataset = head $ filter ((s `isInfixOf`) . datasetName) datasets
+
   -- parse the music piece
-  piece <- parseOneMidMusic song
-
-  let base' = snd q
-  let checker = fst q
-
-  putStrLn $ "Song name is: " ++ show song
-  putStrLn $ "Piece length: " ++ show (length piece)
-
-  -- get the base pattern
-  let base = map timeUnitConv (toPattern piece base')
-  putStrLn $ "Base length: " ++ show (length base)
-
-  -- extract patterns (do not extract the base pattern again)
-  let pats = filter (/= base) $ query (checker, base) piece
-  let firstNotes = map (!! 0) pats
-  let ontimes = map ontime firstNotes
-  putStrLn $ "Beginnings: " ++ show ontimes
-  putStrLn $ "Found patterns: " ++ show (length pats)
-
-  -- export MIDI files
-  cd ("data/extracted/" ++ song ++ "/") $ do
-    emptyDirectory "."
-    writeToMidi "base.mid" base
-    forM_ (zip [1..] pats) $
-      \(i, p) -> writeToMidi ("occ" ++ show i ++ ".mid") p
-
-queryJKUPDD :: ToPattern a => String -> UserQuery a -> IO ()
-queryJKUPDD song q = do
-  -- parse the music piece
-  piece <- parseMusic song
+  piece <- (parsePiece dataset) song
 
   let base' = snd q
   let checker = fst q
@@ -126,41 +103,7 @@ queryJKUPDD song q = do
       \(i, p) -> writeToMidi ("occ" ++ show i ++ ".mid") p
 
 queryOneSynth :: ToPattern a => UserQuery a -> IO ()
-queryOneSynth q = do
-  -- parse the music piece
-
-  piece <- parseSynthMid
-
-  let base' = snd q
-  let checker = fst q
-
-  putStrLn $ "Piece length: " ++ show (length piece)
-
-  -- get the base pattern
-  let base = map timeUnitConv (toPattern piece base')
-  putStrLn $ "Base length: " ++ show (length base)
-
-  -- extract patterns (do not extract the base pattern again)
-  let pats = filter (/= base) $ query (checker, base) piece
-  let firstNotes = map (!! 0) pats
-  let ontimes = map ontime firstNotes
-  putStrLn $ "Beginnings: " ++ show ontimes
-  putStrLn $ "Found patterns: " ++ show (length pats)
-
-  -- export MIDI files
-  cd "data/extracted/synth/" $ do
-    emptyDirectory "."
-    writeToMidi "base.mid" base
-    forM_ (zip [1..] pats) $
-      \(i, p) -> writeToMidi ("occ" ++ show i ++ ".mid") p
-
-(???) :: ToPattern a => UserQuery a -> IO [()]
-(???) q = do
-  (pieces, names) <- parseMidMusics
-  putStrLn $ "File names are: " ++ show names
-  putStrLn $ "Checking in this many files: " ++ show (length pieces)
-
-  mapM (?? q) names
+queryOneSynth q = ("synth", "") ?? q
 
 synthQuery :: ToPattern a => UserQuery a -> IO [()]
 synthQuery q = do
@@ -168,7 +111,7 @@ synthQuery q = do
   putStrLn $ "File names are: " ++ show names
   putStrLn $ "Checking in this many files: " ++ show (length pieces)
 
-  mapM (?? q) names
+  mapM (\s -> ("queries", s) ?? q) names
 
 -- | Types from which we can extract a pattern from a given song.
 class ToPattern a where

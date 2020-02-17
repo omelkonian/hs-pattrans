@@ -75,7 +75,7 @@ analysePatternGroup :: Analysis -> PatternGroup -> AnalysisResult
 analysePatternGroup analysis pg@(PatternGroup _ _ _ base pats)
   = (mconcat (map check (zip [2..] pats))) { name = show pg }
   where
-    check (i, p) = analysePattern analysis (base, p, show pg ++ ":" ++ show i)
+    check (i, p) = analysePattern analysis (base, p, show pg ++ "-" ++ show i)
 
 -- | Get the results of an analysis, ordered by their occurence in its definition.
 orderedResults :: Analysis -> AnalysisResult -> [(String, Int)]
@@ -99,58 +99,53 @@ orderedResults curAnalysis =
                        Just j  -> j
                        Nothing -> length ordAn
 
---------------------
--- Example analyses
-
-fullAnalysis :: Analysis
-fullAnalysis =
-  ( [ ("exact",         (exactOf ~~))
-    , ("transposed",    (transpositionOf ~~))
-    , ("tonalTransped", (tonalTranspOf ~~))
-    , ("inverted",      (inversionOf ~~))
-    , ("augmented",     (augmentationOf ~~))
-    , ("retrograded",   (retrogradeOf ~~))
-    , ("rotated",       (rotationOf ~~))
-    , ("trInverted",    (trInversionOf ~~))
-    , ("trAugmented",   (trAugmentationOf ~~))
-    , ("trRetrograded", (trRetrogradeOf ~~))
-    ]
-  , [1,0.8..0.2]
-  )
-
-exactAnalysis :: Analysis 
-exactAnalysis =
-  ( [("exact", (exactOf ~~))]
-  , [1,0.8..0.2] ++ [0.1,0.05]
-  )
-
-protoAnalysis :: Analysis
-protoAnalysis =
-  ( [ ("inverted",      (inversionOf ~~))
-    , ("retrograded",   (retrogradeOf ~~))
-    , ("rotated",       (rotationOf ~~))
-    ]
-  , [1,0.8,0.6]
-  )
-
-compoAnalysis :: Analysis
-compoAnalysis =
-  ( [ ("exact",          (exactOf ~~))
-    , ("transposed",     (transpositionOf ~~))
-    , ("tonalTransped",  (tonalTranspOf ~~))
-    , ("inverted",       (inversionOf ~~))
-    , ("augmented",      (augmentationOf ~~))
-    , ("retrograded",    (retrogradeOf ~~))
-    , ("rotated",        (rotationOf ~~))
-    , ("trInverted",     (trInversionOf ~~))
-    , ("trAugmented",    (trAugmentationOf ~~))
-    , ("trRetrograded",  (trRetrogradeOf ~~))
-    , ("trtonAugmented", (trtonAugmentationOf ~~))
-    , ("trtonRotated",   (trtonRotationOf ~~))
-    ]
-  , [1]
-  )
-
-approx6Analysis :: Analysis
-approx6Analysis = fmap (filter (>= 0.6)) fullAnalysis
+analyses :: [(String, Analysis)]
+analyses =
+  [ ( "default"
+    , ( [ ("exact",         (exactOf ~~))
+        , ("transposed",    (transpositionOf ~~))
+        , ("tonalTransped", (tonalTranspOf ~~))
+        , ("inverted",      (inversionOf ~~))
+        , ("augmented",     (augmentationOf ~~))
+        , ("retrograded",   (retrogradeOf ~~))
+        , ("rotated",       (rotationOf ~~))
+        , ("trInverted",    (trInversionOf ~~))
+        , ("trAugmented",   (trAugmentationOf ~~))
+        , ("trRetrograded", (trRetrogradeOf ~~))
+        ], [1,0.8..0.2] ))
+  , ( "exact"
+    , ( [ ("exact", (exactOf ~~))
+        ], [1,0.8..0.2] ++ [0.1,0.05] ))
+  , ( "proto"
+    , ( [ ("inverted",      (inversionOf ~~))
+        , ("retrograded",   (retrogradeOf ~~))
+        , ("rotated",       (rotationOf ~~))
+        ], [1,0.8,0.6] ))
+  , ( "compo"
+    , ( [ ("exact",          (exactOf ~~))
+        , ("transposed",     (transpositionOf ~~))
+        , ("tonalTransped",  (tonalTranspOf ~~))
+        , ("inverted",       (inversionOf ~~))
+        , ("augmented",      (augmentationOf ~~))
+        , ("retrograded",    (retrogradeOf ~~))
+        , ("rotated",        (rotationOf ~~))
+        , ("trInverted",     (trInversionOf ~~))
+        , ("trAugmented",    (trAugmentationOf ~~))
+        , ("trRetrograded",  (trRetrogradeOf ~~))
+        , ("trtonAugmented", (trtonAugmentationOf ~~))
+        , ("trtonRotated",   (trtonRotationOf ~~))
+        ] , [1] ))
+  , ( "approx6"
+    , ( [ ("exact",         (exactOf ~~))
+        , ("transposed",    (transpositionOf ~~))
+        , ("tonalTransped", (tonalTranspOf ~~))
+        , ("inverted",      (inversionOf ~~))
+        , ("augmented",     (augmentationOf ~~))
+        , ("retrograded",   (retrogradeOf ~~))
+        , ("rotated",       (rotationOf ~~))
+        , ("trInverted",    (trInversionOf ~~))
+        , ("trAugmented",   (trAugmentationOf ~~))
+        , ("trRetrograded", (trRetrogradeOf ~~))
+        ], [0.6] ))
+  ]
 

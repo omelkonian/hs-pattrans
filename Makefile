@@ -10,21 +10,17 @@ else
 	stack build
 endif
 
-analysis: build
+run: build
 ifdef CABAL
-	cabal new-run -- hs-pattrans --print -CFEAR
+	cabal new-run -- hs-pattrans $(RUN_ARGS)
 else
-	stack exec -- hs-pattrans --print -CFEAR
+	stack exec -- hs-pattrans $(RUN_ARGS)
 endif
 
-compare: build
-ifdef CABAL
-	cabal new-run -- hs-pattrans --print -MCF
-else
-	stack exec -- hs-pattrans --print -MCF
-endif
+help: 
+	$(MAKE) RUN_ARGS="-h" run
 
-query:
+query: build
 ifdef CABAL
 	cabal new-repl
 else 
@@ -45,12 +41,14 @@ else
 	stack exec -- haddock --html src/*.hs --hyperlinked-source
 endif
 
+analysis: build
+	$(MAKE) RUN_ARGS="--print --filters d:classical -EL" run
+
+compare: build
+	$(MAKE) RUN_ARGS="--print --filters d:folk -CM" run
+
 deploy: build docs
-ifdef CABAL
-	cabal new-run -- hs-pattrans -CE && ./prepare.sh
-else
-	stack exec -- hs-pattrans -MCFEAR && ./prepare.sh
-endif
+	$(MAKE) RUN_ARGS="-ELRM --print" run && ./prepare.sh
 
 clean:
 ifdef CABAL
@@ -60,4 +58,4 @@ else
 endif
 	rm -rf docs/out && rm -f docs/index.html
 
-.PHONY: default build analysis compare query test docs deploy clean
+.PHONY: default build run help query test docs analysis compare deploy clean

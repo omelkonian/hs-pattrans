@@ -33,9 +33,9 @@ data PatternGroup = PatternGroup
 
 instance Show PatternGroup where
   -- | Get a title, unique to the given PatternGroup, in the following format:
-  -- <piece>:<expert>:<pattern>.
+  -- <piece>-<expert>-<pattern>.
   show (PatternGroup piece_n expert_n pattern_n _ _) =
-    concat $ intersperse ":" [piece_n, expert_n, pattern_n]
+    concat $ intersperse "-" [piece_n, expert_n, pattern_n]
 
 -- | A pattern is a sequence of notes.
 type Pattern = [Note]

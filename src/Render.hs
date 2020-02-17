@@ -35,7 +35,7 @@ instance ToNamedRecord (OutputMode, Analysis, AnalysisResult) where
   toNamedRecord (mode, curAnalysis, an) = namedRecord $
     [ ("name",  toField (name an))
     , ("total", toField tot) ] ++
-    map (\(s,n) -> (toField s, showPercentage n))
+      map (\(s,n) -> (toField s, showPercentage n))
         (orderedResults curAnalysis an) ++
     [ ("unclassified", showPercentage $ length (unclassified an)) ]
     where
@@ -47,8 +47,9 @@ instance ToNamedRecord (OutputMode, Analysis, AnalysisResult) where
 
 -- | Dump all files, relevant to a (group of) analyses.
 dumpAnalyses :: String -> Bool -> Analysis -> [AnalysisResult] -> IO ()
-dumpAnalyses fname expo curAnalysis as = do
-  let resFields    = (toField . fst) <$> orderedResults curAnalysis (head as)
+dumpAnalyses _     _    _           []       = return ()
+dumpAnalyses fname expo curAnalysis as@(h:_) = do
+  let resFields    = (toField . fst) <$> orderedResults curAnalysis h
   let headerFields = header $ ["name", "total"] ++ resFields ++ ["unclassified"]
   -- File #1: absolute values
   BL.writeFile (fname ++ ".csv") $
