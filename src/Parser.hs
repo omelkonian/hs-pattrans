@@ -282,13 +282,32 @@ synth = defDataset
       return musicMidis
   }
 
+eurovision :: Dataset
+eurovision = defDataset
+  { datasetName = "eurovision"
+  , parseAlgo  = cd "data/eurovision/patterns/alg" $ do
+      f_algs <- listDirs
+      allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
+      return (concat allPgs)
+  }
+
+jazz :: Dataset
+jazz = defDataset
+  { datasetName = "jazz"
+  , parseAlgo  = cd "data/jazz/patterns/alg" $ do
+      f_algs <- listDirs
+      allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
+      return (concat allPgs)
+  }
+
 datasets :: [Dataset]
 datasets = 
   [ classical
   , folk
   , heman
-  -- , eurovision
-  -- , jazz
+  , eurovision
+  , jazz
+  -- , kern
   , queries
   , synth
   ]
