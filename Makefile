@@ -48,7 +48,7 @@ compare: build
 	$(MAKE) RUN_ARGS="--print --filters d:folk -CM" run
 
 deploy: build docs
-	$(MAKE) RUN_ARGS="-ELRM --print" run && ./prepare.sh
+	$(MAKE) RUN_ARGS="-ELRM" run && ./prepare.sh
 
 clean:
 ifdef CABAL
