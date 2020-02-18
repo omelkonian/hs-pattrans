@@ -300,17 +300,17 @@ jazz = defDataset
       return (concat allPgs)
   }
 
-kern :: Dataset
-kern = defDataset
-  { datasetName = "kerns"
-  , parseAlgo  = cd "data/kerns/patterns/alg" $ do
-      f_algs <- listDirs
-      allPgs <- forM f_algs $ \f_alg -> cd f_alg $ do
-        f_composers <- listDirs
-        concat <$> forM f_composers
-          (\f_c -> cd f_c $ parseAlgoPiece id f_c)
-      return (concat allPgs)
-  }
+-- kern :: Dataset
+-- kern = defDataset
+--   { datasetName = "kerns"
+--   , parseAlgo  = cd "data/kerns/patterns/alg" $ do
+--       f_algs <- listDirs
+--       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ do
+--         f_composers <- listDirs
+--         concat <$> forM f_composers
+--           (\f_c -> cd f_c $ parseAlgoPiece id f_c)
+--       return (concat allPgs)
+--   }
 
 datasets :: [Dataset]
 datasets = 
@@ -319,7 +319,7 @@ datasets =
   , heman
   , eurovision
   , jazz
-  , kern
+  -- , kern
   , queries
   , synth
   ]
