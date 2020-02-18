@@ -12,7 +12,7 @@ writeToMidi :: FilePath -> Pattern -> IO ()
 writeToMidi fn = writeMidi fn . patternToMusic
 
 trackNumber :: Int
-trackNumber = 1
+trackNumber = 0
 
 readFromMidi :: FilePath -> IO Pattern
 readFromMidi = parseMID trackNumber
