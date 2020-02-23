@@ -14,6 +14,7 @@ type MIDI = Integer
 -- | Intervals are represented with integers (i.e. number of semitones).
 type Interval = Integer
 type ScaleDegree = Int
+type Contour = Integer
 
 type Length = Int
 -- | A pattern group is one of the patterns of a piece of music, identified by an expert
@@ -93,6 +94,9 @@ durations = fmap (uncurry (-)) . pairs . onsets
 
 rhythm :: Pattern -> [Time]
 rhythm = map (truncate' 2) . durations
+
+contour :: Pattern -> [Contour]
+contour p = map signum $ intervals p
 
 -- | Normalized (relative) rhythmic structure of a pattern.
 -- e.g. normalRhythm [(A,2), (C#,6), (Eb,8), (B,1), (A,2)] = [1, 3, 4, 1/2, 1]

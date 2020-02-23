@@ -83,6 +83,10 @@ augmentationOf :: ApproxCheck Pattern
 augmentationOf = normalRhythm >$< approxEq2
               <> pitch        >$< approxEq
 
+contourOf :: ApproxCheck Pattern
+contourOf = contour >$< equal
+         <> rhythm  >$< approxEq2
+
 -----------------------
 -- Tonal transposition
 

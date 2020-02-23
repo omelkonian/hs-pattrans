@@ -135,6 +135,21 @@ analyses =
         , ("trtonAugmented", (trtonAugmentationOf ~~))
         , ("trtonRotated",   (trtonRotationOf ~~))
         ] , [1] ))
+  , ( "contour6"
+    , ( [ ("exact",          (exactOf ~~))
+        , ("transposed",     (transpositionOf ~~))
+        , ("tonalTransped",  (tonalTranspOf ~~))
+        , ("contourPreserv", (contourOf ~~))
+        , ("inverted",       (inversionOf ~~))
+        , ("augmented",      (augmentationOf ~~))
+        , ("retrograded",    (retrogradeOf ~~))
+        , ("rotated",        (rotationOf ~~))
+        , ("trInverted",     (trInversionOf ~~))
+        , ("trAugmented",    (trAugmentationOf ~~))
+        , ("trRetrograded",  (trRetrogradeOf ~~))
+        , ("trtonAugmented", (trtonAugmentationOf ~~))
+        , ("trtonRotated",   (trtonRotationOf ~~))
+        ] , [1, 0.8, 0.6] ))
   , ( "approx6"
     , ( [ ("exact",         (exactOf ~~))
         , ("transposed",    (transpositionOf ~~))
@@ -146,6 +161,6 @@ analyses =
         , ("trInverted",    (trInversionOf ~~))
         , ("trAugmented",   (trAugmentationOf ~~))
         , ("trRetrograded", (trRetrogradeOf ~~))
-        ], [0.6] ))
+        ], [1, 0,8, 0.6] ))
   ]
 
