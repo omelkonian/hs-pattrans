@@ -273,8 +273,8 @@ queries = defDataset
       return musicMidis
   }
 
-synth :: Dataset
-synth = defDataset
+qsynth :: Dataset
+qsynth = defDataset
   { datasetName = "synth"
   , parsePiece  = \_ -> cd "data/querySynth/" $ do
       f_music <- listFiles
@@ -290,6 +290,35 @@ eurovision = defDataset
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
       return (concat allPgs)
   }
+
+
+eurovisionG :: Dataset
+eurovisionG = defDataset
+  { datasetName = "eurovisionG"
+  , parseAlgo  = cd "data/eurovisionG/patterns/alg" $ do
+      f_algs <- listDirs
+      allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
+      return (concat allPgs)
+  }
+
+eurovisionU :: Dataset
+eurovisionU = defDataset
+  { datasetName = "eurovisionU"
+  , parseAlgo  = cd "data/eurovisionU/patterns/alg" $ do
+      f_algs <- listDirs
+      allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
+      return (concat allPgs)
+  }
+
+synth :: Dataset
+synth = defDataset
+  { datasetName = "synth"
+  , parseAlgo  = cd "data/synth/patterns/alg" $ do
+      f_algs <- listDirs
+      allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
+      return (concat allPgs)
+  }
+
 
 jazz :: Dataset
 jazz = defDataset
@@ -321,5 +350,8 @@ datasets =
   , jazz
   -- , kern
   , queries
+  , qsynth
   , synth
+  , eurovisionG
+  , eurovisionU
   ]

@@ -13,7 +13,7 @@ import MIDI (writeToMidi)
 
 type WindowSize = Int
 type Query a = (Check a, a)
--- data UserQuery a = ToPattern a => Check Pattern :@ a
+data UserQueryWithinPiece a = ToPattern a => Check Pattern :@ a
 type UserQuery a = (Check Pattern, a)
 
 upTo :: Time -> Time -> (Time, Time)
@@ -32,8 +32,8 @@ queryMatchCount :: Query Pattern -> MusicPiece -> Int
 queryMatchCount q mp = length (query q mp)
 
 -- | Example queries.
--- query1 :: UserQuery (Time, Time)
--- query1 = (transpositionOf ~~ 0.5) :@ (21 `upTo` 28)
+query1 :: UserQueryWithinPiece (Time, Time)
+query1 = (transpositionOf ~~ 0.5) :@ (21 `upTo` 28)
 
 
 -- for eurovision
