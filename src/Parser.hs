@@ -9,6 +9,7 @@ import Text.Parsec
 import Text.Parsec.Language
 import Text.Parsec.String
 import qualified Text.Parsec.Token as Tokens
+import qualified Data.Char as Char
 
 import Types
 import MIDI (readFromMidi)
@@ -105,6 +106,7 @@ data Dataset = Dataset
   { datasetName   :: FilePath
   , parseExperts  :: IO [PatternGroup]
   , parseAlgo     :: IO [PatternGroup]
+  , parseNgram     :: IO [PatternGroup]
   , parseRandom   :: IO [PatternGroup]
   -- | Parse a music piece.
   , parsePiece    :: Song -> IO MusicPiece
@@ -116,10 +118,10 @@ noop :: IO [a]
 noop = return []
 
 defDataset :: Dataset
-defDataset = Dataset "default" noop noop noop (const noop) id
+defDataset = Dataset "default" noop noop noop noop (const noop) id
 
 classical :: Dataset
-classical = Dataset "classical" pExp pAlgo noop pPiece sanitize
+classical = Dataset "classical" pExp pAlgo noop noop pPiece sanitize
   where
     pExp = cd "data/classical/experts" $ do
       f_roots <- listDirs
@@ -170,7 +172,7 @@ classical = Dataset "classical" pExp pAlgo noop pPiece sanitize
       = s
 
 folk :: Dataset
-folk = Dataset "folk" pExp pAlgo pRandom (const noop) sanitize
+folk = Dataset "folk" pExp pAlgo pRandom noop (const noop) sanitize
   where
     pExp = cd "data/MTC/patterns/expert" $ do
       allPgs <- parseAlgoPiece sanitize "exp"
@@ -238,7 +240,7 @@ folk = Dataset "folk" pExp pAlgo pRandom (const noop) sanitize
       | otherwise                       = s
 
 heman :: Dataset
-heman = Dataset "heman" pExp pAlgo noop pPiece sanitize
+heman = Dataset "heman" pExp pAlgo pNgram noop pPiece sanitize
   where
     pExp = cd "data/HEMAN/patterns/annotations/" $ do
       algPgs <- parseAlgoPiece sanitize "Human"
@@ -249,6 +251,10 @@ heman = Dataset "heman" pExp pAlgo noop pPiece sanitize
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece sanitize f_alg
       return (concat allPgs)
 
+    pNgram = cd "data/HEMAN/patterns/ngram/" $ do
+      algPgs <- parseAlgoPiece sanitize "Ngrams"
+      return algPgs
+      
     pPiece song = cd ("data/HEMAN/piece/csv" ++ sanitize song) $ do
       [f_music] <- listFiles
       parseMany mirexP f_music
@@ -329,6 +335,16 @@ jazz = defDataset
       return (concat allPgs)
   }
 
+bach371 :: Dataset
+bach371 = Dataset "bach371" noop noop pNgram noop (const noop) sanitize
+  where
+    pNgram = cd "data/bach371/patterns/ngram/" $ do
+      algPgs <- parseAlgoPiece sanitize "Ngrams"
+      return algPgs
+
+    sanitize = filter Char.isDigit
+    
+    
 -- kern :: Dataset
 -- kern = defDataset
 --   { datasetName = "kerns"
@@ -354,4 +370,5 @@ datasets =
   , synth
   , eurovisionG
   , eurovisionU
+  , bach371
   ]

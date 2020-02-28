@@ -18,6 +18,7 @@ data Options = Options { filters    :: String -- ^ filter datasets/pieces/expert
                        , analysis   :: String -- ^ which analysis to run
                        , experts    :: Bool   -- ^ analyse expert dataset
                        , algorithms :: Bool   -- ^ analyse algorithm dataset
+                       , ng         :: Bool   -- ^ analyze random datasets
                        , random     :: Bool   -- ^ analyze random datasets
                        , export     :: Bool   -- ^ export MIDI files
                        , verify     :: Bool   -- ^ whether to verify hypothesis
@@ -42,6 +43,9 @@ parseOpts = Options
   <*> switch (  long "algorithms"
              <> short 'L'
              <> help "Analyze the algorithm dataset" )
+  <*> switch (  long "ngrams"
+             <> short 'N'
+             <> help "Analyze the ngram dataset" )
   <*> switch (  long "random"
              <> short 'R'
              <> help "Analyze the random datasets" )
@@ -218,10 +222,11 @@ main = do
 
   -- for each dataset
   forM_ (filter (fd . datasetName) datasets) $
-    \(Dataset n pExp pAlgo pRand _ _) -> do
+    \(Dataset n pExp pAlgo pNgram pRand _ _) -> do
       let path = "docs/out/" ++ n ++ "/"
       when (experts op)    $ runSingle (path ++ "experts")    pExp
       when (algorithms op) $ runSingle (path ++ "algorithms") pAlgo
+      when (ng op)         $ runSingle (path ++ "ngram")      pNgram
       when (random op)     $ runSingle (path ++ "random")     pRand
       when (toCompare op)  $ runComparison (path ++ "experts",    pExp)
                                            (path ++ "algorithms", pAlgo)
