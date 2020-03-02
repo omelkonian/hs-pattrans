@@ -33,7 +33,7 @@ install:
       
 script:
   - make deploy
-  # - make test
+  - make test
 
 notifications:
   email: false
