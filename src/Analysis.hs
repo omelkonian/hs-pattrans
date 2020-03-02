@@ -57,10 +57,10 @@ emptyRes (as, ls) = M.fromList $ map (\s -> (s, 0)) [show (fn, l) | l <- ls, (fn
 
 -- | Analyse a single pattern.
 analysePattern :: Analysis -> (Pattern, Pattern, String) -> AnalysisResult
-analysePattern an@(analyses, approxLvls) (base, p, notFound) =
+analysePattern an@(ans, approxLvls) (base, p, notFound) =
   case msum [ go (show (fn, lvl)) (f lvl)
             | lvl     <- approxLvls
-            , (fn, f) <- analyses ] of
+            , (fn, f) <- ans ] of
     Nothing  -> AnalysisResult "" (emptyRes an) [(notFound, p)]
     Just res -> res
   where

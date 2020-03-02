@@ -1,4 +1,4 @@
-# Build instructions [![Build Status](https://travis-ci.com/omelkonian/hs-pattrans.svg?branch=master)](https://travis-ci.com/omelkonian/hs-pattrans) [![Hackage](https://img.shields.io/hackage/v/hs-pattrans.svg)](http://hackage.haskell.org/package/hs-pattrans)
+# Build instructions [![Build Status](https://travis-ci.com/omelkonian/hs-pattrans.svg?branch=master)](https://travis-ci.com/omelkonian/hs-pattrans) [![Hackage](https://repology.org/badge/version-for-repo/hackage/haskell:hs-pattrans.svg)](http://hackage.haskell.org/package/hs-pattrans)
 
 - To build the source code: `make build`
 
