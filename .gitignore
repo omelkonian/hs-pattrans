@@ -6,21 +6,7 @@ dist-newstyle/
 
 # Generated output
 docs/out/
-docs/charts.html
-
-# Confidential data
-data/HEMAN/patterns/
-data/HEMAN/pieces/csv/
-data/HEMAN/pieces/mid/
-data/queryDataset/
-data/querys/
+docs/index.html
 
 # TAGS
 TAGS
-stack.yaml.lock
-
-# docs
-docs/
-
-# extracted patterns
-data/extracted/

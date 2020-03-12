@@ -35,9 +35,6 @@ script:
   - make deploy
   - make test
 
-notifications:
-  email: false
-
 deploy:
   - provider: pages
     skip-cleanup: true

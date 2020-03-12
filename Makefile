@@ -45,10 +45,10 @@ analysis: build
 	$(MAKE) RUN_ARGS="--print --filters d:classical -EL" run
 
 compare: build
-	$(MAKE) RUN_ARGS="--print --filters d:folk -CM" run
+	$(MAKE) RUN_ARGS="--print --filters d:folk -M" run
 
 deploy: build docs
-	$(MAKE) RUN_ARGS="-ELRM" run && ./prepare.sh
+	$(MAKE) RUN_ARGS="-F d:folk+d:classical+d:heman -A approx6 -ELR" run && ./prepare.sh
 
 clean:
 ifdef CABAL
@@ -56,6 +56,7 @@ ifdef CABAL
 else
 	stack clean
 endif
-	rm -rf docs/out && rm -f docs/index.html
+	rm -rf docs/out
+	find docs/ -maxdepth 1 -type f ! -regex ".*/\(ocean.css\|index0.html\|template.html\)" -delete
 
 .PHONY: default build run help query test docs analysis compare deploy clean

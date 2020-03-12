@@ -106,7 +106,7 @@ data Dataset = Dataset
   { datasetName   :: FilePath
   , parseExperts  :: IO [PatternGroup]
   , parseAlgo     :: IO [PatternGroup]
-  , parseNgram     :: IO [PatternGroup]
+  , parseNgram    :: IO [PatternGroup]
   , parseRandom   :: IO [PatternGroup]
   -- | Parse a music piece.
   , parsePiece    :: Song -> IO MusicPiece
@@ -123,7 +123,7 @@ defDataset = Dataset "default" noop noop noop noop (const noop) id
 classical :: Dataset
 classical = Dataset "classical" pExp pAlgo noop noop pPiece sanitize
   where
-    pExp = cd "data/classical/experts" $ do
+    pExp = cd "dataset/classical/experts" $ do
       f_roots <- listDirs
       res <- forM f_roots $ \f_root -> cd (f_root ++ "/monophonic/repeatedPatterns") $ do
         f_patExs <- listDirs
@@ -141,7 +141,7 @@ classical = Dataset "classical" pExp pAlgo noop noop pPiece sanitize
         return $ concat allPats
       return $ concat res
 
-    pAlgo = cd "data/classical/alg" $ do
+    pAlgo = cd "dataset/classical/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ do
         f_versions <- listDirs
@@ -152,7 +152,7 @@ classical = Dataset "classical" pExp pAlgo noop noop pPiece sanitize
             (\f_v -> cd f_v $ parseAlgoPiece sanitize (f_alg ++ "-" ++ f_v))
       return (concat allPgs)
 
-    pPiece song = cd ("data/classical/experts/" ++ sanitize song ++ "/monophonic/csv") $ do
+    pPiece song = cd ("dataset/classical/experts/" ++ sanitize song ++ "/monophonic/csv") $ do
       [f_music] <- listFiles
       parseMany mirexP f_music
   
@@ -174,7 +174,7 @@ classical = Dataset "classical" pExp pAlgo noop noop pPiece sanitize
 folk :: Dataset
 folk = Dataset "folk" pExp pAlgo pRandom noop (const noop) sanitize
   where
-    pExp = cd "data/MTC/patterns/expert" $ do
+    pExp = cd "dataset/folk/patterns/expert" $ do
       allPgs <- parseAlgoPiece sanitize "exp"
       return (groupPatterns allPgs)
       where
@@ -192,12 +192,12 @@ folk = Dataset "folk" pExp pAlgo pRandom noop (const noop) sanitize
           | samePattern p1 p2 = PatternGroup p e pa b $ (b' : os) ++ os'
           | otherwise         = error "Cannot combine occurences of different patterns"
 
-    pAlgo = cd "data/MTC/patterns/alg" $ do
+    pAlgo = cd "dataset/folk/patterns/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece sanitize f_alg
       return (concat allPgs)
 
-    pRandom = cd "data/MTC/ranexcerpts" $ do
+    pRandom = cd "dataset/folk/ranexcerpts" $ do
       f_groups <- listDirs
       allPgs <- forM f_groups $ \f_group -> cd f_group $ do
         fs <- listFiles
@@ -242,20 +242,20 @@ folk = Dataset "folk" pExp pAlgo pRandom noop (const noop) sanitize
 heman :: Dataset
 heman = Dataset "heman" pExp pAlgo pNgram noop pPiece sanitize
   where
-    pExp = cd "data/HEMAN/patterns/annotations/" $ do
+    pExp = cd "dataset/HEMAN/patterns/annotations/" $ do
       algPgs <- parseAlgoPiece sanitize "Human"
       return algPgs
 
-    pAlgo = cd "data/HEMAN/patterns/alg" $ do
+    pAlgo = cd "dataset/HEMAN/patterns/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece sanitize f_alg
       return (concat allPgs)
 
-    pNgram = cd "data/HEMAN/patterns/ngram/" $ do
+    pNgram = cd "dataset/HEMAN/patterns/ngram/" $ do
       algPgs <- parseAlgoPiece sanitize "Ngrams"
       return algPgs
       
-    pPiece song = cd ("data/HEMAN/piece/csv" ++ sanitize song) $ do
+    pPiece song = cd ("dataset/HEMAN/piece/csv" ++ sanitize song) $ do
       [f_music] <- listFiles
       parseMany mirexP f_music
   
@@ -270,7 +270,7 @@ heman = Dataset "heman" pExp pAlgo pNgram noop pPiece sanitize
 queries :: Dataset
 queries = defDataset
   { datasetName = "queries"
-  , parsePiece  = \s -> cd "data/queryDataset/" $ do
+  , parsePiece  = \s -> cd "dataset/queryDataset/" $ do
       f_music <- listFiles
       -- putStrLn $ "Searching: " ++ show f_music
       let matched = (filter (`isInfixOf` s)) f_music
@@ -282,7 +282,7 @@ queries = defDataset
 qsynth :: Dataset
 qsynth = defDataset
   { datasetName = "synth"
-  , parsePiece  = \_ -> cd "data/querySynth/" $ do
+  , parsePiece  = \_ -> cd "dataset/querySynth/" $ do
       f_music <- listFiles
       musicMidis <- foldMap readFromMidi f_music
       return musicMidis
@@ -291,7 +291,7 @@ qsynth = defDataset
 eurovision :: Dataset
 eurovision = defDataset
   { datasetName = "eurovision"
-  , parseAlgo  = cd "data/eurovision/patterns/alg" $ do
+  , parseAlgo  = cd "dataset/eurovision/patterns/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
       return (concat allPgs)
@@ -301,7 +301,7 @@ eurovision = defDataset
 eurovisionG :: Dataset
 eurovisionG = defDataset
   { datasetName = "eurovisionG"
-  , parseAlgo  = cd "data/eurovisionG/patterns/alg" $ do
+  , parseAlgo  = cd "dataset/eurovisionG/patterns/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
       return (concat allPgs)
@@ -310,7 +310,7 @@ eurovisionG = defDataset
 eurovisionU :: Dataset
 eurovisionU = defDataset
   { datasetName = "eurovisionU"
-  , parseAlgo  = cd "data/eurovisionU/patterns/alg" $ do
+  , parseAlgo  = cd "dataset/eurovisionU/patterns/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
       return (concat allPgs)
@@ -319,7 +319,7 @@ eurovisionU = defDataset
 synth :: Dataset
 synth = defDataset
   { datasetName = "synth"
-  , parseAlgo  = cd "data/synth/patterns/alg" $ do
+  , parseAlgo  = cd "dataset/synth/patterns/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
       return (concat allPgs)
@@ -329,7 +329,7 @@ synth = defDataset
 jazz :: Dataset
 jazz = defDataset
   { datasetName = "jazz"
-  , parseAlgo  = cd "data/jazz/patterns/alg" $ do
+  , parseAlgo  = cd "dataset/jazz/patterns/alg" $ do
       f_algs <- listDirs
       allPgs <- forM f_algs $ \f_alg -> cd f_alg $ parseAlgoPiece id f_alg
       return (concat allPgs)
@@ -338,7 +338,7 @@ jazz = defDataset
 bach371 :: Dataset
 bach371 = Dataset "bach371" noop noop pNgram noop (const noop) sanitize
   where
-    pNgram = cd "data/bach371/patterns/ngram/" $ do
+    pNgram = cd "dataset/bach371/patterns/ngram/" $ do
       algPgs <- parseAlgoPiece sanitize "Ngrams"
       return algPgs
 

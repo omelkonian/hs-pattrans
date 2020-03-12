@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title></title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<link rel="stylesheet" href="lib/justifiedGallery.min.css">
+<script src="lib/jquery.justifiedGallery.min.js"></script>
+
+<link rel="stylesheet" href="lib/colorbox.css">
+<script src="lib/jquery.colorbox-min.js"></script>
+
+<link rel="stylesheet" href="lib/jquery-ui.min.css">
+<script src="lib/jquery-ui.min.js"></script>
+
+<script type="text/javascript">
+
+// Gather all images (script 'prepare.sh' will insert the actual filenames)
+var files = [
+  "docs/out/classical/experts/ALL.png","docs/out/classical/experts/bachBWV889Fg/bruhn/A.png","docs/out/classical/experts/bachBWV889Fg/bruhn/B.png","docs/out/classical/experts/bachBWV889Fg/bruhn/C.png","docs/out/classical/experts/beethovenOp2No1Mvt3/barlowAndMorgenstern/A.png","docs/out/classical/experts/beethovenOp2No1Mvt3/barlowAndMorgenstern/B.png","docs/out/classical/experts/beethovenOp2No1Mvt3/sectionalRepetitions/E.png","docs/out/classical/experts/beethovenOp2No1Mvt3/sectionalRepetitions/F.png","docs/out/classical/experts/beethovenOp2No1Mvt3/sectionalRepetitions/G.png","docs/out/classical/experts/beethovenOp2No1Mvt3/sectionalRepetitions/H.png","docs/out/classical/experts/beethovenOp2No1Mvt3/tomCollins/I.png","docs/out/classical/experts/chopinOp24No4/barlowAndMorgenstern/A.png","docs/out/classical/experts/chopinOp24No4/barlowAndMorgensternRevised/B.png","docs/out/classical/experts/chopinOp24No4/sectionalRepetitions/C.png","docs/out/classical/experts/chopinOp24No4/sectionalRepetitions/D.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/A.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/B.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/C.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/D.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/E.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/F.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/G.png","docs/out/classical/experts/gibbonsSilverSwan1612/tomCollins/H.png","docs/out/classical/experts/mozartK282Mvt2/barlowAndMorgensternRevised/C.png","docs/out/classical/experts/mozartK282Mvt2/barlowAndMorgensternRevised/D.png","docs/out/classical/experts/mozartK282Mvt2/schoenberg/E.png","docs/out/classical/experts/mozartK282Mvt2/schoenberg/F.png","docs/out/classical/experts/mozartK282Mvt2/sectionalRepetitions/G.png","docs/out/classical/experts/mozartK282Mvt2/sectionalRepetitions/H.png","docs/out/classical/experts/mozartK282Mvt2/sectionalRepetitions/I.png","docs/out/classical/experts/mozartK282Mvt2/sectionalRepetitions/J.png","docs/out/classical/experts/mozartK282Mvt2/tomCollins/K.png"
+];
+
+// Attach every chart to the appropriate gallery
+var handleFiles = function() {
+  var filesByGroup = [[], [], [], []];
+
+  files.forEach(function (file0) {
+    // remove 'docs/' prefix
+    var file = file0.slice(5);
+    // experts -> 0, algorithms -> 1, random -> 2, ngram -> 3
+    if (file.indexOf("experts") != -1)
+      filesByGroup[0].push(file);
+    else if (file.indexOf("algorithms") != -1)
+      filesByGroup[1].push(file);
+    else if (file.indexOf("random") != -1)
+      filesByGroup[2].push(file);
+    else if (file.indexOf("ngram") != -1)
+      filesByGroup[3].push(file);
+    else
+      console.log("***ERROR*** invalid image filename");
+  });
+
+  console.log(filesByGroup);
+
+  for (var i = 0; i < 4; i++) {
+    var images = ``;
+    filesByGroup[i].forEach(function (f) {
+      images += `<a class='gallery' href="${f}"> <img src="${f}"> </a>`;
+    });
+    console.log(i);
+    console.log(images);
+    $(`#chart${i}`).append(images);
+    $(`#chart${i}`).justifiedGallery('norewind');
+  }
+}
+
+// Justify chart galleries
+$(document).ready(function() {
+  // Format gallery
+  for (var i = 0; i < 4; i++) {
+    $(`#chart${i}`).justifiedGallery({
+      rowHeight : 140,
+      lastRow : 'nojustify',
+      margins : 3
+    }).on('jg.complete', function () {
+      $(this).find('a').colorbox({
+        maxWidth : '80%',
+        maxHeight : '80%',
+        opacity : 0.8,
+        transition : 'elastic',
+        current : ''
+      });
+    });
+  }
+  // Enable accordion
+  $('#accordion').accordion({header: "h2", active:false, collapsible: true});
+  // Append images
+  handleFiles();
+});
+
+</script>
+</head>
+
+<body>
+
+<div id="accordion">
+  <h2>Experts</h2>
+  <div id="chart0"></div>
+
+  <h2>Algorithms</h2>
+  <div id="chart1"></div>
+
+  <h2>Random</h2>
+  <div id="chart2"></div>
+
+  <h2>N-Gram</h2>
+  <div id="chart3"></div>
+</div>
+
+</body>
+</html>

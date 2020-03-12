@@ -256,13 +256,23 @@ interpret :: [Filter]
              , String -> Bool -- filter on pieces
              , String -> Bool -- filter on experts/algorithms
              )
-interpret []     = (const True, const True, const True)
-interpret (f:fs) = 
-  let (fd, fp, fe) = interpret fs in
-  case f of
-    DatasetF   s -> ((s `isInfixOf`), fp, fe)
-    PieceF     s -> (fd, (s `isInfixOf`), fe)
-    ExpertF    s -> (fd, fp, (s `isInfixOf`))
+interpret fs0 = let (fd, fp, fe) = go fs0 in (mf fd, mf fp, mf fe)
+  where    
+    mf :: Maybe (String -> Bool) -> (String -> Bool)
+    mf Nothing  = const True
+    mf (Just f) = f
+
+    (\/) :: Maybe (String -> Bool) -> (String -> Bool) -> Maybe (String -> Bool)
+    Nothing \/ g = Just g
+    Just f  \/ g = Just $ \x -> f x || g x
+
+    go []     = (Nothing, Nothing, Nothing)
+    go (f:fs) = 
+      let (fd, fp, fe) = go fs in
+      case f of
+        DatasetF   s -> (fd \/ (s `isInfixOf`), fp, fe)
+        PieceF     s -> (fd, fp \/ (s `isInfixOf`), fe)
+        ExpertF    s -> (fd, fp, fe \/ (s `isInfixOf`))
 
 -- runManyKernSIAF1Analysis :: FilePath -> FilePath -> (FilePath -> IO [PatternGroup]) -> IO ()
 -- runManyKernSIAF1Analysis input_root f_root parser = cd input_root $ do
