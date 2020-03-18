@@ -5,8 +5,7 @@
 dist-newstyle/
 
 # Generated output
-docs/out/
-docs/index.html
+out/
 
 # TAGS
 TAGS
