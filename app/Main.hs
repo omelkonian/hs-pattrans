@@ -12,19 +12,23 @@ import Types
 import Parser
 import Analysis
 import Render
+import HTML
 
 -- | Command-line options.
-data Options = Options { filters    :: String -- ^ filter datasets/pieces/experts
-                       , analysis   :: String -- ^ which analysis to run
-                       , experts    :: Bool   -- ^ analyse expert dataset
-                       , algorithms :: Bool   -- ^ analyse algorithm dataset
-                       , ng         :: Bool   -- ^ analyze random datasets
-                       , random     :: Bool   -- ^ analyze random datasets
-                       , export     :: Bool   -- ^ export MIDI files
-                       , verify     :: Bool   -- ^ whether to verify hypothesis
-                       , toCompare  :: Bool   -- ^ run cross-dataset comparison
-                       , toPrint    :: Bool   -- ^ whether to print results
-                       }
+data Options = Options
+  { filters    :: String -- ^ filter datasets/pieces/experts
+  , analysis   :: String -- ^ which analysis to run
+  , outDir     :: String -- ^ where to output generated files
+  , experts    :: Bool   -- ^ analyse expert dataset
+  , algorithms :: Bool   -- ^ analyse algorithm dataset
+  , ng         :: Bool   -- ^ analyze random datasets
+  , random     :: Bool   -- ^ analyze random datasets
+  , export     :: Bool   -- ^ export MIDI files
+  , html       :: Bool   -- ^ whether to produce HTML website
+  , verify     :: Bool   -- ^ whether to verify hypothesis
+  , toCompare  :: Bool   -- ^ run cross-dataset comparison
+  , toPrint    :: Bool   -- ^ whether to print results
+  }
 
 -- | Parsing command-line options.
 parseOpts :: Parser Options
@@ -37,6 +41,10 @@ parseOpts = Options
                 <> short 'A'
                 <> help "Specify the analysis to run, e.g. -A 'approx6'"
                 <> value "default" )
+  <*> strOption (  long "outDir"
+                <> short 'O'
+                <> help "Specify an output directory to pull generated files"
+                <> value "out" )
   <*> switch (  long "experts"
              <> short 'E'
              <> help "Analyze the expert dataset" )
@@ -52,6 +60,9 @@ parseOpts = Options
   <*> switch (  long "export"
              <> short 'X'
              <> help "Export MIDI files" )
+  <*> switch (  long "html"
+             <> short 'H'
+             <> help "Produce navigatable HTML." )
   <*> switch (  long "verify"
              <> short 'V'
              <> help "Verify equivalence-class hypothesis" )
@@ -223,7 +234,7 @@ main = do
   -- for each dataset
   forM_ (filter (fd . datasetName) datasets) $
     \(Dataset n pExp pAlgo pNgram pRand _ _) -> do
-      let path = "docs/out/" ++ n ++ "/"
+      let path = outDir op ++ "/" ++ n ++ "/"
       when (experts op)    $ runSingle (path ++ "experts")    pExp
       when (algorithms op) $ runSingle (path ++ "algorithms") pAlgo
       when (ng op)         $ runSingle (path ++ "ngram")      pNgram
@@ -231,6 +242,9 @@ main = do
       when (toCompare op)  $ runComparison (path ++ "experts",    pExp)
                                            (path ++ "algorithms", pAlgo)
 
+  -- Generate HTML
+  when (html op) $
+    generateAll (outDir op)
 
 -------------------
 -- Filters.

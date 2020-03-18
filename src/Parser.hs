@@ -96,6 +96,13 @@ listFiles = sort <$> (getCurrentDirectory
                  >>= listDirectory
                  >>= filterM ((not <$>) . doesDirectoryExist))
 
+listFilesRecursively :: IO [FilePath]
+listFilesRecursively = do
+  dirs <- listDirs
+  fs   <- listFiles
+  fss  <- forM dirs $ \d -> cd d $ fmap (\f -> d ++ "/" ++ f) <$> listFilesRecursively
+  return (fs ++ concat fss)
+
 emptyDirectory :: FilePath -> IO ()
 emptyDirectory f_root = cd f_root $ mapM_ removeFile =<< listFiles
           
