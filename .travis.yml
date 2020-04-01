@@ -32,7 +32,6 @@ install:
   - make build
       
 script:
-  - make deploy
   - make website
   - make test
 
