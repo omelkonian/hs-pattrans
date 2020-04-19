@@ -3,7 +3,7 @@ module HTML where
 
 import Control.Monad (forM_)
 
-import Data.List (isInfixOf, isSuffixOf)
+import Data.List (isSuffixOf)
 
 import Text.Hamlet (Html, shamlet)
 import Text.Blaze.Html.Renderer.String (renderHtml)
@@ -35,71 +35,82 @@ writeHTML fname body = writeFile fname $ renderHtml [shamlet|
   |]
   where
     googleLib = "https://ajax.googleapis.com/ajax/libs"
-    cdnLib    = "https://cdnjs.cloudflare.com/ajax/libs"
-
+    cdnLib    = "https://cdnjs.cloudflare.com/ajax/libs" 
 
 generateAll :: FilePath  -- ^ path where generated output resides
             -> IO ()     -- ^ generates HTML that navigates through the results
 generateAll outDir = cd outDir $ do
-  results <- listDirs
-  forM_ results $ \r -> do
-    allImages <- listFilesRecursively
-    print allImages
-    let images = filter (".png" `isSuffixOf`) allImages
-    let experts    = filter ("experts" `isInfixOf`) images
-        algorithms = filter ("algorithms" `isInfixOf`) images
-        random     = filter ("random" `isInfixOf`) images
-        ngram      = filter ("ngram" `isInfixOf`) images
-    writeHTML (r ++ ".html") [shamlet| 
-      <div id="accordion">
-        <h2> Experts
-        <div id="chart0">
-          $forall f <- experts
-            <a class='gallery' href="#{f}">
-              <img src="#{f}">
+  let gotoParent fname = [shamlet|
+    <a href=#{fname} style="text-decoration: none"> &#8624;
+  |]
+  let mkChart images = [shamlet|
+    <div id="chart">
+      $forall f <- images
+        <a class='gallery' href="#{f}">
+          <img src="#{f}">
 
-        <h2> Algorithms
-        <div id="chart1">
-          $forall f <- algorithms
-            <a class='gallery' href="#{f}"> <img src="#{f}">
-
-        <h2> Random
-        <div id="chart2">
-          $forall f <- random
-            <a class='gallery' href="#{f}"> <img src="#{f}">
-
-        <h2> N-Gram
-        <div id="chart3">
-          $forall f <- ngram
-            <a class='gallery' href="#{f}"> <img src="#{f}">
-
-        <script>
-          \$(document).ready(function() {
-            for (var i = 0; i < 4; i++) {
-              \$(`#chart${i}`).justifiedGallery({
-                rowHeight : 140,
-                lastRow : 'nojustify',
-                margins : 3
-              }).on('jg.complete', function () {
-                \$(this).find('a').colorbox({
-                  maxWidth : '80%',
-                  maxHeight : '80%',
-                  opacity : 0.8,
-                  transition : 'elastic',
-                  current : ''
-                });
-              });
-            }
-            \$('#accordion').accordion({header: "h2", active:false, collapsible: true});
+    <script>
+      \$(document).ready(function() {
+        \$(`#chart`).justifiedGallery({
+          rowHeight : 140,
+          lastRow : 'nojustify',
+          margins : 3
+        }).on('jg.complete', function () {
+          \$(this).find('a').colorbox({
+            maxWidth : '80%',
+            maxHeight : '80%',
+            opacity : 0.8,
+            transition : 'elastic',
+            current : ''
           });
-      |]
+        });
+      });
+    |]
 
+  results <- listDirs
+  rImages <- filter (".png" `isSuffixOf`) <$> listFiles
   writeHTML "index.html" [shamlet|
     <h2> Results
+    ^{mkChart rImages}
     <ul>
       $forall r <- results
         <li>
-          <a href=#{r}.html>#{r}
+          <a href=#{r}/index.html>#{r}
+  |]
+
+  forM_ results $ \r -> cd r $ do
+    groups <- listDirs
+    gImages <- filter (".png" `isSuffixOf`) <$> listFiles
+    writeHTML "index.html" [shamlet|
+      <h2>
+        ^{gotoParent "../index.html"}
+        #{r}
+      ^{mkChart gImages}
+      <ul>
+        $forall g <- groups
+          <li>
+            <a href=#{g}/index.html>#{g}
     |]
 
+    forM_ groups $ \g -> cd g $ do
+      pieces <- listDirs
+      pImages <- filter (".png" `isSuffixOf`) <$> listFiles
+      writeHTML ("index.html") [shamlet|
+        <h2>
+          ^{gotoParent "../index.html"}
+          #{g}
+        ^{mkChart pImages}
+        <ul>
+          $forall p <- pieces
+            <li>
+              <a href=#{p}.html>#{p}
+      |]
 
+      forM_ pieces $ \p -> do
+        images <- filter (".png" `isSuffixOf`) <$> listFilesRecursively
+        writeHTML (p ++ ".html") [shamlet| 
+          <h2>
+            ^{gotoParent "index.html"}
+            #{p}
+          ^{mkChart images}
+        |]
