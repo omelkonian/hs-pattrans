@@ -247,18 +247,19 @@ folk = Dataset "folk" pExp pAlgo pRandom noop (const noop) sanitize
       | otherwise                       = s
 
 paf :: Dataset
-paf = Dataset "paf" pExp noop noop noop (const noop) sanitize
+paf = Dataset "paf" pExp noop noop noop (const noop) id
   where
     pExp = cd "dataset/PAF/patterns/annotations/" $ do
-      algPgs <- parseAlgoPiece sanitize "Human"
+      algPgs <- parseAlgoPiece id "Human"
       return algPgs
-  
+
     sanitize s 
-      | ("bach1" `isInfixOf` s) = "bach1"
-      | ("bach2" `isInfixOf` s) = "bach2"
-      | ("bee1" `isInfixOf` s)  = "bee1"
-      | ("mo155" `isInfixOf` s) = "mo155"
-      | ("mo458" `isInfixOf` s) = "mo458"
+      | ("bwv-1" `isInfixOf` s) = "bach1"
+      | ("bwv-2" `isInfixOf` s) = "bach2"
+      | ("bee" `isInfixOf` s)  = "bee1"
+      | ("mo" `isInfixOf` s) = "mo155"
+      | ("Mo" `isInfixOf` s) = "mo458"
+      | ("haydn" `isInfixOf` s) = "hy"
       | otherwise               = s
   
 heman :: Dataset
@@ -385,6 +386,7 @@ datasets =
   [ classical
   , folk
   , heman
+  , paf
   , eurovision
   , jazz
   -- , kern
