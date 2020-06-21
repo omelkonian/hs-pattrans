@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"></html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title></title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.colorbox/1.6.4/jquery.colorbox-min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js"></script>
+</head>
+<body><h2> Results</h2>
+<div id="chart"></div>
+<script>$(document).ready(function() {$(`#chart`).justifiedGallery({rowHeight : 140,
+lastRow : 'nojustify',
+margins : 3}).on('jg.complete', function () {$(this).find('a').colorbox({maxWidth : '80%',
+maxHeight : '80%',
+opacity : 0.8,
+transition : 'elastic',
+current : ''});});});</script>
+
+<ul><li><a href="classical/index.html">classical</a>
+</li>
+<li><a href="folk/index.html">folk</a>
+</li>
+<li><a href="heman/index.html">heman</a>
+</li>
+</ul>
+</body>
