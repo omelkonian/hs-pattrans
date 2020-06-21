@@ -246,6 +246,21 @@ folk = Dataset "folk" pExp pAlgo pRandom noop (const noop) sanitize
       | ("Zolang" `isInfixOf` s)        = "ZolangDeBoomZalBloeien"
       | otherwise                       = s
 
+paf :: Dataset
+paf = Dataset "paf" pExp noop noop noop (const noop) sanitize
+  where
+    pExp = cd "dataset/PAF/patterns/annotations/" $ do
+      algPgs <- parseAlgoPiece sanitize "Human"
+      return algPgs
+  
+    sanitize s 
+      | ("bach1" `isInfixOf` s) = "bach1"
+      | ("bach2" `isInfixOf` s) = "bach2"
+      | ("bee1" `isInfixOf` s)  = "bee1"
+      | ("mo155" `isInfixOf` s) = "mo155"
+      | ("mo458" `isInfixOf` s) = "mo458"
+      | otherwise               = s
+  
 heman :: Dataset
 heman = Dataset "heman" pExp pAlgo pNgram noop pPiece sanitize
   where
@@ -273,6 +288,7 @@ heman = Dataset "heman" pExp pAlgo pNgram noop pPiece sanitize
       | ("mo155" `isInfixOf` s) = "mo155"
       | ("mo458" `isInfixOf` s) = "mo458"
       | otherwise               = s
+
 
 queries :: Dataset
 queries = defDataset
