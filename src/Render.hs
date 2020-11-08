@@ -11,7 +11,7 @@ import Data.Char (isDigit)
 import Data.Colour
 import Data.Colour.Names
 import Graphics.Rendering.Chart.Easy hiding (render)
-import Graphics.Rendering.Chart.Backend.Cairo
+import Graphics.Rendering.Chart.Backend.Diagrams
 
 -- CSV
 import Data.Csv hiding ((.=))

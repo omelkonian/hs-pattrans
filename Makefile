@@ -1,17 +1,17 @@
 default: build
 
-# Comment out this line to build with `stack`
-CABAL=1
+# To use Stack, e.g. call `$ make STACK=1 build` or just uncomment the line below:
+#STACK=1
 
 build:
-ifdef CABAL
-	cabal new-build
+ifndef STACK
+	cabal new-build --enable-shared
 else
 	stack build
 endif
 
 run: build
-ifdef CABAL
+ifndef STACK
 	cabal new-run -- hs-pattrans $(RUN_ARGS)
 else
 	stack exec -- hs-pattrans $(RUN_ARGS)
@@ -21,21 +21,21 @@ help:
 	$(MAKE) RUN_ARGS="-h" run
 
 query: build
-ifdef CABAL
+ifndef STACK
 	cabal new-repl
 else 
 	stack repl
 endif
 
 test: build
-ifdef CABAL
+ifndef STACK
 	cabal new-test
 else
 	stack test
 endif
 
 docs: build
-ifdef CABAL
+ifndef STACK
 	cabal new-haddock --haddock-for-hackage --haddock-hyperlink-source
 else
 	stack exec -- haddock --html src/*.hs --hyperlinked-source
@@ -51,7 +51,7 @@ compare: build
 	$(MAKE) RUN_ARGS="--print --filters d:folk -M" run
 
 clean:
-ifdef CABAL
+ifndef STACK
 	cabal new-clean
 else
 	stack clean
