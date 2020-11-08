@@ -22,11 +22,12 @@
 
 # Troubleshooting
 
-We only currently support/test the following configurations:
+We currently only support the following configurations:
 - **Linux:** `GHC-8.0.2` with `cabal`
 - **MacOS:** `LTS-10.09 (GHC-8.2.2)` with `stack`
+- **Windows:** not currently tested, use at your own risk
 
-You can always refer to the Github action [workflow](https://github.com/omelkonian/hs-pattrans/blob/master/.github/workflows/ci.yml) for the exact commands we run in a fresh VM.
+You can always refer to the Github action [workflow](https://github.com/omelkonian/hs-pattrans/blob/master/.github/workflows/ci.yml) for the exact commands we run in a fresh VM, both for Ubuntu and macOS.
 
 ## Linux
 
