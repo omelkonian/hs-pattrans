@@ -1,5 +1,0 @@
-with-compiler: ghc-8.0.2
-
-packages:
-  hs-pattrans.cabal
-

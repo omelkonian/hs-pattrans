@@ -170,6 +170,7 @@ approxEqWith del1
   | ?p == 1.0 = equal -- short-circuit for faster results
   | otherwise = Check go
   where
+    go :: (?p :: Float) => [b] -> [b] -> Bool
     go xs' ys' =
       let [xs, ys]   = sortOn length [xs', ys']
           [n, m]     = length <$> [xs, ys]

@@ -1,7 +1,10 @@
-resolver: lts-9.17
+resolver: lts-10.09
 
 # lts-9.21
 # ghc-8.0.2
+
+# lts-10.09
+# ghc-8.2.2
 
 # lts-11.22
 # ghc-8.2.2
@@ -28,3 +31,5 @@ extra-deps:
 - arrows-0.4.4.2
 - Stream-0.4.7.2
 - lazysmallcheck-0.6
+
+allow-newer: true
