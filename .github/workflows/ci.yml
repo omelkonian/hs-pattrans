@@ -30,6 +30,7 @@ jobs:
         stack-version: 2.1.3
 
     - name: Update cabal
+      if: runner.os == 'Linux'
       run: cabal new-update
 
     - name: Install asound package
@@ -38,16 +39,17 @@ jobs:
 
     # Generate .freeze files with all dependencies to use as the cache key.
     - name: Freeze (cabal)
-      if: runner.os != 'macOS'
+      if: runner.os == 'Linux'
       run: cabal new-freeze
 
     - name: Freeze (stack)
+      if: runner.os == 'macOS'
       run: stack freeze >> stack.freeze
 
     # Cache to avoid rebuilding dependencies for every build.
     - uses: actions/cache@v2
       name: Cache ~/.cabal/store
-      if: runner.os != 'macOS'
+      if: runner.os == 'Linux'
       with:
         path: ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
         key:          cabal-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
@@ -55,6 +57,7 @@ jobs:
 
     - uses: actions/cache@v2
       name: Cache ~/.stack and .stack-work
+      if: runner.os == 'macOS'
       with:
         path: |
           ~/.stack
@@ -71,20 +74,16 @@ jobs:
     - name: Test
       run: make $X test
 
-  deploy:
-    needs: test
-    name: Deploy from ubuntu-latest/ghc-8.0.2/cabal-3.4
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    # Deployment
+    - name: Render documentation, website and publish to Hackage
+      if: github.ref == 'refs/heads/master' && runner.os == 'Linux' && matrix.cabal == '3.4'
+      run: |
+       make docs 
+       make website
+       bash publish.sh
 
-    steps:  
-    - name: Render documentation
-      run: make docs
-    - name: Generate website
-      run: make website
-    - name: Publish to Hackage (if version changed)
-      run: bash publish.sh
     - name: Deploy 🚀
+      if: github.ref == 'refs/heads/master' && runner.os == 'Linux' && matrix.cabal == '3.4'
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
