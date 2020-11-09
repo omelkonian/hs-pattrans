@@ -74,18 +74,21 @@ jobs:
     - name: Test
       run: make $X test
 
-    # Deployment
-    - name: Render documentation, website and publish to Hackage
-      if: github.ref == 'refs/heads/master' && runner.os == 'Linux' && matrix.cabal == '3.4'
-      run: |
-       make docs 
-       make website
-       bash publish.sh
+    # Deployment (done locally for now)
+    # - name: Render documentation, website and publish to Hackage
+    #   if: github.ref == 'refs/heads/master' && runner.os == 'Linux' && matrix.cabal == '3.4'
+    #   env:
+    #     HACKAGE_USERNAME: ${{ secrets.HACKAGE_USERNAME }}
+    #     HACKAGE_PASSWORD: ${{ secrets.HACKAGE_PASSWORD }}
+    #   run: |
+    #    make docs 
+    #    make website
+    #    bash publish.sh
 
-    - name: Deploy 🚀
-      if: github.ref == 'refs/heads/master' && runner.os == 'Linux' && matrix.cabal == '3.4'
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: out
+    # - name: Deploy 🚀
+    #   if: github.ref == 'refs/heads/master' && runner.os == 'Linux' && matrix.cabal == '3.4'
+    #   uses: JamesIves/github-pages-deploy-action@3.7.1
+    #   with:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     BRANCH: gh-pages
+    #     FOLDER: out

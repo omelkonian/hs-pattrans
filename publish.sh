@@ -1,5 +1,5 @@
 curVersion=$(grep "^version" hs-pattrans.cabal | cut -d: -f2 | tr -d "[:blank:]")
-prevVersion=$(git show HEAD~:hs-pattrans.cabal | grep "^version" | cut -d: -f2 | tr -d "[:blank:]")
+prevVersion=$(git show HEAD^:hs-pattrans.cabal | grep "^version" | cut -d: -f2 | tr -d "[:blank:]")
 if [[ $curVersion != $prevVersion ]]; then
   echo "Version has changed, publishing to Hackage."
   cabal new-sdist
